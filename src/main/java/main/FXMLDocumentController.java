@@ -50,7 +50,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     
     @FXML
     public void clearLogAction() {
-        Main.notifyAction(Action.CLEAR_LOGS, "Logs have been cleared");
+        Main.notifyAction(Action.CLEAR_LOGS, "Log has been cleared");
     }
 
     @FXML
@@ -75,7 +75,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textFieldPortNumber.setEditable(true);
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        textAreaLogging.setText("TEXT");
+        textAreaLogging.setText("Log is clear");
+        logText.setLength(0);
         Main.addApplicationController(this);
     }
 
@@ -89,7 +90,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         switch (action) {
             case CLEAR_LOGS:
                 logText.setLength(0);
-                textAreaLogging.setText(logText.toString());
+                textAreaLogging.setText("Log is clear");
                 break;
             case PORT_NUMBER_ERROR:
                 textFieldPortNumber.setEditable(true);
