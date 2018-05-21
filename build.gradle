@@ -1,22 +1,27 @@
+buildscript {
+    apply from: 'version.gradle'
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+
+    }
+}
+
 apply plugin: 'application'
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-// NetBeans will automatically add "run" and "debug" tasks relying on the
-// "mainClass" property. You may however define the property prior executing
-// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
-//
-// Note however, that you may define your own "run" and "debug" task if you
-// prefer. In this case NetBeans will not add these tasks but you may rely on
-// your own implementation.
 if (!hasProperty('mainClass')) {
-    ext.mainClass = 'Listen'
+    ext.mainClass = 'main.Main'
 }
 
-mainClassName = "Listen"
+mainClassName = "main.Main"
 distZip.shouldRunAfter(build)
-
 jar {
     // Keep jar clean:
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
@@ -25,20 +30,20 @@ jar {
         attributes 'Main-Class': mainClassName,
                    'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(' ')
     }
-    // How-to add class path:
-    //     https://stackoverflow.com/questions/22659463/add-classpath-in-manifest-using-gradle
-    //     https://gist.github.com/simon04/6865179
-}
-repositories {
-    mavenCentral()
-    // You may define additional repositories, or even remove "mavenCentral()".
-    // Read more about repositories here:
-    //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:repositories
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+apply plugin: 'javafx-gradle-plugin'
+
 dependencies {
-    // TODO: Add dependencies here ...
-    // You can read more about how to add dependency here:
-    //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies
     testCompile group: 'junit', name: 'junit', version: '4.10'
+}
+
+jfx {
+    mainClass = 'main.Main'
+    vendor = 'SDD'
 }
