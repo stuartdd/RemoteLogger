@@ -6,11 +6,16 @@
 package main;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -25,9 +30,6 @@ import javafx.scene.paint.Color;
  * @author stuart
  */
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
-
-    @FXML
-    private Label label;
 
     @FXML
     private TextArea textAreaLogging;
@@ -45,9 +47,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     public void closeAction() {
-        Main.closeApplication();
+        Main.closeApplication(false);
     }
-    
+
     @FXML
     public void clearLogAction() {
         Main.notifyAction(Action.CLEAR_LOGS, "Log has been cleared");
@@ -70,7 +72,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        textFieldPortNumber.setText("" + Main.getPortNumber());
+        textFieldPortNumber.setText("" + Main.getConfig().getPort());
         buttonConnect.setText("Start");
         textFieldPortNumber.setEditable(true);
         labelStatus.setText("Ready to start the server");
@@ -78,8 +80,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textAreaLogging.setText("Log is clear");
         logText.setLength(0);
         Main.addApplicationController(this);
-        if (Main.shouldAutoConnect()) {
-            Main.startServerThread(Main.getPortNumber());
+        if (Main.getConfig().getAutoConnect()) {
+            Main.startServerThread(Main.getConfig().getPort());
         }
     }
 
@@ -121,6 +123,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 buttonConnect.setText("Start");
                 textFieldPortNumber.setEditable(true);
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+                break;
+            case CONFIG_SAVE_ERROR:
+                Alert alert = new Alert(AlertType.CONFIRMATION, message+"\n\nConfiguration data was not updated. \n\nPress OK to exit");
+                alert.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.OK) {
+                        Main.closeApplication(true);
+                    }
+                });
                 break;
         }
         return true;

@@ -16,5 +16,6 @@ public enum Action {
     SERVER_FAIL,
     LOG_TEXT,
     PORT_NUMBER_ERROR,
+    CONFIG_SAVE_ERROR,
     CLEAR_LOGS
 }

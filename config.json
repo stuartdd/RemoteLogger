@@ -1,0 +1,10 @@
+{
+  "port" : 15000,
+  "logDateFormat" : "yyyy-MM-dd':'HH-mm-ss-SSS': '",
+  "autoConnect" : true,
+  "verbose" : true,
+  "x" : 253.0,
+  "y" : 207.0,
+  "width" : 1440.0,
+  "height" : 759.0
+}
