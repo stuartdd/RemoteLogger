@@ -29,6 +29,6 @@
       </FlowPane>
    </bottom>
    <center>
-      <TextArea fx:id="textAreaLogging" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <TextArea fx:id="textAreaLogging" editable="false" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

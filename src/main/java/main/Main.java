@@ -17,6 +17,8 @@ public class Main extends Application {
     private static Stage mainStage;
     private static ServerThread serverThread;
     private static int portNumber = 1088;
+    private static Integer argPort;
+    private static boolean argAutoConnect = false;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -43,7 +45,14 @@ public class Main extends Application {
         CONTROLLERS.add(applicationController);
     }
 
+    public static boolean shouldAutoConnect() {
+        return argAutoConnect;
+    }
+
     public static int getPortNumber() {
+        if (argPort != null) {
+            return argPort;
+        }
         return portNumber;
     }
 
@@ -81,6 +90,21 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        argAutoConnect = false;
+        try {
+            for (String arg : args) {
+                if (arg.startsWith("-p")) {
+                    argPort = Integer.parseInt(arg.substring(2));
+                }
+                if (arg.startsWith("-a")) {
+                    argAutoConnect = true;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+            System.exit(1);
+        }
         launch(args);
     }
 }

@@ -78,6 +78,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textAreaLogging.setText("Log is clear");
         logText.setLength(0);
         Main.addApplicationController(this);
+        if (Main.shouldAutoConnect()) {
+            Main.startServerThread(Main.getPortNumber());
+        }
     }
 
     @Override
@@ -97,7 +100,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case LOG_TEXT:
-                logText.append(message).append("\n");
+                logText.append(message);
                 textAreaLogging.setText(logText.toString());
                 labelStatus.setText("Message Logged");
             case SERVER_START:

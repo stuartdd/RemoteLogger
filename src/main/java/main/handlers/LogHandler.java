@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.Action;
@@ -23,6 +22,8 @@ import main.Main;
  * @author stuart
  */
 public class LogHandler implements HttpHandler {
+
+    private static final String NL = System.getProperty("line.separator");
 
     @Override
     public void handle(HttpExchange he) throws IOException {
@@ -42,7 +43,10 @@ public class LogHandler implements HttpHandler {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(line);
+                line = line.trim();
+                if (line.length() > 0) {
+                    sb.append(line).append(NL);
+                }
             }
             return sb.toString();
         } catch (IOException ex) {
