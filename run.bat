@@ -1,1 +1,1 @@
-java -jar build/libs/RemoteLogger.jar -p1999 -a
+java -jar build/libs/RemoteLogger-all-1.0.jar %1 %2 %3
