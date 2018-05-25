@@ -16,6 +16,7 @@ public class ConfigData extends Config {
     private String logDateFormat;
     private Boolean autoConnect;
     private boolean verbose = false;
+    private boolean includeHeaders = false;
     private double x;
     private double y;
     private double width;
@@ -87,6 +88,14 @@ public class ConfigData extends Config {
 
     public void setHeight(double height) {
         this.height = height;
+    }
+
+    public boolean isIncludeHeaders() {
+        return includeHeaders;
+    }
+
+    public void setIncludeHeaders(boolean includeHeaders) {
+        this.includeHeaders = includeHeaders;
     }
 
     

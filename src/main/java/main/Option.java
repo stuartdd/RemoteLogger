@@ -9,14 +9,6 @@ package main;
  *
  * @author stuart
  */
-public enum Action {
-    SERVER_START,
-    SERVER_STOPPING,
-    SERVER_STOP,
-    SERVER_FAIL,
-    LOG_TEXT,
-    LOG_REFRESH,
-    PORT_NUMBER_ERROR,
-    CONFIG_SAVE_ERROR,
-    CLEAR_LOGS
+public enum Option {
+    FILTER_HEADERS
 }

@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +69,14 @@ public class Main extends Application {
             }
         });
     }
+    
+    public static void notifyOption(Option option, boolean selected, String message) {
+        switch (option) {
+            case FILTER_HEADERS:
+                 config.setIncludeHeaders(selected); 
+                 notifyAction(Action.LOG_REFRESH,"");
+        }
+    }
 
     public static void addApplicationController(ApplicationController applicationController) {
         CONTROLLERS.add(applicationController);
@@ -82,6 +88,7 @@ public class Main extends Application {
         serverThread.start();
     }
 
+    
     public static void stopServerThread() {
         if (serverThread != null) {
             serverThread.stopServer(1);

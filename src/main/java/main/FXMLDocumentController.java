@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -30,6 +31,9 @@ import javafx.scene.paint.Color;
  * @author stuart
  */
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
+
+    @FXML
+    private CheckBox checkBoxHeaders;
 
     @FXML
     private TextArea textAreaLogging;
@@ -56,6 +60,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @FXML
+    public void checkBoxHeadersAction() {
+        Main.notifyOption(Option.FILTER_HEADERS, checkBoxHeaders.isSelected(), "");
+    }
+
+    @FXML
     public void connectAction() {
         if (buttonConnect.getText().equalsIgnoreCase("start")) {
             try {
@@ -74,15 +83,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public void initialize(URL url, ResourceBundle rb) {
         textFieldPortNumber.setText("" + Main.getConfig().getPort());
         buttonConnect.setText("Start");
+        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         textFieldPortNumber.setEditable(true);
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        textAreaLogging.setText("Log is clear");
-        logText.setLength(0);
         Main.addApplicationController(this);
         if (Main.getConfig().getAutoConnect()) {
             Main.startServerThread(Main.getConfig().getPort());
         }
+
+        logText.setLength(0);
+        updateLogDisplay(null);
     }
 
     @Override
@@ -95,16 +106,21 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         switch (action) {
             case CLEAR_LOGS:
                 logText.setLength(0);
-                textAreaLogging.setText("Log is clear");
+                updateLogDisplay(null);
+                labelStatus.setText("Log display cleared");
+                break;
+            case LOG_TEXT:
+                updateLogDisplay(message);
+                labelStatus.setText("Message Logged");
+                break;
+            case LOG_REFRESH:
+                updateLogDisplay(null);
+                labelStatus.setText("Log display refreshed");
                 break;
             case PORT_NUMBER_ERROR:
                 textFieldPortNumber.setEditable(true);
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
-            case LOG_TEXT:
-                logText.append(message);
-                textAreaLogging.setText(logText.toString());
-                labelStatus.setText("Message Logged");
             case SERVER_START:
                 buttonConnect.setText("Stop");
                 textFieldPortNumber.setEditable(false);
@@ -125,7 +141,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case CONFIG_SAVE_ERROR:
-                Alert alert = new Alert(AlertType.CONFIRMATION, message+"\n\nConfiguration data was not updated. \n\nPress OK to exit");
+                Alert alert = new Alert(AlertType.CONFIRMATION, message + "\n\nConfiguration data was not updated. \n\nPress OK to exit");
                 alert.showAndWait().ifPresent(response -> {
                     if (response == ButtonType.OK) {
                         Main.closeApplication(true);
@@ -136,4 +152,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
+    private void updateLogDisplay(String message) {
+        if ((message == null) || (message.trim().length() == 0)) {
+            if (logText.length() == 0) {
+                textAreaLogging.setText("Log is empty");
+            }
+        } else {
+            logText.append(message);
+            textAreaLogging.setText(logText.toString());
+        }
+    }
 }
