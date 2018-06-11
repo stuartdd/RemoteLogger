@@ -4,8 +4,10 @@
   "autoConnect" : true,
   "verbose" : true,
   "includeHeaders" : true,
-  "x" : 3949.0,
-  "y" : 38.0,
-  "width" : 1767.0,
-  "height" : 999.0
+  "includeBody" : true,
+  "includeEmpty" : false,
+  "x" : 243.0,
+  "y" : 25.0,
+  "width" : 1394.0,
+  "height" : 815.0
 }

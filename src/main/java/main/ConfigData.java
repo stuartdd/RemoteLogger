@@ -17,6 +17,8 @@ public class ConfigData extends Config {
     private Boolean autoConnect;
     private boolean verbose = false;
     private boolean includeHeaders = false;
+    private boolean includeBody = true;
+    private boolean includeEmpty = false;
     private double x;
     private double y;
     private double width;
@@ -98,5 +100,20 @@ public class ConfigData extends Config {
         this.includeHeaders = includeHeaders;
     }
 
+    public boolean isIncludeBody() {
+        return includeBody;
+    }
+
+    public void setIncludeBody(boolean includeBody) {
+        this.includeBody = includeBody;
+    }
+
+    public boolean isIncludeEmpty() {
+        return includeEmpty;
+    }
+
+    public void setIncludeEmpty(boolean includeEmpty) {
+        this.includeEmpty = includeEmpty;
+    }
     
 }

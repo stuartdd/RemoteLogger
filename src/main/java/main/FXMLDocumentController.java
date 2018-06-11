@@ -6,7 +6,6 @@
 package main;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -16,7 +15,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -32,6 +30,11 @@ import javafx.scene.paint.Color;
  */
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
 
+    private static final String NL = System.getProperty("line.separator");
+
+    private LogLine firstLine = null;
+    private LogLine lastLine = firstLine;
+
     @FXML
     private CheckBox checkBoxHeaders;
 
@@ -46,8 +49,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private TextField textFieldPortNumber;
-
-    StringBuffer logText = new StringBuffer();
 
     @FXML
     public void closeAction() {
@@ -91,30 +92,31 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (Main.getConfig().getAutoConnect()) {
             Main.startServerThread(Main.getConfig().getPort());
         }
-
-        logText.setLength(0);
-        updateLogDisplay(null);
+        resetLog();
+        updateLogDisplay(LogCatagory.EMPTY, null);
     }
 
     @Override
     public boolean notifyAction(Action action, String message) {
-        if (action != Action.LOG_TEXT) {
+        if (action != Action.LOG_BODY) {
             if (message != null) {
                 labelStatus.setText(message);
             }
         }
         switch (action) {
             case CLEAR_LOGS:
-                logText.setLength(0);
-                updateLogDisplay(null);
+                resetLog();
+                updateLogDisplay(LogCatagory.EMPTY, null);
                 labelStatus.setText("Log display cleared");
                 break;
-            case LOG_TEXT:
-                updateLogDisplay(message);
-                labelStatus.setText("Message Logged");
+            case LOG_BODY:
+                updateLogDisplay(LogCatagory.BODY, message);
+                break;
+            case LOG_HEADER:
+                updateLogDisplay(LogCatagory.HEADER, message);
                 break;
             case LOG_REFRESH:
-                updateLogDisplay(null);
+                updateLogDisplay(null, null);
                 labelStatus.setText("Log display refreshed");
                 break;
             case PORT_NUMBER_ERROR:
@@ -152,14 +154,51 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
-    private void updateLogDisplay(String message) {
-        if ((message == null) || (message.trim().length() == 0)) {
-            if (logText.length() == 0) {
-                textAreaLogging.setText("Log is empty");
+    private void updateLogDisplay(LogCatagory cat, String message) {
+        if (firstLine == null) {
+            if ((message == null) || (message.trim().length() == 0)) {
+                textAreaLogging.setText("Log is empty 1");
+                labelStatus.setText("Log message is empty!");
+            } else {
+                firstLine = new LogLine(message, cat);
+                lastLine = firstLine;
+                textAreaLogging.setText(filter());
+                labelStatus.setText("Log 1st line:" + message);
             }
         } else {
-            logText.append(message);
-            textAreaLogging.setText(logText.toString());
+            lastLine.setNext(new LogLine(message, cat));
+            lastLine = lastLine.getNext();
+            textAreaLogging.setText(filter());
         }
+    }
+
+    private void resetLog() {
+        firstLine = null;
+    }
+
+    private String filter() {
+        StringBuilder sb = new StringBuilder();
+        LogLine line = firstLine;
+        while (line != null) {
+            switch (line.catagory) {
+                case EMPTY:
+                    if (Main.getConfig().isIncludeEmpty()) {
+                        sb.append(line.getText()).append(NL);
+                    }
+                    break;
+                case BODY:
+                    if (Main.getConfig().isIncludeBody()) {
+                        sb.append(line.getText()).append(NL);
+                    }
+                    break;
+                case HEADER:
+                    if (Main.getConfig().isIncludeHeaders()) {
+                        sb.append(line.getText()).append(NL);
+                    }
+                    break;
+            }
+            line = line.getNext();
+        }
+        return sb.toString().trim();
     }
 }

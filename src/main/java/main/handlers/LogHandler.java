@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.Action;
@@ -27,12 +29,31 @@ public class LogHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange he) throws IOException {
-        Main.notifyAction(Action.LOG_TEXT, readStream(he.getRequestBody()));
+        String body = readStream(he.getRequestBody());
+        if ((body != null) && (body.trim().length() > 0)) {
+            Main.notifyAction(Action.LOG_BODY, readStream(he.getRequestBody()));
+            Main.notifyAction(Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+        } else {
+            Main.notifyAction(Action.LOG_BODY, "METHOD: " + he.getRequestMethod() + ". The body is empty");
+        }
+        for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
+            String head = it.next();
+            Main.notifyAction(Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
+        }
         String response = "log/?";
         he.sendResponseHeaders(201, response.length());
         OutputStream os = he.getResponseBody();
         os.write(response.getBytes());
         os.close();
+    }
+
+    private String asString(String key, List<String> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(key).append(':');
+        for (String s : list) {
+            sb.append('"').append(s).append('"');
+        }
+        return sb.toString();
     }
 
     private String readStream(InputStream iStream) {
@@ -61,4 +82,5 @@ public class LogHandler implements HttpHandler {
         }
 
     }
+
 }
