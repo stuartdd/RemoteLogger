@@ -11,11 +11,12 @@ package main;
  */
 public class LogLine {
 
-    String text;
-    LogCatagory catagory;
-    LogLine next;
+    private final long time;
+    private final LogCatagory catagory;
+    private final String text;
+    private LogLine next;
 
-    public LogLine(String text, LogCatagory catagory) {
+    public LogLine(long time, String text, LogCatagory catagory) {
         if ((text == null) || (text.trim().length() == 0)) {
             this.text = "";
             this.catagory = LogCatagory.EMPTY;
@@ -23,7 +24,12 @@ public class LogLine {
             this.text = text;
             this.catagory = catagory;
         }
+        this.time = time;
         this.next = null;
+    }
+
+    public long getTime() {
+        return time;
     }
 
     public String getText() {
@@ -41,4 +47,10 @@ public class LogLine {
     public void setNext(LogLine next) {
         this.next = next;
     }
+
+    @Override
+    public String toString() {
+        return "Catagory=" + catagory + ", Text=" + text;
+    }
+
 }

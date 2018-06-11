@@ -30,15 +30,17 @@ public class LogHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         String body = readStream(he.getRequestBody());
+        long time = System.currentTimeMillis();
+        
         if ((body != null) && (body.trim().length() > 0)) {
-            Main.notifyAction(Action.LOG_BODY, readStream(he.getRequestBody()));
-            Main.notifyAction(Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod()+ ":" + he.getRequestURI() );
+            Main.notifyAction(time, Action.LOG_BODY, body.trim());
         } else {
-            Main.notifyAction(Action.LOG_BODY, "METHOD: " + he.getRequestMethod() + ". The body is empty");
+            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod()+ ":" + he.getRequestURI() );
         }
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
-            Main.notifyAction(Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
+            Main.notifyAction(time, Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
         }
         String response = "log/?";
         he.sendResponseHeaders(201, response.length());

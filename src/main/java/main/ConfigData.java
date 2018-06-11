@@ -4,28 +4,45 @@
  * and open the template in the editor.
  */
 package main;
+
 import config.Config;
 import java.io.File;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
  * @author stuar
  */
 public class ConfigData extends Config {
+
     private Integer port;
     private String logDateFormat;
     private Boolean autoConnect;
+    private String timeFormat;
     private boolean verbose = false;
-    private boolean includeHeaders = false;
+    private boolean includeHeaders = true;
     private boolean includeBody = true;
     private boolean includeEmpty = false;
+    private boolean showTime = true;
     private double x;
     private double y;
     private double width;
     private double height;
-    
-    public static ConfigData loadConfig(File fil){ 
-      return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);        
+
+    private DateTimeFormatter ts;
+
+    public static ConfigData loadConfig(File fil) {
+        return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
+    }
+
+    public String timeStamp(long time) {
+        DateTime dt = new DateTime(time);
+        if (ts == null) {
+            ts = DateTimeFormat.forPattern(getTimeFormat());
+        }
+        return dt.toString(ts);
     }
 
     public Integer getPort() {
@@ -115,5 +132,26 @@ public class ConfigData extends Config {
     public void setIncludeEmpty(boolean includeEmpty) {
         this.includeEmpty = includeEmpty;
     }
+
+    public String getTimeFormat() {
+        if (timeFormat == null) {
+            return "HH:mm:ss.SSS";
+        }
+        return timeFormat;
+    }
+
+    public void setTimeFormat(String timeFormat) {
+        this.timeFormat = timeFormat;
+    }
+
+    public boolean isShowTime() {
+        return showTime;
+    }
+
+    public void setShowTime(boolean showTime) {
+        this.showTime = showTime;
+    }
     
+    
+
 }

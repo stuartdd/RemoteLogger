@@ -38,26 +38,26 @@ public class ServerThread extends Thread {
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/control", new ControlHandler());
-            server.createContext("/log", new LogHandler());
+            server.createContext("/", new LogHandler());
             server.setExecutor(null); // creates a default executor
             Main.log("Starting server on port " + port);
             server.start();
-            Main.notifyAction(Action.SERVER_START,"Server started on port "+port);
+            Main.notifyAction(System.currentTimeMillis(), Action.SERVER_START,"Server started on port "+port);
         } catch (IOException ex) {
-            Main.notifyAction(Action.SERVER_FAIL,ex.getClass().getSimpleName()+": port:"+port+" Error:"+ex.getMessage());
+            Main.notifyAction(System.currentTimeMillis(), Action.SERVER_FAIL,ex.getClass().getSimpleName()+": port:"+port+" Error:"+ex.getMessage());
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
         while (canRun) {
             sleeep(500);
         }
-        Main.notifyAction(Action.SERVER_STOPPING,"Server is stopping");
+        Main.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING,"Server is stopping");
         sleeep(500);
         if (server != null) {
             server.stop(1);
             server = null;
         }
-        Main.notifyAction(Action.SERVER_STOP,"Ready to start the server");
+        Main.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP,"Ready to start the server");
         running = false;
     }
 

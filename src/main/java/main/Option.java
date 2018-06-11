@@ -10,5 +10,5 @@ package main;
  * @author stuart
  */
 public enum Option {
-    FILTER_HEADERS
+    FILTER_HEADERS, FILTER_BODY, FILTER_EMPTY, TIME
 }

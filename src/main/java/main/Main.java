@@ -59,22 +59,35 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void notifyAction(Action action, String message) {
+    public static void notifyAction(long time, Action action, String message) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 for (ApplicationController ap : CONTROLLERS) {
-                    ap.notifyAction(action, message);
+                    ap.notifyAction(time, action, message);
                 }
             }
         });
     }
-    
+
     public static void notifyOption(Option option, boolean selected, String message) {
         switch (option) {
             case FILTER_HEADERS:
-                 config.setIncludeHeaders(selected); 
-                 notifyAction(Action.LOG_REFRESH,"");
+                config.setIncludeHeaders(selected);
+                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                break;
+            case FILTER_BODY:
+                config.setIncludeBody(selected);
+                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                break;
+            case FILTER_EMPTY:
+                config.setIncludeEmpty(selected);
+                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                break;
+            case TIME:
+                config.setShowTime(selected);
+                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                break;
         }
     }
 
@@ -88,7 +101,6 @@ public class Main extends Application {
         serverThread.start();
     }
 
-    
     public static void stopServerThread() {
         if (serverThread != null) {
             serverThread.stopServer(1);
@@ -114,7 +126,7 @@ public class Main extends Application {
                         StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException io) {
                 if (!force) {
-                    Main.notifyAction(Action.CONFIG_SAVE_ERROR, io.toString());
+                    Main.notifyAction(System.currentTimeMillis(), Action.CONFIG_SAVE_ERROR, io.toString());
                     return;
                 }
             }
@@ -194,4 +206,6 @@ public class Main extends Application {
         }
         launch(args);
     }
+    
+    
 }

@@ -2,12 +2,14 @@
   "port" : 1999,
   "logDateFormat" : "",
   "autoConnect" : true,
+  "timeFormat" : "HH:mm:ss.SSS",
   "verbose" : true,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,
-  "x" : 243.0,
-  "y" : 25.0,
-  "width" : 1394.0,
+  "showTime" : true,
+  "x" : 0.0,
+  "y" : 17.0,
+  "width" : 825.0,
   "height" : 815.0
 }

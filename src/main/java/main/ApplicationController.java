@@ -10,5 +10,5 @@ package main;
  * @author stuart
  */
 public interface ApplicationController {
-    boolean notifyAction(Action s, String message);
+    boolean notifyAction(long time, Action s, String message);
 }
