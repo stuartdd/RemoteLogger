@@ -1,5 +1,6 @@
 package main;
 
+import main.expectations.Expectations;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -18,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
+import main.expectations.ExpectationMatcher;
 import org.joda.time.DateTime;
 import server.ServerThread;
 
@@ -204,8 +206,29 @@ public class Main extends Application {
         if (config.getLogDateFormat() == null) {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
+        if (config.getExpectationsFile() != null) {
+            String exFile = config.getExpectationsFile().trim();
+            if (exFile.length() == 0) {
+                config.setExpectationsFile(null);
+                exFile = null;
+            }
+            if (exFile != null) {
+                File f = new File(exFile);
+                if (!f.exists()) {
+                    System.out.println("Expectation definitions file [" + exFile + "] was not found");
+                    System.exit(1);
+                }
+                try {
+                    Expectations expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, f);
+                    ExpectationMatcher.setExpectations(expectations);
+                } catch (Exception e) {
+                    System.out.println("Expectation definitions file [" + exFile + "] could not be loaded");
+                    e.printStackTrace(System.err);
+                    System.exit(1);
+                }
+            }
+        }
         launch(args);
     }
-    
-    
+
 }

@@ -11,19 +11,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.Action;
 import main.Main;
+import main.expectations.ExpectationMatcher;
 
 /**
  *
  * @author stuart
  */
-public class LogHandler implements HttpHandler {
+public class ExpectationHandler implements HttpHandler {
 
     private static final String NL = System.getProperty("line.separator");
 
@@ -41,13 +41,9 @@ public class LogHandler implements HttpHandler {
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             Main.notifyAction(time, Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
-        }
-        String response = "log/?";
-        he.sendResponseHeaders(201, response.length());
-        OutputStream os = he.getResponseBody();
-        os.write(response.getBytes());
-        os.close();
-    }
+        }      
+        ExpectationMatcher.getResponse(he);
+     }
 
     private String asString(String key, List<String> list) {
         StringBuilder sb = new StringBuilder();
@@ -79,7 +75,7 @@ public class LogHandler implements HttpHandler {
                     br.close();
                 }
             } catch (IOException ex) {
-                Logger.getLogger(LogHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ExpectationHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 

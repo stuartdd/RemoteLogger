@@ -1,0 +1,10 @@
+{
+    "expectations": [
+        {
+            "method": "post",
+            "url": "",
+            "file": "post.xml"
+        }
+    ],
+    "paths" : [".", "/appl","/bea"]
+}

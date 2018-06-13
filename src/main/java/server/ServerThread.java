@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import main.Action;
 import main.Main;
 import main.handlers.ControlHandler;
-import main.handlers.LogHandler;
+import main.handlers.ExpectationHandler;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -38,7 +38,7 @@ public class ServerThread extends Thread {
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/control", new ControlHandler());
-            server.createContext("/", new LogHandler());
+            server.createContext("/", new ExpectationHandler());
             server.setExecutor(null); // creates a default executor
             Main.log("Starting server on port " + port);
             server.start();

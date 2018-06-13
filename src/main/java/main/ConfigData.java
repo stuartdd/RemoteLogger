@@ -21,6 +21,7 @@ public class ConfigData extends Config {
     private String logDateFormat;
     private Boolean autoConnect;
     private String timeFormat;
+    private String expectationsFile;
     private boolean verbose = false;
     private boolean includeHeaders = true;
     private boolean includeBody = true;
@@ -150,6 +151,14 @@ public class ConfigData extends Config {
 
     public void setShowTime(boolean showTime) {
         this.showTime = showTime;
+    }
+
+    public String getExpectationsFile() {
+        return expectationsFile;
+    }
+
+    public void setExpectationsFile(String expectationsFile) {
+        this.expectationsFile = expectationsFile;
     }
     
     
