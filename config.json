@@ -5,7 +5,7 @@
   "timeFormat" : "HH:mm:ss.SSS",
   "expectationsFile" : "expectations.json",
   "verbose" : true,
-  "includeHeaders" : false,
+  "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,
   "showTime" : false,

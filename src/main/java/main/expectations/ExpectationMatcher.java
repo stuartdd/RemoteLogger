@@ -27,50 +27,44 @@ public class ExpectationMatcher {
         ExpectationMatcher.expectations = expectations;
     }
 
-    private static Expectation match(HttpExchange he) {
+    private static boolean doesNotMatchString(String ref, String subject) {
+        if ((ref == null) || (ref.trim().length()==0)) {
+            return false;
+        }
+        return (!ref.equalsIgnoreCase(subject));
+    }
+
+    private static Expectation matchExpectation(HttpExchange he) {
         if (expectations == null) {
             Main.log("No Expectation have been set!");
             return null;
         }
-        String method = he.getRequestMethod();
         Expectation found = null;
         for (Expectation exp : expectations.getExpectations()) {
-            if (exp.getMethod().equalsIgnoreCase(method)) {
-                found = exp;
+            found = exp;
+            if (doesNotMatchString(exp.getMethod(), he.getRequestMethod())) {
+                found = null;
             }
-        }
-        if (found == null) {
-            Main.log("Expectation not met");
-        } else {
-            Main.log("Expectation met:" + found);
+            if (doesNotMatchString(exp.getUrl(), he.getRequestURI().getPath())) {
+                found = null;
+            }
         }
         return found;
-    }
-
-    private static Path locate(String file) throws FileNotFoundException {
-        StringBuilder sb = new StringBuilder();
-        for (String path : expectations.getPaths()) {
-            sb.append(path).append(',');
-            Path p = Paths.get(path, file);
-            if (Files.exists(p)) {
-                return p;
-            }
-        }
-        throw new FileNotFoundException("File [" + file + "] Not Found in paths [" + sb + "]");
     }
 
     public static void getResponse(HttpExchange he) {
         String response = "Not Found";
         int statusCode = 200;
-        Expectation found = match(he);
+        Expectation found = matchExpectation(he);
         if (found != null) {
+            Main.log("Expectation met:" + found);
             try {
-                Path path = locate(found.getFile());
+                Path path = locateResponseFile(found.getFile());
                 response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
                 statusCode = found.getStatusCode();
                 Main.log("Expectation response:\n-------------------\n" + response + "\n-------------------\nExpectation status:" + statusCode);
             } catch (IOException io) {
-                Main.log(new IOException("Read file failed for " + found + ". "+io.getMessage(), io));
+                Main.log(new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
             }
             try {
                 he.sendResponseHeaders(statusCode, response.length());
@@ -81,6 +75,21 @@ public class ExpectationMatcher {
                 io.printStackTrace();
                 Main.log(new IOException("Output Stream write failed for " + found, io));
             }
+        } else {
+            Main.log("Expectation not met");
         }
+
+    }
+
+    private static Path locateResponseFile(String file) throws FileNotFoundException {
+        StringBuilder sb = new StringBuilder();
+        for (String path : expectations.getPaths()) {
+            sb.append(path).append(',');
+            Path p = Paths.get(path, file);
+            if (Files.exists(p)) {
+                return p;
+            }
+        }
+        throw new FileNotFoundException("File [" + file + "] Not Found in paths [" + sb + "]");
     }
 }

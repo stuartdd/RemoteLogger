@@ -2,7 +2,7 @@
     "expectations": [
         {
             "method": "post",
-            "url": "",
+            "url": "/log/two?a=8",
             "file": "post.xml"
         }
     ],
