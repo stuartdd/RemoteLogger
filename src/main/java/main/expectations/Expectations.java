@@ -5,16 +5,7 @@
  */
 package main.expectations;
 
-import main.expectations.Expectation;
-import com.sun.net.httpserver.HttpExchange;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import main.Main;
 
 /**
  *
@@ -24,6 +15,7 @@ public class Expectations {
 
     private List<Expectation> expectations;
     private String[] paths;
+    private boolean listMap;
 
     public List<Expectation> getExpectations() {
         return expectations;
@@ -40,5 +32,13 @@ public class Expectations {
     public void setPaths(String[] paths) {
         this.paths = paths;
     }
-    
+
+    public boolean isListMap() {
+        return listMap;
+    }
+
+    public void setListMap(boolean listMap) {
+        this.listMap = listMap;
+    }
+   
 }

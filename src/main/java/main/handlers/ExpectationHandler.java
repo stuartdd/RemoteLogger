@@ -42,7 +42,7 @@ public class ExpectationHandler implements HttpHandler {
             String head = it.next();
             Main.notifyAction(time, Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
         }      
-        ExpectationMatcher.getResponse(he);
+        ExpectationMatcher.getResponse(time, he, body);
      }
 
     private String asString(String key, List<String> list) {

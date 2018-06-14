@@ -12,6 +12,8 @@ package main.expectations;
 public class Expectation {
     private String method;
     private String url;
+    private XmlContent xml;
+    
     private String file;
     private int statusCode = 200;
 
@@ -45,6 +47,14 @@ public class Expectation {
 
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public XmlContent getXml() {
+        return xml;
+    }
+
+    public void setXml(XmlContent xml) {
+        this.xml = xml;
     }
 
     @Override

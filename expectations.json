@@ -2,9 +2,13 @@
     "expectations": [
         {
             "method": "post",
-            "url": "/log/two?a=8",
+            "url": "",
+            "xml": {
+                "asserts" : {"Envelope.Body.multiRef.username" : "Ensia123"}
+            },
             "file": "post.xml"
         }
     ],
-    "paths" : [".", "/appl","/bea"]
+    "paths" : [".", "/appl","/bea"],
+    "listMap" : true
 }

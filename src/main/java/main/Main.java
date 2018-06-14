@@ -149,6 +149,12 @@ public class Main extends Application {
             System.out.println(getTimeStamp() + "ERROR:" + throwable.getMessage());
         }
     }
+    
+    public static void log(String message, Throwable throwable) {
+        if (throwable != null) {
+            System.out.println(getTimeStamp() + "ERROR:" + message + ": " + throwable.getMessage());
+        }
+    }
 
     public static ConfigData getConfig() {
         return config;
