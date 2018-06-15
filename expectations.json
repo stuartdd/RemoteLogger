@@ -2,9 +2,9 @@
     "expectations": [
         {
             "method": "post",
-            "url": "",
+            "url": "/stop",
             "xml": {
-                "asserts" : {"Envelope.Body.multiRef.username" : "Ensia123"}
+                "asserts" : {"Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username" : "Ensia123"}
             },
             "file": "post.xml"
         }

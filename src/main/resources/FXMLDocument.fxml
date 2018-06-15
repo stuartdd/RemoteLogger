@@ -53,7 +53,7 @@
                         </TextArea>
                     </content>
                 </Tab>
-                <Tab text="Loggs">
+                <Tab text="Logs">
                     <content>
                        <TextArea fx:id="textAreaLog" editable="false" prefHeight="329.0" prefWidth="627.0" BorderPane.alignment="CENTER">
                             <font>

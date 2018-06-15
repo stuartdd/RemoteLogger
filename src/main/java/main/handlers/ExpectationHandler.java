@@ -31,19 +31,19 @@ public class ExpectationHandler implements HttpHandler {
     public void handle(HttpExchange he) throws IOException {
         String body = readStream(he.getRequestBody());
         long time = System.currentTimeMillis();
-        
+
         if ((body != null) && (body.trim().length() > 0)) {
-            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod()+ ":" + he.getRequestURI() );
+            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod() + ":" + he.getRequestURI());
             Main.notifyAction(time, Action.LOG_BODY, body.trim());
         } else {
-            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod()+ ":" + he.getRequestURI() );
+            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod() + ":" + he.getRequestURI());
         }
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             Main.notifyAction(time, Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
-        }      
+        }
         ExpectationMatcher.getResponse(time, he, body);
-     }
+    }
 
     private String asString(String key, List<String> list) {
         StringBuilder sb = new StringBuilder();
@@ -61,10 +61,7 @@ public class ExpectationHandler implements HttpHandler {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.length() > 0) {
-                    sb.append(Main.getTimeStamp()).append(line).append(NL);
-                }
+                sb.append(Main.getTimeStamp()).append(line).append(NL);
             }
             return sb.toString();
         } catch (IOException ex) {

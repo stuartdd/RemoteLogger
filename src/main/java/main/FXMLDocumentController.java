@@ -40,6 +40,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private LogLine firstLine = null;
     private LogLine lastLine = firstLine;
 
+    private LogLine firstLog = null;
+    private LogLine lastLog = firstLog;
+    
     @FXML
     private CheckBox checkBoxTime;
 
@@ -54,6 +57,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private TextArea textAreaLogging;
+
+    @FXML
+    private TextArea textAreaLog;
 
     @FXML
     private Label labelStatus;
@@ -120,30 +126,36 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textFieldPortNumber.setEditable(true);
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.addApplicationController(this);
         if (Main.getConfig().getAutoConnect()) {
             Main.startServerThread(Main.getConfig().getPort());
         }
-        resetLog();
-        updateLogDisplay(System.currentTimeMillis(), LogCatagory.EMPTY, null);
+        resetMainLog();
+        updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
     }
 
     @Override
     public boolean notifyAction(long time, Action action, String message) {
         switch (action) {
             case CLEAR_LOGS:
-                resetLog();
-                updateLogDisplay(time, null, null);
+                resetMainLog();
+                updateMainLog(time, null, null);
+                updateLog(time, null, null);
                 labelStatus.setText("Log display cleared");
                 break;
             case LOG_BODY:
-                updateLogDisplay(time, LogCatagory.BODY, message);
+                updateMainLog(time, LogCatagory.BODY, message);
                 break;
             case LOG_HEADER:
-                updateLogDisplay(time, LogCatagory.HEADER, message);
+                updateMainLog(time, LogCatagory.HEADER, message);
                 break;
             case LOG_REFRESH:
-                updateLogDisplay(time, null, null);
+                updateMainLog(time, null, null);
+                labelStatus.setText("Log display refreshed");
+                break;
+            case LOG:
+                updateLog(time, LogCatagory.LOG, message);
                 labelStatus.setText("Log display refreshed");
                 break;
             case PORT_NUMBER_ERROR:
@@ -181,7 +193,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
-    private void updateLogDisplay(long time, LogCatagory cat, String message) {
+    private void updateMainLog(long time, LogCatagory cat, String message) {
         if (firstLine == null) {
             if ((message == null) || (message.trim().length() == 0)) {
                 textAreaLogging.setText("Log is empty 1");
@@ -189,22 +201,40 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             } else {
                 firstLine = new LogLine(time, message, cat);
                 lastLine = firstLine;
-                textAreaLogging.setText(filter());
+                textAreaLogging.setText(filterMainLog());
                 labelStatus.setText("Log 1st line:" + message);
             }
         } else {
             lastLine.setNext(new LogLine(time, message, cat));
             lastLine = lastLine.getNext();
-            textAreaLogging.setText(filter());
+            textAreaLogging.setText(filterMainLog());
         }
-        Main.notifyAction(time, Action.SCROLL_TO_END, null);
+    }
+    
+    private void updateLog(long time, LogCatagory cat, String message) {
+        if (firstLog == null) {
+            if ((message == null) || (message.trim().length() == 0)) {
+                textAreaLog.setText("Log is empty 1");
+                labelStatus.setText("Log message is empty!");
+            } else {
+                firstLog = new LogLine(time, message, cat);
+                lastLog = firstLog;
+                textAreaLog.setText(filterMainLog());
+                labelStatus.setText("Log 1st line:" + message);
+            }
+        } else {
+            lastLog.setNext(new LogLine(time, message, cat));
+            lastLog = lastLog.getNext();
+            textAreaLog.setText(filterLog());
+        }
     }
 
-    private void resetLog() {
+    private void resetMainLog() {
         firstLine = null;
+        firstLog = null;
     }
 
-    private String filter() {
+    private String filterMainLog() {
         StringBuilder sb = new StringBuilder();
         LogLine line = firstLine;
         while (line != null) {
@@ -235,6 +265,18 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
         return sb.toString().trim();
     }
-
+    
+    private String filterLog() {
+        StringBuilder sb = new StringBuilder();
+        LogLine line = firstLog;
+        while (line != null) {
+            if (Main.getConfig().isShowTime()) {
+                sb.append(Main.getConfig().timeStamp(line.getTime())).append(":");
+            }
+            sb.append(line.getText()).append(NL);
+            line = line.getNext();
+        }
+        return sb.toString().trim();
+    }
 
 }

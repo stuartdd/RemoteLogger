@@ -6,6 +6,7 @@
 package main.expectations;
 
 import com.sun.net.httpserver.HttpExchange;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+import json.JsonUtils;
 import main.Main;
 import xml.MappedXml;
 import xml.ParseXmlException;
@@ -28,9 +31,13 @@ public class ExpectationMatcher {
     private static final String NL = System.getProperty("line.separator");
     private static final String LS = " -----------------------------------------------------------" + NL;
     private static Expectations expectations;
+    private static long expectationsLoadTime;
+    private static File expectationsFile;
 
-    public static void setExpectations(Expectations expectations) {
-        ExpectationMatcher.expectations = expectations;
+    public static void setExpectations(File file) {
+        ExpectationMatcher.expectationsFile = file;
+        ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
+        ExpectationMatcher.expectationsLoadTime = file.lastModified();
     }
 
     private static Expectation matchExpectation(long time, HttpExchange he, String body) {
@@ -38,7 +45,13 @@ public class ExpectationMatcher {
             Main.log("No Expectation have been set!");
             return null;
         }
-
+        
+        if (expectationsFile.lastModified() != expectationsLoadTime) {
+            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
+            ExpectationMatcher.expectationsLoadTime = expectationsFile.lastModified();
+            Main.log("* NOTE Expectatations file Reloaded:"+expectationsFile.getAbsolutePath());
+        }
+        
         String bodyTrimmed = trimmedNull(body);
         Map<String, String> map = new HashMap<>();
         Expectation found = null;
@@ -58,13 +71,13 @@ public class ExpectationMatcher {
                         MappedXml mappedXml = new MappedXml(bodyTrimmed, null);
                         map.putAll(mappedXml.getMap());
                         if (expectations.isListMap()) {
-                            listMap(time, map, "XML");
+                            logMap(time, map, "XML ");
                         }
                         if (doesNotMapAssertions(map, exp.getXml().getAsserts())) {
                             found = null;
                         }
                     } catch (ParseXmlException pe) {
-                        Main.log("Failed to parse XML body content",pe.getCause());
+                        Main.log("Failed to parse XML body content", pe.getCause());
                         found = null;
                     }
                 }
@@ -99,14 +112,28 @@ public class ExpectationMatcher {
         return (!exp.equalsIgnoreCase(subject));
     }
 
-    private static void listMap(long time, Map<String, String> map, String id) {
+    private static void logMap(long time, Map<String, String> map, String id) {
         StringBuilder sb = new StringBuilder();
         sb.append("* ").append(id).append(LS);
         for (Map.Entry<String, String> e : map.entrySet()) {
-            sb.append("* ").append(id).append(" MAP:").append(e.getKey()).append('=').append(e.getValue()).append(NL);
+            sb.append("* ").append(id).append(' ').append(e.getKey()).append('=').append(e.getValue()).append(NL);
         }
         sb.append("* ").append(id).append(LS);
-        Main.log(sb.toString());
+        Main.log(sb.toString().trim());
+    }
+
+    private static void logResponse(long time, String resp, int statusCode, String id) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("* ").append(id).append(LS);
+        sb.append("* ").append(id).append("STATUS:").append(statusCode).append(NL);
+        sb.append("* ").append(id).append(LS);
+        Scanner sc = new Scanner(resp);
+        while (sc.hasNextLine()) {
+            String l = sc.nextLine();
+            sb.append("* ").append(id).append(' ').append(l).append(NL);
+        }
+        sb.append("* ").append(id).append(LS);
+        Main.log(sb.toString().trim());
     }
 
     private static String trimmedNull(String s) {
@@ -125,12 +152,12 @@ public class ExpectationMatcher {
         int statusCode = 404;
         Expectation found = matchExpectation(time, he, body);
         if (found != null) {
-            Main.log("Expectation met:" + found);
+            Main.log("Expectation was met: " + found);
             try {
                 Path path = locateResponseFile(found.getFile());
                 response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
                 statusCode = found.getStatusCode();
-                Main.log("Expectation response:\n-------------------\n" + response + "\n-------------------\nExpectation status:" + statusCode);
+                logResponse(time, response, statusCode, "RESP");
             } catch (IOException io) {
                 Main.log(new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
             }

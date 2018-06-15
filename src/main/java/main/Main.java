@@ -140,18 +140,21 @@ public class Main extends Application {
 
     public static void log(String message) {
         if ((message != null) && (config.isVerbose())) {
-            System.out.println(getTimeStamp() + "LOG:" + message);
+            notifyAction(System.currentTimeMillis(), Action.LOG, message);
+            System.out.println(getTimeStamp() + message);
         }
     }
 
     public static void log(Throwable throwable) {
         if (throwable != null) {
+            notifyAction(System.currentTimeMillis(), Action.LOG, "ERROR:" + throwable.getMessage());
             System.out.println(getTimeStamp() + "ERROR:" + throwable.getMessage());
         }
     }
     
     public static void log(String message, Throwable throwable) {
         if (throwable != null) {
+            notifyAction(System.currentTimeMillis(), Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
             System.out.println(getTimeStamp() + "ERROR:" + message + ": " + throwable.getMessage());
         }
     }
@@ -225,8 +228,7 @@ public class Main extends Application {
                     System.exit(1);
                 }
                 try {
-                    Expectations expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, f);
-                    ExpectationMatcher.setExpectations(expectations);
+                    ExpectationMatcher.setExpectations(f);
                 } catch (Exception e) {
                     System.out.println("Expectation definitions file [" + exFile + "] could not be loaded");
                     e.printStackTrace(System.err);

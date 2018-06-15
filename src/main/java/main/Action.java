@@ -14,6 +14,7 @@ public enum Action {
     SERVER_STOPPING,
     SERVER_STOP,
     SERVER_FAIL,
+    LOG,
     LOG_BODY,
     LOG_HEADER,
     LOG_REFRESH,
