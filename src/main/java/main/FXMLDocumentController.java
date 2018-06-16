@@ -5,12 +5,8 @@
  */
 package main;
 
-import static java.lang.Thread.sleep;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -27,7 +23,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
-import static main.Main.closeApplication;
 
 /**
  *
@@ -37,12 +32,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private static final String NL = System.getProperty("line.separator");
 
-    private LogLine firstLine = null;
-    private LogLine lastLine = firstLine;
+    private LogLine firstMainLog = null;
+    private LogLine lastMainLog = firstMainLog;
 
     private LogLine firstLog = null;
     private LogLine lastLog = firstLog;
-    
+
     @FXML
     private CheckBox checkBoxTime;
 
@@ -73,6 +68,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void closeAction() {
         Main.closeApplication(false);
+    }
+
+    @FXML
+    public void clearMainLogAction() {
+        Main.notifyAction(System.currentTimeMillis(), Action.CLEAR_MAIN_LOGS, "Log has been cleared");
     }
 
     @FXML
@@ -139,10 +139,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public boolean notifyAction(long time, Action action, String message) {
         switch (action) {
             case CLEAR_LOGS:
+                resetLog();
+                updateLog(time, null, null);
+                break;
+            case CLEAR_MAIN_LOGS:
                 resetMainLog();
                 updateMainLog(time, null, null);
-                updateLog(time, null, null);
-                labelStatus.setText("Log display cleared");
                 break;
             case LOG_BODY:
                 updateMainLog(time, LogCatagory.BODY, message);
@@ -194,23 +196,23 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void updateMainLog(long time, LogCatagory cat, String message) {
-        if (firstLine == null) {
+        if (firstMainLog == null) {
             if ((message == null) || (message.trim().length() == 0)) {
                 textAreaLogging.setText("Log is empty 1");
                 labelStatus.setText("Log message is empty!");
             } else {
-                firstLine = new LogLine(time, message, cat);
-                lastLine = firstLine;
+                firstMainLog = new LogLine(time, message, cat);
+                lastMainLog = firstMainLog;
                 textAreaLogging.setText(filterMainLog());
                 labelStatus.setText("Log 1st line:" + message);
             }
         } else {
-            lastLine.setNext(new LogLine(time, message, cat));
-            lastLine = lastLine.getNext();
+            lastMainLog.setNext(new LogLine(time, message, cat));
+            lastMainLog = lastMainLog.getNext();
             textAreaLogging.setText(filterMainLog());
         }
     }
-    
+
     private void updateLog(long time, LogCatagory cat, String message) {
         if (firstLog == null) {
             if ((message == null) || (message.trim().length() == 0)) {
@@ -219,7 +221,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             } else {
                 firstLog = new LogLine(time, message, cat);
                 lastLog = firstLog;
-                textAreaLog.setText(filterMainLog());
+                textAreaLog.setText(filterLog());
                 labelStatus.setText("Log 1st line:" + message);
             }
         } else {
@@ -230,13 +232,18 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void resetMainLog() {
-        firstLine = null;
+        firstMainLog = null;
+        lastMainLog = firstMainLog;
+    }
+
+    private void resetLog() {
         firstLog = null;
+        lastLog = firstLog;
     }
 
     private String filterMainLog() {
         StringBuilder sb = new StringBuilder();
-        LogLine line = firstLine;
+        LogLine line = firstMainLog;
         while (line != null) {
             switch (line.getCatagory()) {
                 case EMPTY:
@@ -265,7 +272,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
         return sb.toString().trim();
     }
-    
+
     private String filterLog() {
         StringBuilder sb = new StringBuilder();
         LogLine line = firstLog;

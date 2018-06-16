@@ -20,6 +20,7 @@ public enum Action {
     LOG_REFRESH,
     PORT_NUMBER_ERROR,
     CONFIG_SAVE_ERROR,
+    CLEAR_MAIN_LOGS,
     CLEAR_LOGS,
     SCROLL_TO_END
 }
