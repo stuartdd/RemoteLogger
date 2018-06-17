@@ -76,6 +76,26 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     private TextField textFieldPortNumber;
 
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        textFieldPortNumber.setText("" + Main.getConfig().getPort());
+        buttonConnect.setText("Start");
+        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
+        checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
+        checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
+        checkBoxTime.setSelected(Main.getConfig().isShowTime());
+        textFieldPortNumber.setEditable(true);
+        labelStatus.setText("Ready to start the server");
+        textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        Main.addApplicationController(this);
+        if (Main.getConfig().getAutoConnect()) {
+            Main.startServerThread(Main.getConfig().getPort());
+        }
+        resetMainLog();
+        updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
+    }
+
     @FXML
     public void closeAction() {
         Main.closeApplication(false);
@@ -124,26 +144,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         } else {
             Main.stopServerThread();
         }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        textFieldPortNumber.setText("" + Main.getConfig().getPort());
-        buttonConnect.setText("Start");
-        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
-        checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
-        checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
-        checkBoxTime.setSelected(Main.getConfig().isShowTime());
-        textFieldPortNumber.setEditable(true);
-        labelStatus.setText("Ready to start the server");
-        textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        Main.addApplicationController(this);
-        if (Main.getConfig().getAutoConnect()) {
-            Main.startServerThread(Main.getConfig().getPort());
-        }
-        resetMainLog();
-        updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
     }
 
     @Override
