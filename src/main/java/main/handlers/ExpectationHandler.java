@@ -18,16 +18,13 @@ package main.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
 import main.Action;
 import main.Main;
+import main.Util;
 import main.expectations.ExpectationMatcher;
 
 /**
@@ -36,57 +33,27 @@ import main.expectations.ExpectationMatcher;
  */
 public class ExpectationHandler implements HttpHandler {
 
-    private static final String NL = System.getProperty("line.separator");
-
     @Override
     public void handle(HttpExchange he) throws IOException {
-        String body = readStream(he.getRequestBody());
         long time = System.currentTimeMillis();
-
+        Map<String, String> map = new HashMap<>();
+        String body = Util.readStream(he.getRequestBody());
+        map.put("METHOD", he.getRequestMethod());
         if ((body != null) && (body.trim().length() > 0)) {
-            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod() + ":" + he.getRequestURI());
+            map.put("BODY", body);
             Main.notifyAction(time, Action.LOG_BODY, body.trim());
-        } else {
-            Main.notifyAction(time, Action.LOG_HEADER, he.getRequestMethod() + ":" + he.getRequestURI());
         }
+        map.put("PATH", he.getRequestURI().getPath());
+        map.put("QUERY", he.getRequestURI().getQuery());
+        Main.notifyAction(time, Action.LOG_HEADER, "URI:" + he.getRequestURI());
+        Main.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
+        Main.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
-            Main.notifyAction(time, Action.LOG_HEADER, asString("HEADER:" + head, he.getRequestHeaders().get(head)));
+            String value = Util.asString(he.getRequestHeaders().get(head));
+            map.put(head, value);
+            Main.notifyAction(time, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
         }
-        ExpectationMatcher.getResponse(time, he, body);
+        ExpectationMatcher.getResponse(time, he, map);
     }
-
-    private String asString(String key, List<String> list) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(key).append(':');
-        for (String s : list) {
-            sb.append('"').append(s).append('"');
-        }
-        return sb.toString();
-    }
-
-    private String readStream(InputStream iStream) {
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(iStream, "utf8"));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(Main.getTimeStamp()).append(line).append(NL);
-            }
-            return sb.toString();
-        } catch (IOException ex) {
-            return "";
-        } finally {
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(ExpectationHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-
 }

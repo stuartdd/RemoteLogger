@@ -4,11 +4,17 @@
             "method": "post",
             "url": "/stop",
             "xml": {
-                "asserts" : {"Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username" : "Ensia123"}
+                "asserts": {
+                    "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
+                }
             },
             "file": "post.xml"
+        },
+        {
+            "method": "get",
+            "url": "/log"
         }
     ],
-    "paths" : [".", "/appl","/bea"],
-    "listMap" : true
+    "paths": [".", "/appl", "/bea"],
+    "listMap": true
 }

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Scanner;
 import json.JsonUtils;
 import main.Main;
+import main.Util;
 import xml.MappedXml;
 import xml.ParseXmlException;
 
@@ -45,13 +46,40 @@ public class ExpectationMatcher {
     private static long expectationsLoadTime;
     private static File expectationsFile;
 
+    public static void getResponse(long time, HttpExchange he, Map<String, String> map) {
+        String response = "Not Found";
+        int statusCode = 404;
+        Expectation found = matchExpectation(time, map);
+        if (found != null) {
+            Main.log("Expectation was met: " + found);
+            try {
+                Path path = locateResponseFile(found.getFile());
+                response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
+                statusCode = found.getStatusCode();
+                logResponse(time, response, statusCode, "RESP");
+            } catch (IOException io) {
+                Main.log(new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
+            }
+        } else {
+            Main.log("Expectation not met");
+        }
+        try {
+            he.sendResponseHeaders(statusCode, response.length());
+            try (OutputStream os = he.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        } catch (IOException io) {
+            Main.log(new IOException("Output Stream write failed for " + found, io));
+        }
+    }
+
     public static void setExpectations(File file) {
         ExpectationMatcher.expectationsFile = file;
         ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
         ExpectationMatcher.expectationsLoadTime = file.lastModified();
     }
 
-    private static Expectation matchExpectation(long time, HttpExchange he, String body) {
+    private static Expectation matchExpectation(long time, Map<String, String> map) {
         if (expectations == null) {
             Main.log("No Expectation have been set!");
             return null;
@@ -63,15 +91,14 @@ public class ExpectationMatcher {
             Main.log("* NOTE Expectatations file Reloaded:"+expectationsFile.getAbsolutePath());
         }
         
-        String bodyTrimmed = trimmedNull(body);
-        Map<String, String> map = new HashMap<>();
+        String bodyTrimmed = Util.trimmedNull(map.get("BODY"));
         Expectation found = null;
         for (Expectation exp : expectations.getExpectations()) {
             found = exp;
-            if (doesNotMatchStringOrNullExp(exp.getMethod(), he.getRequestMethod())) {
+            if (doesNotMatchStringOrNullExp(exp.getMethod(), map.get("METHOD"))) {
                 found = null;
             }
-            if (doesNotMatchStringOrNullExp(exp.getUrl(), he.getRequestURI().getPath())) {
+            if (doesNotMatchStringOrNullExp(exp.getUrl(), map.get("PATH"))) {
                 found = null;
             }
             if (exp.getXml() != null) {
@@ -88,7 +115,7 @@ public class ExpectationMatcher {
                             found = null;
                         }
                     } catch (ParseXmlException pe) {
-                        Main.log("Failed to parse XML body content", pe.getCause());
+                        Main.log("Failed to parse body content", pe.getCause());
                         found = null;
                     }
                 }
@@ -123,6 +150,7 @@ public class ExpectationMatcher {
         return (!exp.equalsIgnoreCase(subject));
     }
 
+
     private static void logMap(long time, Map<String, String> map, String id) {
         StringBuilder sb = new StringBuilder();
         sb.append("* ").append(id).append(LS);
@@ -147,45 +175,6 @@ public class ExpectationMatcher {
         Main.log(sb.toString().trim());
     }
 
-    private static String trimmedNull(String s) {
-        if (s == null) {
-            return null;
-        }
-        String st = s.trim();
-        if (st.length() == 0) {
-            return null;
-        }
-        return st;
-    }
-
-    public static void getResponse(long time, HttpExchange he, String body) {
-        String response = "Not Found";
-        int statusCode = 404;
-        Expectation found = matchExpectation(time, he, body);
-        if (found != null) {
-            Main.log("Expectation was met: " + found);
-            try {
-                Path path = locateResponseFile(found.getFile());
-                response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
-                statusCode = found.getStatusCode();
-                logResponse(time, response, statusCode, "RESP");
-            } catch (IOException io) {
-                Main.log(new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
-            }
-        } else {
-            Main.log("Expectation not met");
-        }
-        try {
-            he.sendResponseHeaders(statusCode, response.length());
-            try (OutputStream os = he.getResponseBody()) {
-                os.write(response.getBytes());
-            }
-        } catch (IOException io) {
-            io.printStackTrace();
-            Main.log(new IOException("Output Stream write failed for " + found, io));
-        }
-
-    }
 
     private static Path locateResponseFile(String file) throws FileNotFoundException {
         StringBuilder sb = new StringBuilder();
