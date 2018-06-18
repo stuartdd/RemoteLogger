@@ -24,7 +24,7 @@ public class Expectation {
     private String method;
     private String url;
     private String query;
-    private XmlContent xml;
+    private MessageContent message;
     
     private String file;
     private int statusCode = 200;
@@ -69,12 +69,12 @@ public class Expectation {
         this.statusCode = statusCode;
     }
 
-    public XmlContent getXml() {
-        return xml;
+    public MessageContent getMessage() {
+        return message;
     }
 
-    public void setXml(XmlContent xml) {
-        this.xml = xml;
+    public void setMessage(MessageContent message) {
+        this.message = message;
     }
 
     @Override

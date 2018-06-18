@@ -165,6 +165,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case LOG_REFRESH:
                 updateMainLog(time, null, null);
+                updateLog(time, null, null);
                 labelStatus.setText("Log display refreshed");
                 break;
             case LOG:

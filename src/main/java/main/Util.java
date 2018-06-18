@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
+import main.expectations.BodyType;
 
 /**
  *
@@ -65,7 +67,7 @@ public class Util {
             }
             return trimmedNull(sb.toString());
         } catch (IOException ex) {
-            Main.log(time,"readStream:", ex);
+            Main.log(time, "readStream:", ex);
             return null;
         } finally {
             try {
@@ -73,10 +75,32 @@ public class Util {
                     br.close();
                 }
             } catch (IOException ex) {
-                Main.log(time,"readStream:", ex);
+                Main.log(time, "readStream:", ex);
             }
         }
 
+    }
+
+    public static flatten(String currentkey, Map<String, Object> mapIn, ) {
+        for (Map.Entry<String, Object> s : map.entrySet()) {
+            if (s.getValue() instanceof Map) {
+                Map<String, String> fm = flatten(currentkey+'.'+s.getKey(), (Map)s.getValue());
+                map.putAll(fm);
+            } else {
+                map.put(s.getKey(), s.getValue().toString());
+            }
+        }
+    }
+
+    public static BodyType detirmineBodyType(String bodyTrimmed) {
+        char cN = bodyTrimmed.charAt(bodyTrimmed.length() - 1);
+        if ((bodyTrimmed.charAt(0) == '<') && (cN == '>')) {
+            return BodyType.XML;
+        }
+        if ((cN == '}') && (bodyTrimmed.indexOf(" {") < bodyTrimmed.length() - 1)) {
+            return BodyType.JSON;
+        }
+        return BodyType.TXT;
     }
 
 }

@@ -16,21 +16,12 @@
  */
 package main.expectations;
 
-import java.util.Map;
+import main.*;
 
 /**
  *
- * @author 802996013
+ * @author stuart
  */
-public class XmlContent {
-    private Map<String,String> asserts;
-
-    public Map<String, String> getAsserts() {
-        return asserts;
-    }
-
-    public void setAsserts(Map<String, String> asserts) {
-        this.asserts = asserts;
-    }
-    
+public enum BodyType {
+    XML, JSON, HTML, TXT
 }

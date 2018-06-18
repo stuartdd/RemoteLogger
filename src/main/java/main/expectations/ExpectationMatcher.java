@@ -104,17 +104,25 @@ public class ExpectationMatcher {
             if (doesNotMatchStringOrNullExp(exp.getQuery(), map.get("QUERY"))) {
                 found = null;
             }
-            if (exp.getXml() != null) {
+            if (exp.getMessage() != null) {
                 if (bodyTrimmed == null) {
                     found = null;
                 } else {
                     try {
-                        MappedXml mappedXml = new MappedXml(bodyTrimmed, null);
-                        map.putAll(mappedXml.getMap());
+                        BodyType bodyType = Util.detirmineBodyType(bodyTrimmed);
+                        switch (bodyType) {
+                            case XML:
+                                MappedXml mappedXml = new MappedXml(bodyTrimmed, null);
+                                map.putAll(mappedXml.getMap());
+                                break;
+                            case JSON:
+                                Map<String, Object> objectMap = JsonUtils.mapFromJson(bodyTrimmed);
+                                
+                        }
                         if (expectations.isListMap()) {
                             logMap(time, map, "XML ");
                         }
-                        if (doesNotMapAssertions(map, exp.getXml().getAsserts())) {
+                        if (doesNotMapAssertions(map, exp.getMessage().getAsserts())) {
                             found = null;
                         }
                     } catch (ParseXmlException pe) {
