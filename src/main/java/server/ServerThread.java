@@ -56,7 +56,7 @@ public class ServerThread extends Thread {
             server.createContext("/control", new ControlHandler());
             server.createContext("/", new ExpectationHandler());
             server.setExecutor(null); // creates a default executor
-            Main.log("Starting server on port " + port);
+            Main.log(System.currentTimeMillis(), "Starting server on port " + port);
             server.start();
             Main.notifyAction(System.currentTimeMillis(), Action.SERVER_START,"Server started on port "+port);
         } catch (IOException ex) {

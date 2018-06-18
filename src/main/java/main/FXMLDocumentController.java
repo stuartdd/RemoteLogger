@@ -138,7 +138,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 int port = Integer.parseInt(textFieldPortNumber.getText());
                 Main.startServerThread(port);
             } catch (NumberFormatException nfe) {
-                Main.log(nfe);
+                Main.log(System.currentTimeMillis(), nfe);
                 Main.notifyAction(System.currentTimeMillis(), Action.PORT_NUMBER_ERROR, "Invalid port number");
             }
         } else {

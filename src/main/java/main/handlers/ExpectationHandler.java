@@ -38,16 +38,22 @@ public class ExpectationHandler implements HttpHandler {
         long time = System.currentTimeMillis();
         Map<String, String> map = new HashMap<>();
         String body = Util.readStream(he.getRequestBody());
-        map.put("METHOD", he.getRequestMethod());
         if ((body != null) && (body.trim().length() > 0)) {
-            map.put("BODY", body);
             Main.notifyAction(time, Action.LOG_BODY, body.trim());
+            map.put("BODY", body);
         }
-        map.put("PATH", he.getRequestURI().getPath());
-        map.put("QUERY", he.getRequestURI().getQuery());
-        Main.notifyAction(time, Action.LOG_HEADER, "URI:" + he.getRequestURI());
-        Main.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
-        Main.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
+        Main.notifyAction(time, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+        map.put("METHOD", he.getRequestMethod());
+        String path = Util.trimmedNull(he.getRequestURI().getPath());
+        if (path != null) {
+            Main.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
+            map.put("PATH", he.getRequestURI().getPath());
+        }
+        String query = Util.trimmedNull(he.getRequestURI().getQuery());
+        if (query != null) {
+            Main.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
+            map.put("QUERY", he.getRequestURI().getQuery());
+        }
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             String value = Util.asString(he.getRequestHeaders().get(head));

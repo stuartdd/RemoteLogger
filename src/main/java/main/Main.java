@@ -148,29 +148,29 @@ public class Main extends Application {
                 }
             }
         }
-        log("Shutting down");
+        log(System.currentTimeMillis(), "Shutting down");
         stopServerThread();
         mainStage.close();
     }
 
-    public static void log(String message) {
+    public static void log(long time, String message) {
         if ((message != null) && (config.isVerbose())) {
-            notifyAction(System.currentTimeMillis(), Action.LOG, message);
-            System.out.println(getTimeStamp() + message);
+            notifyAction(time, Action.LOG, message);
+            System.out.println(getTimeStamp(time) + message);
         }
     }
 
-    public static void log(Throwable throwable) {
+    public static void log(long time, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(System.currentTimeMillis(), Action.LOG, "ERROR:" + throwable.getMessage());
-            System.out.println(getTimeStamp() + "ERROR:" + throwable.getMessage());
+            notifyAction(time, Action.LOG, "ERROR:" + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "ERROR:" + throwable.getMessage());
         }
     }
     
-    public static void log(String message, Throwable throwable) {
+    public static void log(long time, String message, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(System.currentTimeMillis(), Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
-            System.out.println(getTimeStamp() + "ERROR:" + message + ": " + throwable.getMessage());
+            notifyAction(time, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "ERROR:" + message + ": " + throwable.getMessage());
         }
     }
 
@@ -182,13 +182,13 @@ public class Main extends Application {
         return configName;
     }
 
-    public static String getTimeStamp() {
+    public static String getTimeStamp(long time) {
         if ((config.getLogDateFormat() != null) && (config.getLogDateFormat().trim().length() > 0)) {
-            return DateTime.now().toString(config.getLogDateFormat());
+            return (new DateTime(time)).toString(config.getLogDateFormat());
         }
         return "";
     }
-
+    
     /**
      * @param args the command line arguments
      */

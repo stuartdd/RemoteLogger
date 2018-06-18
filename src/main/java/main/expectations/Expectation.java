@@ -23,6 +23,7 @@ package main.expectations;
 public class Expectation {
     private String method;
     private String url;
+    private String query;
     private XmlContent xml;
     
     private String file;
@@ -42,6 +43,14 @@ public class Expectation {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public String getFile() {

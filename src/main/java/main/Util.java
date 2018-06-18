@@ -54,17 +54,18 @@ public class Util {
     }
 
     public static String readStream(final InputStream iStream) {
+        long time = System.currentTimeMillis();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(iStream, "utf8"));
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(Main.getTimeStamp()).append(line).append(NL);
+                sb.append(Main.getTimeStamp(time)).append(line).append(NL);
             }
             return trimmedNull(sb.toString());
         } catch (IOException ex) {
-            Main.log("readStream:", ex);
+            Main.log(time,"readStream:", ex);
             return null;
         } finally {
             try {
@@ -72,7 +73,7 @@ public class Util {
                     br.close();
                 }
             } catch (IOException ex) {
-                Main.log("readStream:", ex);
+                Main.log(time,"readStream:", ex);
             }
         }
 
