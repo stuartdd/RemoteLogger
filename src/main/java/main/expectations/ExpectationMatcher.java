@@ -93,6 +93,8 @@ public class ExpectationMatcher {
 
         String bodyTrimmed = Util.trimmedNull(map.get("BODY"));
         Expectation found = null;
+        String mapType = "TXT";
+        Map<String, String> tempMap = new HashMap<>();
         for (Expectation exp : expectations.getExpectations()) {
             found = exp;
             if (doesNotMatchStringOrNullExp(exp.getMethod(), map.get("METHOD"))) {
@@ -113,15 +115,14 @@ public class ExpectationMatcher {
                         switch (bodyType) {
                             case XML:
                                 MappedXml mappedXml = new MappedXml(bodyTrimmed, null);
-                                map.putAll(mappedXml.getMap());
+                                tempMap.putAll(mappedXml.getMap());
+                                mapType = "XML";
                                 break;
                             case JSON:
-                                Map<String, Object> objectMap = JsonUtils.mapFromJson(bodyTrimmed);
-                                
+                                tempMap.putAll(JsonUtils.flatMap(bodyTrimmed));
+                                mapType = "JSON";
                         }
-                        if (expectations.isListMap()) {
-                            logMap(time, map, "XML ");
-                        }
+
                         if (doesNotMapAssertions(map, exp.getMessage().getAsserts())) {
                             found = null;
                         }
@@ -131,6 +132,10 @@ public class ExpectationMatcher {
                     }
                 }
             }
+        }
+        map.putAll(tempMap);
+        if (expectations.isListMap()) {
+            logMap(time, map, mapType);
         }
         return found;
     }

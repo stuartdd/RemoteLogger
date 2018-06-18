@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Map;
 import main.expectations.BodyType;
 
 /**
@@ -79,17 +78,6 @@ public class Util {
             }
         }
 
-    }
-
-    public static flatten(String currentkey, Map<String, Object> mapIn, ) {
-        for (Map.Entry<String, Object> s : map.entrySet()) {
-            if (s.getValue() instanceof Map) {
-                Map<String, String> fm = flatten(currentkey+'.'+s.getKey(), (Map)s.getValue());
-                map.putAll(fm);
-            } else {
-                map.put(s.getKey(), s.getValue().toString());
-            }
-        }
     }
 
     public static BodyType detirmineBodyType(String bodyTrimmed) {

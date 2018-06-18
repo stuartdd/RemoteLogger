@@ -3,7 +3,7 @@
         {
             "method": "post",
             "url": "/stop",
-            "xml": {
+            "message": {
                 "asserts": {
                     "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
                 }
@@ -11,8 +11,8 @@
             "file": "post.xml"
         },
         {
-            "method": "get",
-            "url": "/log"
+            "method": "post",
+            "url": "/list"
         }
     ],
     "paths": [".", "/appl", "/bea"],
