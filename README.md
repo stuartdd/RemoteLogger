@@ -16,7 +16,7 @@ The generated JAR file contains ALL dependencies and can be run using
 java -jar RemoteLogger.jar configfile.json
 ```
 
-For example (annotated):
+Example config file (annotated):
 ```
 {
   "port" : 1999,                  Listens on this port
