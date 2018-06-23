@@ -1,11 +1,11 @@
-# json_tools
+# Remote Logger
 
-Echos http requests sent to it.
-Logs all interactions.
+A GUI that Echos/Logs http requests sent to it.
+It also Logs all interactions.
 
 Logs are on screen
 
-Uses rules to define responses if required
+It can use a set of rules (expectations) to define responses if required
 
 * This module is dependent on json_tools module.
 
