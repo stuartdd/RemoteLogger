@@ -122,7 +122,6 @@ public class ExpectationMatcher {
                                 tempMap.putAll(JsonUtils.flatMap(bodyTrimmed));
                                 mapType = "JSON";
                         }
-
                         if (doesNotMapAssertions(map, exp.getMessage().getAsserts())) {
                             found = null;
                         }
