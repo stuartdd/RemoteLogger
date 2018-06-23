@@ -77,6 +77,13 @@ public class ExpectationMatcher {
         ExpectationMatcher.expectationsFile = file;
         ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
         ExpectationMatcher.expectationsLoadTime = file.lastModified();
+        Map<String, String> map = new HashMap<>();
+        for (Expectation e : ExpectationMatcher.expectations.getExpectations()) {
+            if (map.containsKey(e.getName())) {
+                throw new ExpectationException("Duplicate Expectation name found" + e.getName());
+            }
+            map.put(e.getName(), e.getName());
+        }
     }
 
     private static Expectation matchExpectation(long time, Map<String, String> map) {
