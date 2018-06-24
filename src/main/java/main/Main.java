@@ -36,7 +36,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
-import main.expectations.ExpectationMatcher;
+import expectations.ExpectationMatcher;
 import org.joda.time.DateTime;
 import server.ServerThread;
 
