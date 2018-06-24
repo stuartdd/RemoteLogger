@@ -31,7 +31,7 @@ public class ControlHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
-            Main.stopServerThread();
+            Main.controlStopEventAction();
             String response = "Server will stop";
             he.sendResponseHeaders(200, response.length());
             OutputStream os = he.getResponseBody();

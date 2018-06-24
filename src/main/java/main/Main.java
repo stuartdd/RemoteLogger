@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -42,6 +44,7 @@ public class Main extends Application {
 
     private static final int PORT_NUMBER = 1088;
     private static final Charset CHARSET = Charset.forName("UTF-8");
+    private static boolean headless = false;
 
     private static final List<ApplicationController> CONTROLLERS = new ArrayList<>();
     private static Stage mainStage;
@@ -118,39 +121,63 @@ public class Main extends Application {
         serverThread.start();
     }
 
+    public static void controlStopEventAction() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                }
+                if (headless) {
+                    closeApplication(true);
+                } else {
+                    stopServerThread();
+                }
+            }
+        }).start();
+    }
+
     public static void stopServerThread() {
         if (serverThread != null) {
-            serverThread.stopServer(1);
+            serverThread.stopServer();
+            serverThread = null;
         }
     }
 
     public static void closeApplication(boolean force) {
-        if (configName != null) {
-            config.setX(mainStage.getX());
-            config.setY(mainStage.getY());
-            config.setWidth(mainStage.getWidth());
-            config.setHeight(mainStage.getHeight());
-            if (serverThread == null) {
-                config.setAutoConnect(false);
-            } else {
-                config.setAutoConnect(serverThread.isRunning());
-            }
-            try {
-                Files.write(
-                        FileSystems.getDefault().getPath(configName),
-                        JsonUtils.toJsonFormatted(config).getBytes(CHARSET),
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException io) {
-                if (!force) {
-                    Main.notifyAction(System.currentTimeMillis(), Action.CONFIG_SAVE_ERROR, io.toString());
-                    return;
+        log(System.currentTimeMillis(), "Shutting down");
+        if (!headless) {
+            if (configName != null) {
+                config.setX(mainStage.getX());
+                config.setY(mainStage.getY());
+                config.setWidth(mainStage.getWidth());
+                config.setHeight(mainStage.getHeight());
+                if (serverThread == null) {
+                    config.setAutoConnect(false);
+                } else {
+                    config.setAutoConnect(serverThread.isRunning());
+                }
+                try {
+                    Files.write(
+                            FileSystems.getDefault().getPath(configName),
+                            JsonUtils.toJsonFormatted(config).getBytes(CHARSET),
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING);
+                } catch (IOException io) {
+                    if (!force) {
+                        Main.notifyAction(System.currentTimeMillis(), Action.CONFIG_SAVE_ERROR, io.toString());
+                        return;
+                    }
                 }
             }
         }
-        log(System.currentTimeMillis(), "Shutting down");
         stopServerThread();
-        mainStage.close();
+        if (mainStage != null) {
+            mainStage.close();
+        } else {
+            System.exit(0);
+        }
     }
 
     public static void log(long time, String message) {
@@ -166,7 +193,7 @@ public class Main extends Application {
             System.out.println(getTimeStamp(time) + "ERROR:" + throwable.getMessage());
         }
     }
-    
+
     public static void log(long time, String message, Throwable throwable) {
         if (throwable != null) {
             notifyAction(time, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
@@ -188,11 +215,12 @@ public class Main extends Application {
         }
         return "";
     }
-    
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        headless = false;
         config = new ConfigData();
         config.setWidth(600);
         config.setHeight(600);
@@ -216,6 +244,10 @@ public class Main extends Application {
                 if (arg.startsWith("-a")) {
                     config.setAutoConnect(true);
                 }
+                if (arg.startsWith("-h")) {
+                    headless = true;
+                }
+
             }
         } catch (Exception e) {
             e.printStackTrace(System.out);
@@ -251,7 +283,10 @@ public class Main extends Application {
                 }
             }
         }
-        launch(args);
+        if (headless) {
+            startServerThread(config.getPort());
+        } else {
+            launch(args);
+        }
     }
-
 }

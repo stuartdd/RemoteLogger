@@ -1,7 +1,7 @@
 {
   "port" : 1999,
   "logDateFormat" : "",
-  "autoConnect" : true,
+  "autoConnect" : false,
   "timeFormat" : "HH:mm:ss.SSS",
   "expectationsFile" : "expectations.json",
   "verbose" : true,

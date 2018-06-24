@@ -21,6 +21,7 @@ package main.expectations;
  * @author 802996013
  */
 public class Expectation {
+    private String name;
     private String method;
     private String url;
     private String query;
@@ -28,6 +29,14 @@ public class Expectation {
     
     private String file;
     private int statusCode = 200;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getMethod() {
         return method;
@@ -79,7 +88,7 @@ public class Expectation {
 
     @Override
     public String toString() {
-        return "Expectation{" + "method=" + method + ", url=" + url + ", file=" + file + ", statusCode=" + statusCode + '}';
+        return "Expectation{Name=" + name + ", method=" + method + ", url=" + url + ", file=" + file + ", statusCode=" + statusCode + '}';
     }
     
 }

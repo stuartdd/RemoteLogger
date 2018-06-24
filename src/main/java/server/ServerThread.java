@@ -81,7 +81,7 @@ public class ServerThread extends Thread {
         return running;
     }
 
-    public void stopServer(int i) {
+    public void stopServer() {
         canRun = false;
     }
 
