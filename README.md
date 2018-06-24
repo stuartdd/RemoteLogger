@@ -1,11 +1,12 @@
-# json_tools
+# Remote Logger
 
-Echos http requests sent to it.
-Logs all interactions.
+A GUI that Echos/Logs http requests sent to it.
+
+It also Logs all interactions.
 
 Logs are on screen
 
-Uses rules to define responses if required
+It can use a set of rules (expectations) to define responses if required
 
 * This module is dependent on json_tools module.
 
@@ -35,7 +36,8 @@ Example config file (annotated):
   "height" : 845.0
 }
 ```
-This confog is updated each time the UI exits normally.
+This config file is updated each time the UI exits normally.
 
 The expectation file is yet to be documented.
+
 Note the expectations file will be re-read if the last updated time of the file changes.
