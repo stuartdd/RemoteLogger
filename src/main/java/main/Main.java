@@ -24,8 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -80,34 +78,38 @@ public class Main extends Application {
     }
 
     public static void notifyAction(long time, Action action, String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (ApplicationController ap : CONTROLLERS) {
-                    ap.notifyAction(time, action, message);
+        if (!headless) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (ApplicationController ap : CONTROLLERS) {
+                        ap.notifyAction(time, action, message);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public static void notifyOption(Option option, boolean selected, String message) {
-        switch (option) {
-            case FILTER_HEADERS:
-                config.setIncludeHeaders(selected);
-                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
-                break;
-            case FILTER_BODY:
-                config.setIncludeBody(selected);
-                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
-                break;
-            case FILTER_EMPTY:
-                config.setIncludeEmpty(selected);
-                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
-                break;
-            case TIME:
-                config.setShowTime(selected);
-                notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
-                break;
+        if (!headless) {
+            switch (option) {
+                case FILTER_HEADERS:
+                    config.setIncludeHeaders(selected);
+                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    break;
+                case FILTER_BODY:
+                    config.setIncludeBody(selected);
+                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    break;
+                case FILTER_EMPTY:
+                    config.setIncludeEmpty(selected);
+                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    break;
+                case TIME:
+                    config.setShowTime(selected);
+                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    break;
+            }
         }
     }
 

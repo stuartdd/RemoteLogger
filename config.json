@@ -1,7 +1,7 @@
 {
   "port" : 1999,
   "logDateFormat" : "",
-  "autoConnect" : true,
+  "autoConnect" : false,
   "timeFormat" : "HH:mm:ss.SSS",
   "expectationsFile" : "expectations.json",
   "verbose" : true,
@@ -9,8 +9,8 @@
   "includeBody" : true,
   "includeEmpty" : false,
   "showTime" : false,
-  "x" : 243.0,
-  "y" : 65.0,
+  "x" : 186.0,
+  "y" : 75.0,
   "width" : 1548.0,
   "height" : 845.0
 }
