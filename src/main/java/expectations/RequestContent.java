@@ -22,7 +22,7 @@ import java.util.Map;
  *
  * @author 802996013
  */
-public class MessageContent {
+public class RequestContent {
     private Map<String,String> asserts;
 
     public Map<String, String> getAsserts() {

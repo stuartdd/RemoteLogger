@@ -41,8 +41,8 @@ public class Util {
         }
         return st;
     }
-    
-   public static boolean isEmpty(final Object s) {
+
+    public static boolean isEmpty(final Object s) {
         if (s == null) {
             return true;
         }
@@ -51,6 +51,24 @@ public class Util {
             return true;
         }
         return false;
+    }
+
+    public static String firstN(String s, int n) {
+        if (Util.isEmpty(s)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) >= ' ') {
+                sb.append(s.charAt(i));
+            } else {
+                sb.append(' ');
+            }
+            if (sb.length() >= n) {
+                return sb.toString();
+            }
+        }
+        return sb.toString();
     }
 
     public static String asString(final List<String> list) {

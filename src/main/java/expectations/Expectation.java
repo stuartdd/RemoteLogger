@@ -27,9 +27,6 @@ public class Expectation {
     private String query;
     private RequestContent request;
     private ResponseContent response;
-    
-    private String file;
-    private int statusCode = 200;
 
     public String getName() {
         return name;
@@ -63,22 +60,6 @@ public class Expectation {
         this.query = query;
     }
 
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
     public RequestContent getRequest() {
         return request;
     }
@@ -97,7 +78,7 @@ public class Expectation {
 
     @Override
     public String toString() {
-        return "Expectation{Name=" + name + ", method=" + method + ", url=" + url + ", file=" + file + ", statusCode=" + statusCode + '}';
+        return "Expectation{name='" + name + "', method=" + method + ", url=" + url + ", response=" + (response==null?"Undefined":response)  + '}';
     }
     
 }
