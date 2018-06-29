@@ -3,7 +3,7 @@
         {
             "method": "post",
             "url": "/stop",
-            "message": {
+            "request": {
                 "asserts": {
                     "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
                 }

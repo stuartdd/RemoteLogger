@@ -31,6 +31,7 @@ import java.util.Scanner;
 import json.JsonUtils;
 import main.Main;
 import main.Util;
+import template.Template;
 import xml.MappedXml;
 import xml.ParseXmlException;
 
@@ -46,16 +47,22 @@ public class ExpectationMatcher {
     private static long expectationsLoadTime;
     private static File expectationsFile;
 
-    public static void getResponse(long time, HttpExchange he, Map<String, String> map) {
+    public static void getResponse(long time, HttpExchange he, Map<String, Object> map) {
         String response = "Not Found";
         int statusCode = 404;
         Expectation found = matchExpectation(time, map);
         if (found != null) {
             try {
                 Main.log(time, "Expectation was met: " + found);
-                Path path = locateResponseFile(found.getFile());
-                response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
-                statusCode = found.getStatusCode();
+                if (found.getResponse() != null) {
+                    if (Util.isEmpty(found.getResponse().getTemplate())) {
+                        Path path = locateResponseFile(found.getResponse().getTemplate(), map);
+                        response = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
+                    } else {
+                        
+                    }
+                    statusCode = found.getStatusCode();
+                }
                 logResponse(time, response, statusCode, "RESP");
             } catch (IOException io) {
                 Main.log(time, new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
@@ -63,6 +70,7 @@ public class ExpectationMatcher {
         } else {
             Main.log(time, "Expectation not met");
         }
+
         try {
             he.sendResponseHeaders(statusCode, response.length());
             try (OutputStream os = he.getResponseBody()) {
@@ -75,18 +83,21 @@ public class ExpectationMatcher {
 
     public static void setExpectations(File file) {
         ExpectationMatcher.expectationsFile = file;
-        ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
+        ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
+                file);
         ExpectationMatcher.expectationsLoadTime = file.lastModified();
     }
 
-    private static Expectation matchExpectation(long time, Map<String, String> map) {
+    private static Expectation matchExpectation(long time, Map<String, Object> map) {
         if (expectations == null) {
             Main.log(time, "No Expectation have been set!");
             return null;
+
         }
 
         if (expectationsFile.lastModified() != expectationsLoadTime) {
-            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
+            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
+                    expectationsFile);
             ExpectationMatcher.expectationsLoadTime = expectationsFile.lastModified();
             Main.log(time, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
         }
@@ -106,7 +117,7 @@ public class ExpectationMatcher {
             if (doesNotMatchStringOrNullExp(exp.getQuery(), map.get("QUERY"))) {
                 found = null;
             }
-            if (exp.getMessage() != null) {
+            if (exp.getRequest() != null) {
                 if (bodyTrimmed == null) {
                     found = null;
                 } else {
@@ -123,7 +134,7 @@ public class ExpectationMatcher {
                                 mapType = "JSON";
                         }
 
-                        if (doesNotMapAssertions(map, exp.getMessage().getAsserts())) {
+                        if (doesNotMatchRequestAssertions(map, exp.getRequest().getAsserts())) {
                             found = null;
                         }
                     } catch (ParseXmlException pe) {
@@ -140,9 +151,12 @@ public class ExpectationMatcher {
         return found;
     }
 
-    private static boolean doesNotMapAssertions(Map<String, String> map, Map<String, String> asserts) {
+    private static boolean doesNotMatchRequestAssertions(Map<String, Object> map, Map<String, String> asserts) {
+        if ((asserts == null) || asserts.isEmpty()) {
+            return false;
+        }
         for (Map.Entry<String, String> ass : asserts.entrySet()) {
-            String actual = map.get(ass.getKey());
+            Object actual = map.get(ass.getKey());
             if (actual == null) {
                 return true;
             }
@@ -155,21 +169,21 @@ public class ExpectationMatcher {
         return false;
     }
 
-    private static boolean doesNotMatchStringOrNullExp(String exp, String subject) {
+    private static boolean doesNotMatchStringOrNullExp(String exp, Object subject) {
         if ((exp == null) || (exp.trim().length() == 0)) {
             return false;
         }
-        return doesNotMatchString(exp, subject);
+        return doesNotMatchString(exp, subject.toString());
     }
 
-    private static boolean doesNotMatchString(String exp, String subject) {
-        return (!exp.equalsIgnoreCase(subject));
+    private static boolean doesNotMatchString(String exp, Object subject) {
+        return (!exp.equalsIgnoreCase(subject.toString()));
     }
 
-    private static void logMap(long time, Map<String, String> map, String id) {
+    private static void logMap(long time, Map<String, Object> map, String id) {
         StringBuilder sb = new StringBuilder();
         sb.append("* ").append(id).append(LS);
-        for (Map.Entry<String, String> e : map.entrySet()) {
+        for (Map.Entry<String, Object> e : map.entrySet()) {
             sb.append("* ").append(id).append(' ').append(e.getKey()).append('=').append(e.getValue()).append(NL);
         }
         sb.append("* ").append(id).append(LS);
@@ -190,10 +204,11 @@ public class ExpectationMatcher {
         Main.log(time, sb.toString().trim());
     }
 
-    private static Path locateResponseFile(String file) throws FileNotFoundException {
-        if (file == null) {
+    private static Path locateResponseFile(String fileName, Map map) throws FileNotFoundException {
+        if (fileName == null) {
             throw new FileNotFoundException("File for Expectation is not defined");
         }
+        String file = Template.parse(fileName, map, true);
         StringBuilder sb = new StringBuilder();
         for (String path : expectations.getPaths()) {
             sb.append(path).append(',');

@@ -36,7 +36,7 @@ public class ExpectationHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         long time = System.currentTimeMillis();
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         String body = Util.readStream(he.getRequestBody());
         if ((body != null) && (body.trim().length() > 0)) {
             Main.notifyAction(time, Action.LOG_BODY, body.trim());

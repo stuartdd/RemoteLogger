@@ -24,7 +24,8 @@ public class Expectation {
     private String method;
     private String url;
     private String query;
-    private MessageContent message;
+    private RequestContent request;
+    private ResponseContent response;
     
     private String file;
     private int statusCode = 200;
@@ -69,12 +70,20 @@ public class Expectation {
         this.statusCode = statusCode;
     }
 
-    public MessageContent getMessage() {
-        return message;
+    public RequestContent getRequest() {
+        return request;
     }
 
-    public void setMessage(MessageContent message) {
-        this.message = message;
+    public void setRequest(RequestContent request) {
+        this.request = request;
+    }
+
+    public ResponseContent getResponse() {
+        return response;
+    }
+
+    public void setResponse(ResponseContent response) {
+        this.response = response;
     }
 
     @Override

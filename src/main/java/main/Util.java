@@ -31,15 +31,26 @@ public class Util {
 
     public static final String NL = System.getProperty("line.separator");
 
-    public static String trimmedNull(final String s) {
+    public static String trimmedNull(final Object s) {
         if (s == null) {
             return null;
         }
-        String st = s.trim();
+        String st = s.toString().trim();
         if (st.length() == 0) {
             return null;
         }
         return st;
+    }
+    
+   public static boolean isEmpty(final Object s) {
+        if (s == null) {
+            return true;
+        }
+        String st = s.toString().trim();
+        if (st.length() == 0) {
+            return true;
+        }
+        return false;
     }
 
     public static String asString(final List<String> list) {
