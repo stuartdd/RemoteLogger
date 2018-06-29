@@ -23,8 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.Action;
 import main.Main;
-import main.handlers.ControlHandler;
-import main.handlers.ExpectationHandler;
+import handlers.ControlHandler;
+import handlers.ExpectationHandler;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -81,7 +81,7 @@ public class ServerThread extends Thread {
         return running;
     }
 
-    public void stopServer(int i) {
+    public void stopServer() {
         canRun = false;
     }
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main.expectations;
+package expectations;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.File;
@@ -86,6 +86,13 @@ public class ExpectationMatcher {
         ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
                 file);
         ExpectationMatcher.expectationsLoadTime = file.lastModified();
+        Map<String, String> map = new HashMap<>();
+        for (Expectation e : ExpectationMatcher.expectations.getExpectations()) {
+            if (map.containsKey(e.getName())) {
+                throw new ExpectationException("Duplicate Expectation name found" + e.getName());
+            }
+            map.put(e.getName(), e.getName());
+        }
     }
 
     private static Expectation matchExpectation(long time, Map<String, Object> map) {

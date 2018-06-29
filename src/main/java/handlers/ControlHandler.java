@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main.handlers;
+package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -31,7 +31,7 @@ public class ControlHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
-            Main.stopServerThread();
+            Main.controlStopEventAction();
             String response = "Server will stop";
             he.sendResponseHeaders(200, response.length());
             OutputStream os = he.getResponseBody();

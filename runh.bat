@@ -1,0 +1,1 @@
+java -jar build/libs/RemoteLogger-all-1.0.jar config.json -h %1 %2 %3

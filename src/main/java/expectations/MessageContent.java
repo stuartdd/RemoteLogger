@@ -14,42 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main.expectations;
+package expectations;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author 802996013
  */
-public class Expectations {
+public class MessageContent {
+    private Map<String,String> asserts;
 
-    private List<Expectation> expectations;
-    private String[] paths;
-    private boolean listMap;
-
-    public List<Expectation> getExpectations() {
-        return expectations;
+    public Map<String, String> getAsserts() {
+        return asserts;
     }
 
-    public void setExpectations(List<Expectation> expectations) {
-        this.expectations = expectations;
+    public void setAsserts(Map<String, String> asserts) {
+        this.asserts = asserts;
     }
-
-    public String[] getPaths() {
-        return paths;
-    }
-
-    public void setPaths(String[] paths) {
-        this.paths = paths;
-    }
-
-    public boolean isListMap() {
-        return listMap;
-    }
-
-    public void setListMap(boolean listMap) {
-        this.listMap = listMap;
-    }
-   
+    
 }

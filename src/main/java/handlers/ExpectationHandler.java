@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main.handlers;
+package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -25,7 +25,7 @@ import java.util.Map;
 import main.Action;
 import main.Main;
 import main.Util;
-import main.expectations.ExpectationMatcher;
+import expectations.ExpectationMatcher;
 
 /**
  *

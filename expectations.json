@@ -1,6 +1,7 @@
 {
     "expectations": [
         {
+            "name" : "TestPost and body",
             "method": "post",
             "url": "/stop",
             "request": {
@@ -11,6 +12,7 @@
             "file": "post.xml"
         },
         {
+            "name" : "TestPost",
             "method": "post",
             "url": "/list"
         }
