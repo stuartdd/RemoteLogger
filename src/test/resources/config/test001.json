@@ -3,7 +3,7 @@
   "logDateFormat" : "",
   "autoConnect" : true,
   "timeFormat" : "HH:mm:ss.SSS",
-  "expectationsFile" : "expectations.json",
+  "expectationsFile" : "config/expectations.json",
   "verbose" : true,
   "includeHeaders" : true,
   "includeBody" : true,

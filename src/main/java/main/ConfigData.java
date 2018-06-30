@@ -18,6 +18,7 @@ package main;
 
 import config.Config;
 import java.io.File;
+import java.io.InputStream;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -43,10 +44,29 @@ public class ConfigData extends Config {
     private double width;
     private double height;
 
+    private static String writeFileName;
+    private static String readFileName;
+
     private DateTimeFormatter ts;
 
-    public static ConfigData loadConfig(File fil) {
-        return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
+    public static ConfigData loadConfig(String fileName) {
+        File fil = new File(fileName);
+        if (fil.exists()) {
+            writeFileName = fil.getAbsolutePath();
+            readFileName = writeFileName;
+            return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
+        } else {
+            InputStream is = ConfigData.class.getResourceAsStream(fileName);
+            if (is == null) {
+                is = ConfigData.class.getResourceAsStream("/"+fileName);
+                if (is == null) {
+                    throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
+                }
+             }
+            writeFileName = null;
+            readFileName = fileName;
+            return (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
+        }
     }
 
     public String timeStamp(long time) {
@@ -171,7 +191,13 @@ public class ConfigData extends Config {
     public void setExpectationsFile(String expectationsFile) {
         this.expectationsFile = expectationsFile;
     }
-    
-    
+
+    public static String writeFileName() {
+        return writeFileName;
+    }
+
+    public static String readFileName() {
+        return readFileName;
+    }
 
 }

@@ -150,7 +150,7 @@ public class Main extends Application {
     public static void closeApplication(boolean force) {
         log(System.currentTimeMillis(), "Shutting down");
         if (!headless) {
-            if (configName != null) {
+            if (ConfigData.writeFileName() != null) {
                 config.setX(mainStage.getX());
                 config.setY(mainStage.getY());
                 config.setWidth(mainStage.getWidth());
@@ -162,7 +162,7 @@ public class Main extends Application {
                 }
                 try {
                     Files.write(
-                            FileSystems.getDefault().getPath(configName),
+                            FileSystems.getDefault().getPath(ConfigData.writeFileName()),
                             JsonUtils.toJsonFormatted(config).getBytes(CHARSET),
                             StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING);
@@ -218,6 +218,9 @@ public class Main extends Application {
         return "";
     }
 
+    public static void startHeadless(int port, String configFile) {
+        main(new String[]{"-h", "-p"+port, configFile});
+    }
     /**
      * @param args the command line arguments
      */
@@ -231,15 +234,6 @@ public class Main extends Application {
         configName = null;
         try {
             for (String arg : args) {
-                if (arg.toLowerCase().endsWith(".json")) {
-                    File f = new File(arg);
-                    if (f.exists()) {
-                        configName = f.getAbsolutePath();
-                        config = ConfigData.loadConfig(f);
-                    }
-                }
-            }
-            for (String arg : args) {
                 if (arg.startsWith("-p")) {
                     config.setPort(Integer.parseInt(arg.substring(2)));
                 }
@@ -249,10 +243,18 @@ public class Main extends Application {
                 if (arg.startsWith("-h")) {
                     headless = true;
                 }
-
+            }
+            for (String arg : args) {
+                if (arg.toLowerCase().endsWith(".json")) {
+                    config = ConfigData.loadConfig(arg);
+                    configName = ConfigData.readFileName();
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace(System.out);
+            e.printStackTrace(System.err);
+            if (headless) {
+                return;
+            }
             System.exit(1);
         }
         if (config.getPort() == null) {
@@ -271,16 +273,13 @@ public class Main extends Application {
                 exFile = null;
             }
             if (exFile != null) {
-                File f = new File(exFile);
-                if (!f.exists()) {
-                    System.out.println("Expectation definitions file [" + exFile + "] was not found");
-                    System.exit(1);
-                }
                 try {
-                    ExpectationMatcher.setExpectations(f);
+                    ExpectationMatcher.setExpectations(exFile);
                 } catch (Exception e) {
-                    System.out.println("Expectation definitions file [" + exFile + "] could not be loaded");
                     e.printStackTrace(System.err);
+                    if (headless) {
+                        return;
+                    }
                     System.exit(1);
                 }
             }

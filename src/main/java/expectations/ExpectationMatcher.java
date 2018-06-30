@@ -32,6 +32,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import json.JsonUtils;
+import main.ConfigData;
 import main.Main;
 import main.Util;
 import template.Template;
@@ -98,11 +99,24 @@ public class ExpectationMatcher {
         }
     }
 
-    public static void setExpectations(File file) {
-        ExpectationMatcher.expectationsFile = file;
-        ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
-                file);
-        ExpectationMatcher.expectationsLoadTime = file.lastModified();
+    public static void setExpectations(String fileName) {
+        File file = new File(fileName);
+        if (file.exists()) {
+            ExpectationMatcher.expectationsFile = file;
+            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
+            ExpectationMatcher.expectationsLoadTime = file.lastModified();
+        } else {
+            InputStream is = ConfigData.class.getResourceAsStream(fileName);
+            if (is == null) {
+                is = ConfigData.class.getResourceAsStream("/"+fileName);
+                if (is == null) {
+                    throw new ExpectationException("Expectations file: " + fileName + " not found (File or classpath)");
+                }
+            }
+            ExpectationMatcher.expectationsFile = null;
+            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, is);
+            ExpectationMatcher.expectationsLoadTime = 0;
+        }
         Map<String, String> map = new HashMap<>();
         for (Expectation e : ExpectationMatcher.expectations.getExpectations()) {
             if (map.containsKey(e.getName())) {
@@ -117,11 +131,13 @@ public class ExpectationMatcher {
             Main.log(time, "No Expectation have been set!");
             return null;
         }
-        if (expectationsFile.lastModified() != expectationsLoadTime) {
-            ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
-                    expectationsFile);
-            ExpectationMatcher.expectationsLoadTime = expectationsFile.lastModified();
-            Main.log(time, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+        if (ExpectationMatcher.expectationsFile != null) {
+            if (expectationsFile.lastModified() != expectationsLoadTime) {
+                ExpectationMatcher.expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
+                        expectationsFile);
+                ExpectationMatcher.expectationsLoadTime = expectationsFile.lastModified();
+                Main.log(time, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+            }
         }
         String bodyTrimmed = Util.trimmedNull(map.get("BODY"));
         Expectation found = null;
@@ -262,7 +278,7 @@ public class ExpectationMatcher {
         StringBuilder sb = new StringBuilder();
         int content;
         while ((content = is.read()) != -1) {
-            sb.append((char)content);
+            sb.append((char) content);
         }
         return sb.toString();
     }

@@ -1,0 +1,40 @@
+{
+    "expectations": [
+        {
+            "name": "TestPost XML body",
+            "method": "post",
+            "url": "/stop",
+            "request": {
+                "asserts": {
+                    "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
+                }
+            },
+            "response": {
+                "status": 200,
+                "template": "post-%{Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username}.xml"
+            }
+        },
+        {
+            "name": "Test Post Response Empty",
+            "method": "post",
+            "url": "/pre"
+        },
+        {
+            "name": "Test Get Response Empty",
+            "method": "get",
+            "url": "/gre"
+        },
+        {
+            "name": "Test Get Response Body",
+            "method": "get",
+            "url": "/grb",
+            "response": {
+                "status" : 200,
+                "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
+                "headers" : {"Accept":"%{Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
+            }
+        }
+    ],
+    "paths": [".", "/appl", "/bea"],
+    "listMap": true
+}
