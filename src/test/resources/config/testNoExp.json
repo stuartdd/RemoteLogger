@@ -1,0 +1,15 @@
+{
+  "port" : 1999,
+  "logDateFormat" : "",
+  "autoConnect" : true,
+  "timeFormat" : "HH:mm:ss.SSS",
+  "verbose" : true,
+  "includeHeaders" : true,
+  "includeBody" : true,
+  "includeEmpty" : false,
+  "showTime" : false,
+  "x" : 788.0,
+  "y" : 228.0,
+  "width" : 897.0,
+  "height" : 863.0
+}

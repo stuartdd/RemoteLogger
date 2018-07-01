@@ -29,8 +29,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import json.JsonUtils;
 import main.ConfigData;
 import main.Main;
@@ -74,6 +72,13 @@ public class ExpectationMatcher {
                     }
                     statusCode = found.getResponse().getStatus();
                     headers = found.getResponse().getHeaders();
+                } else {
+                    if (found.getMethod().equalsIgnoreCase("GET")) {
+                        statusCode = 200;
+                    } else {
+                        statusCode = 201;
+                    }
+                    response = "Response is undefined";
                 }
                 map.put("STATUS", "" + statusCode);
                 response = Template.parse(response, map, true);
@@ -81,7 +86,6 @@ public class ExpectationMatcher {
             } catch (IOException io) {
                 Main.log(time, new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
             }
-
         } else {
             Main.log(time, "Expectation not met");
         }
@@ -108,7 +112,7 @@ public class ExpectationMatcher {
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
-                is = ConfigData.class.getResourceAsStream("/"+fileName);
+                is = ConfigData.class.getResourceAsStream("/" + fileName);
                 if (is == null) {
                     throw new ExpectationException("Expectations file: " + fileName + " not found (File or classpath)");
                 }

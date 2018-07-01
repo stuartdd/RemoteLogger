@@ -17,13 +17,13 @@ import org.junit.Test;
  *
  * @author 802996013
  */
-public class TestExp {
+public class TestNoExp {
 
     private static Client client = new Client(new ClientConfig("http://localhost:1999"));
 
     @BeforeClass
     public static void beforeClass() {
-        Main.startHeadless(1999, "/config/test001.json");
+        Main.startHeadless(1999, "/config/testNoExp.json");
     }
 
     @AfterClass
@@ -31,23 +31,9 @@ public class TestExp {
         client.send("control/stop", null, Client.Method.PUT);
     }
 
-   @Test
-    public void testPre() {
-        String e = "ClientResponse{status=201, body=Response is undefined}";
-        String r = client.send("pre", null, Client.Method.POST).toString();
-        assertEquals(e, r);
-    }
-    
-    @Test
-    public void testGre() {
-        String e = "ClientResponse{status=200, body=Response is undefined}";
-        String r = client.send("gre", null, Client.Method.GET).toString();
-        assertEquals(e, r);
-    }
-    
     @Test
     public void testGrb() {
-        String e = "ClientResponse{status=200, body=Method GET.URL:'/grb'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.xxx:%{xxx}}";
+        String e = "ClientResponse{status=404, body=Not Found}";
         String r = client.send("grb", null, Client.Method.GET).toString();
         System.out.println("["+r+"]");
         assertEquals(e, r);
