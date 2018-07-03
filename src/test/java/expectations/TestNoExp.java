@@ -18,12 +18,12 @@ import org.junit.Test;
  * @author 802996013
  */
 public class TestNoExp {
-
-    private static Client client = new Client(new ClientConfig("http://localhost:1999"));
+    private static int PORT = 1889;
+    private static Client client = new Client(new ClientConfig("http://localhost:"+PORT));
 
     @BeforeClass
     public static void beforeClass() {
-        Main.startHeadless(1999, "/config/testNoExp.json");
+        Main.startHeadless(PORT, "/config/testNoExp.json");
     }
 
     @AfterClass
@@ -32,9 +32,17 @@ public class TestNoExp {
     }
 
     @Test
-    public void testGrb() {
+    public void testNoExpGet() {
         String e = "ClientResponse{status=404, body=Not Found}";
-        String r = client.send("grb", null, Client.Method.GET).toString();
+        String r = client.send("gettest", null, Client.Method.GET).toString();
+        System.out.println("["+r+"]");
+        assertEquals(e, r);
+        
+    }
+    @Test
+    public void testNoExpPost() {
+        String e = "ClientResponse{status=404, body=Not Found}";
+        String r = client.send("posttest", "<XML/>", Client.Method.POST).toString();
         System.out.println("["+r+"]");
         assertEquals(e, r);
         

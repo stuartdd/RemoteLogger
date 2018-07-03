@@ -7,7 +7,9 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -55,11 +57,13 @@ public class Client {
                 wr = null;
             }
             int responseCode = con.getResponseCode();
-            if (responseCode >= 300) {
-                return new ClientResponse(responseCode, "Failed");
+            InputStream is = null;
+            try {
+                is = con.getInputStream();
+            } catch (FileNotFoundException fnfe) {
+                return new ClientResponse(responseCode, "Not Found");
             }
-            in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(is));
             String inputLine;
             StringBuilder response = new StringBuilder();
             while ((inputLine = in.readLine()) != null) {

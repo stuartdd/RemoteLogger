@@ -16,7 +16,6 @@
  */
 package main;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
@@ -219,8 +218,9 @@ public class Main extends Application {
     }
 
     public static void startHeadless(int port, String configFile) {
-        main(new String[]{"-h", "-p"+port, configFile});
+        main(new String[]{"-h", "-p" + port, configFile});
     }
+
     /**
      * @param args the command line arguments
      */
@@ -234,9 +234,6 @@ public class Main extends Application {
         configName = null;
         try {
             for (String arg : args) {
-                if (arg.startsWith("-p")) {
-                    config.setPort(Integer.parseInt(arg.substring(2)));
-                }
                 if (arg.startsWith("-a")) {
                     config.setAutoConnect(true);
                 }
@@ -248,6 +245,11 @@ public class Main extends Application {
                 if (arg.toLowerCase().endsWith(".json")) {
                     config = ConfigData.loadConfig(arg);
                     configName = ConfigData.readFileName();
+                }
+            }
+            for (String arg : args) {
+                if (arg.startsWith("-p")) {
+                    config.setPort(Integer.parseInt(arg.substring(2)));
                 }
             }
         } catch (Exception e) {

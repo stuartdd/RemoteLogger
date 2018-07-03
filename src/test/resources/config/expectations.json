@@ -3,10 +3,10 @@
         {
             "name": "TestPost XML body",
             "method": "post",
-            "url": "/stop",
+            "url": "test/post/xml",
             "request": {
                 "asserts": {
-                    "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
+                    "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
                 }
             },
             "response": {

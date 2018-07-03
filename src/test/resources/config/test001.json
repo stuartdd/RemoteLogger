@@ -1,5 +1,4 @@
 {
-  "port" : 1999,
   "logDateFormat" : "",
   "autoConnect" : true,
   "timeFormat" : "HH:mm:ss.SSS",

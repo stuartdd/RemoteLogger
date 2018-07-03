@@ -83,6 +83,17 @@ public class Util {
         return sb.toString();
     }
 
+    public static String readResource(final String resourceName) {
+        InputStream is = ConfigData.class.getResourceAsStream(resourceName);
+        if (is == null) {
+            is = ConfigData.class.getResourceAsStream("/" + resourceName);
+            if (is == null) {
+                throw new ConfigDataException("Resource data [" + resourceName + "] could not be found.");
+            }
+        }
+        return readStream(is);
+    }
+
     public static String readStream(final InputStream iStream) {
         long time = System.currentTimeMillis();
         BufferedReader br = null;
