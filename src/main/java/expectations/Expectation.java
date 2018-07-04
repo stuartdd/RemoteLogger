@@ -23,11 +23,12 @@ package expectations;
 public class Expectation {
     private String name;
     private String method;
-    private String url;
+    private String path;
     private String query;
-    private RequestContent request;
+    private String bodyType;
+    private RequestContent body;
     private ResponseContent response;
-
+ 
     public String getName() {
         return name;
     }
@@ -44,13 +45,14 @@ public class Expectation {
         this.method = method;
     }
 
-    public String getUrl() {
-        return url;
+    public String getPath() {
+        return path;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setPath(String path) {
+        this.path = path;
     }
+
 
     public String getQuery() {
         return query;
@@ -60,12 +62,12 @@ public class Expectation {
         this.query = query;
     }
 
-    public RequestContent getRequest() {
-        return request;
+    public RequestContent getBody() {
+        return body;
     }
 
-    public void setRequest(RequestContent request) {
-        this.request = request;
+    public void setBody(RequestContent body) {
+        this.body = body;
     }
 
     public ResponseContent getResponse() {
@@ -76,9 +78,17 @@ public class Expectation {
         this.response = response;
     }
 
+    public String getBodyType() {
+        return bodyType;
+    }
+
+    public void setBodyType(String bodyType) {
+        this.bodyType = bodyType;
+    }
+
     @Override
     public String toString() {
-        return "Expectation{name='" + name + "', method=" + method + ", url=" + url + ", response=" + (response==null?"Undefined":response)  + '}';
+        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response==null?"Undefined":response)  + '}';
     }
     
 }

@@ -20,47 +20,54 @@ import org.junit.Test;
  */
 public class TestExp {
 
-   private static int PORT = 1999;
-    private static Client client = new Client(new ClientConfig("http://localhost:"+PORT));
+    private static final String POST_RESPONSE = "<bottom>\n"
+            + "    <FlowPane prefHeight=\"25.0\" prefWidth=\"600.0\" BorderPane.alignment=\"CENTER\">\n"
+            + "        <children>\n"
+            + "            <Separator valueFromRequestXml=\"UNAVAILABLE\" prefHeight=\"31.0\" prefWidth=\"15.0\" />\n"
+            + "            <Label prefHeight=\"22.0\" prefWidth=\"539.0\" text=\"Label\" />\n"
+            + "        </children>\n"
+            + "    </FlowPane>\n"
+            + "</bottom>\n";
+    private static int PORT = 1999;
+    private static Client client = new Client(new ClientConfig("http://localhost:" + PORT));
 
     @BeforeClass
     public static void beforeClass() {
-//        Main.startHeadless(PORT, "/config/test001.json");
+        Main.startHeadless(PORT, "/config/test001.json");
     }
 
     @AfterClass
     public static void afterClass() {
- //       client.send("control/stop", null, Client.Method.PUT);
+        client.send("control/stop", null, Client.Method.PUT);
     }
 
-   @Test
+    @Test
     public void testPost() {
-        String e = "ClientResponse{status=201, body=Response is undefined}";
-        String r = client.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST).toString();
-        assertEquals(e, r);
+        String r = client.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST).getBody();
+        System.out.println(r);
+        assertEquals(POST_RESPONSE, r);
     }
-    
-    
-   @Test
+
+    @Test
     public void testPre() {
         String e = "ClientResponse{status=201, body=Response is undefined}";
         String r = client.send("pre", null, Client.Method.POST).toString();
         assertEquals(e, r);
     }
-    
+
     @Test
     public void testGre() {
         String e = "ClientResponse{status=200, body=Response is undefined}";
         String r = client.send("gre", null, Client.Method.GET).toString();
         assertEquals(e, r);
     }
-    
+
     @Test
     public void testGrb() {
         String e = "ClientResponse{status=200, body=Method GET.URL:'/grb'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.xxx:%{xxx}}";
         String r = client.send("grb", null, Client.Method.GET).toString();
-        System.out.println("["+r+"]");
+        System.out.println("[" + r + "]");
         assertEquals(e, r);
-        
+
     }
 }

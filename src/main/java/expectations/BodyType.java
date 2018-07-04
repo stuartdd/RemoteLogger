@@ -23,5 +23,5 @@ import main.*;
  * @author stuart
  */
 public enum BodyType {
-    XML, JSON, HTML, TXT
+    XML, JSON, HTML, TXT, EMPTY
 }

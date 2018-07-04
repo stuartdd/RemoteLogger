@@ -211,6 +211,9 @@ public class Main extends Application {
     }
 
     public static String getTimeStamp(long time) {
+        if (config == null) {
+            return (new DateTime(time)).toString("HH:mm:ss.SSS: ");
+        }
         if ((config.getLogDateFormat() != null) && (config.getLogDateFormat().trim().length() > 0)) {
             return (new DateTime(time)).toString(config.getLogDateFormat());
         }

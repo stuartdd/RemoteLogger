@@ -83,8 +83,8 @@ public class ExpectationMatcher {
                 map.put("STATUS", "" + statusCode);
                 response = Template.parse(response, map, true);
                 logResponse(time, response, statusCode, "RESP");
-            } catch (IOException io) {
-                Main.log(time, new IOException("Read file failed for " + found + ". " + io.getMessage(), io));
+            } catch (IOException | ExpectationException io) {
+                Main.log(time, new IOException("Read file failed for expectation: " + found.getName() + ". " + io.getMessage(), io));
             }
         } else {
             Main.log(time, "Expectation not met");
@@ -143,73 +143,94 @@ public class ExpectationMatcher {
                 Main.log(time, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
             }
         }
-        String bodyTrimmed = Util.trimmedNull(map.get("BODY"));
         Expectation found = null;
-        String mapType = "---";
-        Map<String, String> tempMap = new HashMap<>();
         for (Expectation exp : expectations.getExpectations()) {
-            found = exp;
-            if (doesNotMatchStringOrNullExp(exp.getMethod(), map.get("METHOD"))) {
-                found = null;
-            }
-            if (doesNotMatchStringOrNullExp(exp.getUrl(), map.get("PATH"))) {
-                found = null;
-            }
-            if (doesNotMatchStringOrNullExp(exp.getQuery(), map.get("QUERY"))) {
-                found = null;
-            }
-            if (exp.getRequest() != null) {
-                if (bodyTrimmed == null) {
-                    found = null;
-                } else {
-                    try {
-                        BodyType bodyType = Util.detirmineBodyType(bodyTrimmed);
-                        switch (bodyType) {
-                            case XML:
-                                MappedXml mappedXml = new MappedXml(bodyTrimmed, null);
-                                tempMap.putAll(mappedXml.getMap());
-                                mapType = "XML";
-                                break;
-                            case JSON:
-                                tempMap.putAll(JsonUtils.flatMap(bodyTrimmed));
-                                mapType = "JSON";
-                        }
-                        if (doesNotMatchRequestAssertions(map, exp.getRequest().getAsserts())) {
-                            found = null;
-                        }
-                    } catch (ParseXmlException pe) {
-                        Main.log(time, "Failed to parse body content", pe.getCause());
-                        found = null;
-                    }
-                }
-            }
+            found = testExpectationMatches(time, exp, map);
             if (found != null) {
                 break;
             }
         }
-        map.putAll(tempMap);
         if (expectations.isListMap()) {
-            logMap(time, map, mapType);
+            logMap(time, map);
         }
         return found;
     }
 
-    private static boolean doesNotMatchRequestAssertions(Map<String, Object> map, Map<String, String> asserts) {
-        if ((asserts == null) || asserts.isEmpty()) {
+    private static Expectation testExpectationMatches(long time, Expectation exp, Map<String, Object> map1) {
+        if (doesNotMatchStringOrNullExp(exp.getMethod(), map1.get("METHOD"))) {
+            Main.log(time, "MIS-MATCH:" + exp.getName() + ": METHOD:'" + exp.getMethod() + "' != '" + map1.get("METHOD") + "'");
+            return null;
+        }
+        if (doesNotMatchStringOrNullExp(exp.getPath(), map1.get("PATH"))) {
+            Main.log(time, "MIS-MATCH:" + exp.getName() + " PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
+            return null;
+        }
+        if (doesNotMatchStringOrNullExp(exp.getQuery(), map1.get("QUERY"))) {
+            Main.log(time, "MIS-MATCH:" + exp.getName() + " QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
+            return null;
+        }
+        if (doesNotMatchStringOrNullExp(exp.getBodyType(), map1.get("BODY-TYPE"))) {
+            Main.log(time, "MIS-MATCH:" + exp.getName() + " BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
+            return null;
+        }
+        if (exp.getBody() != null) {
+            String bodyTrimmed = Util.trimmedNull(map1.get("BODY"));
+            if (bodyTrimmed == null) {
+                return null;
+            } else {
+                try {
+                    String bodyType = map1.get("BODY-TYPE").toString();
+                    Map<String, Object> tempMap = mapBodyContent(time, bodyTrimmed, (BodyType) map1.get("BODY-TYPE"));
+                    for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
+                        map1.put(bodyType + "." + ent.getKey(), ent.getValue());
+                    }
+                    if (doesNotMatchRequestAssertions(time, exp, map1)) {
+                        return null;
+                    }
+                } catch (ExpectationException pe) {
+                    Main.log(time, "Expectation ["+exp.getName()+"] not met! Failed to map body content", pe.getCause());
+                    return null;
+                }
+            }
+        }
+        return exp;
+    }
+
+    private static boolean doesNotMatchRequestAssertions(long time, Expectation exp, Map<String, Object> map) {
+        if ((exp.getBody().getAsserts() == null) || exp.getBody().getAsserts().isEmpty()) {
             return false;
         }
-        for (Map.Entry<String, String> ass : asserts.entrySet()) {
+        for (Map.Entry<String, String> ass : exp.getBody().getAsserts().entrySet()) {
             Object actual = map.get(ass.getKey());
             if (actual == null) {
+                Main.log(time, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' Not Found");
                 return true;
             }
             if (!ass.getValue().equalsIgnoreCase("*")) {
                 if (doesNotMatchString(ass.getValue(), actual)) {
+                    Main.log(time, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' != " + "'" + ass.getValue() + "'");
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private static Map<String, Object> mapBodyContent(long time, String body, BodyType bodyType) {
+        Map<String, Object> tempMap = new HashMap<>();
+        try {
+            switch (bodyType) {
+                case XML:
+                    MappedXml mappedXml = new MappedXml(body, null);
+                    tempMap.putAll(mappedXml.getMap());
+                    break;
+                case JSON:
+                    tempMap.putAll(JsonUtils.flatMap(body));
+            }
+        } catch (Exception pe) {
+            throw new ExpectationException("Failed to parse body text: Type:" + bodyType, pe);
+        }
+        return tempMap;
     }
 
     private static boolean doesNotMatchStringOrNullExp(String exp, Object subject) {
@@ -223,13 +244,13 @@ public class ExpectationMatcher {
         return (!exp.equalsIgnoreCase(subject.toString()));
     }
 
-    private static void logMap(long time, Map<String, Object> map, String id) {
+    private static void logMap(long time, Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
-        sb.append("* ").append(id).append(' ').append(LS);
+        sb.append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
-            sb.append("* ").append(id).append(' ').append(e.getKey()).append('=').append(e.getValue()).append(NL);
+            sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
         }
-        sb.append("* ").append(id).append(' ').append(LS);
+        sb.append(LS);
         Main.log(time, sb.toString().trim());
     }
 
@@ -238,11 +259,7 @@ public class ExpectationMatcher {
         sb.append("* ").append(id).append(' ').append(LS);
         sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
-        Scanner sc = new Scanner(resp);
-        while (sc.hasNextLine()) {
-            String l = sc.nextLine();
-            sb.append("* ").append(id).append(' ').append(l).append(NL);
-        }
+        sb.append(resp);
         sb.append("* ").append(id).append(' ').append(LS);
         Main.log(time, sb.toString().trim());
     }
@@ -254,7 +271,7 @@ public class ExpectationMatcher {
         String file = Template.parse(fileName, map, true);
         StringBuilder sb = new StringBuilder();
         for (String path : expectations.getPaths()) {
-            sb.append(path).append(',');
+            sb.append('"').append(path).append('"').append(',');
             Path p = Paths.get(path, file);
             if (Files.exists(p)) {
                 try {
@@ -265,19 +282,19 @@ public class ExpectationMatcher {
             }
         }
         try {
-            return readResource(fileName, sb.toString());
+            return readResource(file, sb.toString());
         } catch (IOException ex) {
             throw new ExpectationException("File [" + file + "] Not readable from class path", ex);
         }
     }
 
-    private static String readResource(String fileName, String list) throws IOException {
-        InputStream is = ExpectationMatcher.class.getResourceAsStream(fileName);
+    private static String readResource(String file, String list) throws IOException {
+        InputStream is = ExpectationMatcher.class.getResourceAsStream(file);
         if (is == null) {
-            is = ExpectationMatcher.class.getResourceAsStream("/" + fileName);
+            is = ExpectationMatcher.class.getResourceAsStream("/" + file);
         }
         if (is == null) {
-            throw new ExpectationException("File [" + fileName + "] Not Found in paths [" + list + "]");
+            throw new ExpectationException("File [" + file + "] Not Found in paths [" + list + "] or on the class path");
         }
         StringBuilder sb = new StringBuilder();
         int content;

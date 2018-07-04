@@ -3,31 +3,31 @@
         {
             "name": "TestPost XML body",
             "method": "post",
-            "url": "test/post/xml",
-            "request": {
+            "path": "/test/post/xml",
+            "body": {
                 "asserts": {
-                    "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
+                    "XML.BorderPane.center.TabPane.tabs.Tab[1].(text)": "Loggs"
                 }
             },
             "response": {
                 "status": 200,
-                "template": "post-%{Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username}.xml"
+                "template": "config/post-%{XML.BorderPane.center.TabPane.tabs.Tab[0].(text)}.xml"
             }
         },
         {
             "name": "Test Post Response Empty",
             "method": "post",
-            "url": "/pre"
+            "path": "/pre"
         },
         {
             "name": "Test Get Response Empty",
             "method": "get",
-            "url": "/gre"
+            "path": "/gre"
         },
         {
             "name": "Test Get Response Body",
             "method": "get",
-            "url": "/grb",
+            "path": "/grb",
             "response": {
                 "status" : 200,
                 "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",

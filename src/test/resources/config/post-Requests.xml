@@ -1,0 +1,8 @@
+<bottom>
+    <FlowPane prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+        <children>
+            <Separator valueFromRequestXml="UNAVAILABLE" prefHeight="31.0" prefWidth="15.0" />
+            <Label prefHeight="22.0" prefWidth="539.0" text="Label" />
+        </children>
+    </FlowPane>
+</bottom>

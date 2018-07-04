@@ -3,10 +3,10 @@
         {
             "name": "TestPost XML body",
             "method": "post",
-            "url": "/stop",
-            "request": {
+            "path": "/test/post/xml",
+            "body": {
                 "asserts": {
-                    "Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username": "Ensia123"
+                    "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
                 }
             },
             "response": {
@@ -17,17 +17,17 @@
         {
             "name": "Test Post Response Empty",
             "method": "post",
-            "url": "/pre"
+            "path": "/pre"
         },
         {
             "name": "Test Get Response Empty",
             "method": "get",
-            "url": "/gre"
+            "path": "/gre"
         },
         {
             "name": "Test Get Response Body",
             "method": "get",
-            "url": "/grb",
+            "path": "/grb",
             "response": {
                 "status" : 200,
                 "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",

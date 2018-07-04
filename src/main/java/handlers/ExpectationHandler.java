@@ -18,6 +18,7 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import expectations.BodyType;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,9 +39,13 @@ public class ExpectationHandler implements HttpHandler {
         long time = System.currentTimeMillis();
         Map<String, Object> map = new HashMap<>();
         String body = Util.readStream(he.getRequestBody());
-        if ((body != null) && (body.trim().length() > 0)) {
-            Main.notifyAction(time, Action.LOG_BODY, body.trim());
-            map.put("BODY", body);
+        if (body != null) {
+            String bodyTrim = body.trim();
+            Main.notifyAction(time, Action.LOG_BODY, bodyTrim);
+            map.put("BODY", bodyTrim);
+            map.put("BODY-TYPE", Util.detirmineBodyType(bodyTrim));
+        } else {
+            map.put("BODY-TYPE", BodyType.EMPTY);            
         }
         Main.notifyAction(time, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
         map.put("METHOD", he.getRequestMethod());

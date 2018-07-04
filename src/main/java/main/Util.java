@@ -102,7 +102,7 @@ public class Util {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(Main.getTimeStamp(time)).append(line).append(NL);
+                sb.append(line).append(NL);
             }
             return trimmedNull(sb.toString());
         } catch (IOException ex) {
