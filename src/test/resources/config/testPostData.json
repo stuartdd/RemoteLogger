@@ -15,20 +15,6 @@
             }
         },
         {
-            "name": "TestPost JSON body",
-            "method": "post",
-            "path": "/test/post/json",
-            "body": {
-                "asserts": {
-                    "JSON.listMap": "true"
-                }
-            },
-            "response": {
-                "status": 200,
-                "template": "config/post-%{JSON.expectations[1].response.status}.json"
-            }
-        },
-        {
             "name": "TestPost File Not Found",
             "method": "get",
             "path": "/test/getNoFile",
@@ -36,16 +22,6 @@
                 "status": 200,
                 "template": "AnyFile.xml"
             }
-        },
-        {
-            "name": "Test Post Response Empty",
-            "method": "post",
-            "path": "/pre"
-        },
-        {
-            "name": "Test Get Response Empty",
-            "method": "get",
-            "path": "/gre"
         },
         {
             "name": "Test Get Response Body",

@@ -31,5 +31,4 @@ public class ClientResponse {
         return "ClientResponse{" + "status=" + status + ", body=" + body + '}';
     }
     
-    
 }

@@ -18,8 +18,8 @@ import org.junit.Test;
  * @author 802996013
  */
 public class TestNoExp {
-    private static int PORT = 1889;
-    private static Client client = new Client(new ClientConfig("http://localhost:"+PORT));
+    private static final int PORT = 1889;
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:"+PORT));
 
     @BeforeClass
     public static void beforeClass() {
@@ -28,23 +28,20 @@ public class TestNoExp {
 
     @AfterClass
     public static void afterClass() {
-        client.send("control/stop", null, Client.Method.PUT);
+        CLIENT.send("control/stop", null, Client.Method.PUT);
     }
 
     @Test
     public void testNoExpGet() {
         String e = "ClientResponse{status=404, body=Not Found}";
-        String r = client.send("gettest", null, Client.Method.GET).toString();
-        System.out.println("["+r+"]");
+        String r = CLIENT.send("gettest", null, Client.Method.GET).toString();
         assertEquals(e, r);
         
     }
     @Test
     public void testNoExpPost() {
         String e = "ClientResponse{status=404, body=Not Found}";
-        String r = client.send("posttest", "<XML/>", Client.Method.POST).toString();
-        System.out.println("["+r+"]");
+        String r = CLIENT.send("posttest", "<XML/>", Client.Method.POST).toString();
         assertEquals(e, r);
-        
     }
 }

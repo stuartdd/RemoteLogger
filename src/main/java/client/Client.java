@@ -68,10 +68,11 @@ public class Client {
             StringBuilder response = new StringBuilder();
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
+                response.append(NL);
             }
             in.close();
             in = null;
-            return new ClientResponse(responseCode, response.toString());
+            return new ClientResponse(responseCode, response.toString().trim());
         } catch (ClientException | IOException e) {
             throw new ClientException("Failed to send to:" + fullHost, e);
         } finally {

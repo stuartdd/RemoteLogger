@@ -7,6 +7,7 @@ package expectations;
 
 import client.Client;
 import client.ClientConfig;
+import client.ClientResponse;
 import main.Main;
 import main.Util;
 import org.junit.AfterClass;
@@ -20,16 +21,31 @@ import org.junit.Test;
  */
 public class TestExp {
 
-    private static final String POST_RESPONSE = "<bottom>\n"
+    private static final String POST_RESPONSE_JSON = "{\n"
+            + "  \"showTime\" : \"/bea\",\n"
+            + "  \"x\" : 788.0,\n"
+            + "  \"y\" : 228.0,\n"
+            + "  \"width\" : 897.0,\n"
+            + "  \"height\" : 863.0\n"
+            + "}";
+
+    private static final String POST_RESPONSE_XML = "<bottom>\n"
             + "    <FlowPane prefHeight=\"25.0\" prefWidth=\"600.0\" BorderPane.alignment=\"CENTER\">\n"
             + "        <children>\n"
             + "            <Separator valueFromRequestXml=\"UNAVAILABLE\" prefHeight=\"31.0\" prefWidth=\"15.0\" />\n"
             + "            <Label prefHeight=\"22.0\" prefWidth=\"539.0\" text=\"Label\" />\n"
             + "        </children>\n"
             + "    </FlowPane>\n"
-            + "</bottom>\n";
-    private static int PORT = 1999;
-    private static Client client = new Client(new ClientConfig("http://localhost:" + PORT));
+            + "</bottom>";
+
+    private static final String GET_RESPONSE = "Method GET.\n"
+            + "URL:'/grb'.\n"
+            + "HOST:localhost:1999.\n"
+            + "Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.\n"
+            + "xxx:%{xxx}";
+
+    private static final int PORT = 1999;
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT));
 
     @BeforeClass
     public static void beforeClass() {
@@ -38,36 +54,55 @@ public class TestExp {
 
     @AfterClass
     public static void afterClass() {
-        client.send("control/stop", null, Client.Method.PUT);
+        CLIENT.send("control/stop", null, Client.Method.PUT);
     }
 
     @Test
-    public void testPost() {
-        String r = client.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST).getBody();
-        System.out.println(r);
-        assertEquals(POST_RESPONSE, r);
+    public void testPostJson() {
+        ClientResponse r = CLIENT.send("test/post/json", Util.readResource("config/testPostData.json"), Client.Method.POST);
+        assertEquals(POST_RESPONSE_JSON, r.getBody());
+        assertEquals(200, r.getStatus());
+    }
+
+    @Test
+    public void testPostXml() {
+        ClientResponse r = CLIENT.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST);
+        assertEquals(POST_RESPONSE_XML, r.getBody());
+        assertEquals(200, r.getStatus());
     }
 
     @Test
     public void testPre() {
         String e = "ClientResponse{status=201, body=Response is undefined}";
-        String r = client.send("pre", null, Client.Method.POST).toString();
+        String r = CLIENT.send("pre", null, Client.Method.POST).toString();
         assertEquals(e, r);
     }
 
     @Test
     public void testGre() {
         String e = "ClientResponse{status=200, body=Response is undefined}";
-        String r = client.send("gre", null, Client.Method.GET).toString();
+        String r = CLIENT.send("gre", null, Client.Method.GET).toString();
         assertEquals(e, r);
     }
 
     @Test
     public void testGrb() {
-        String e = "ClientResponse{status=200, body=Method GET.URL:'/grb'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.xxx:%{xxx}}";
-        String r = client.send("grb", null, Client.Method.GET).toString();
-        System.out.println("[" + r + "]");
-        assertEquals(e, r);
+        ClientResponse r = CLIENT.send("grb", null, Client.Method.GET);
+        assertEquals(GET_RESPONSE, r.getBody());
+        assertEquals(200, r.getStatus());
+    }
 
+    @Test
+    public void testGetParts() {
+        ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
+        assertEquals("PATH[0]=test PATH[1]=get PATH[2]=parts [%{PATH[3]}] QUERY.q1=ONE QUERY.q2=TWO [%{QUERY.q3}]", r.getBody());
+        assertEquals(200, r.getStatus());
+    }
+
+    @Test
+    public void testFileNotFound() {
+        ClientResponse r = CLIENT.send("test/getNoFile", null, Client.Method.GET);
+        assertEquals("Not Found", r.getBody());
+        assertEquals(404, r.getStatus());
     }
 }

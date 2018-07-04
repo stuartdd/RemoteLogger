@@ -45,7 +45,7 @@ public class ExpectationHandler implements HttpHandler {
             map.put("BODY", bodyTrim);
             map.put("BODY-TYPE", Util.detirmineBodyType(bodyTrim));
         } else {
-            map.put("BODY-TYPE", BodyType.EMPTY);            
+            map.put("BODY-TYPE", BodyType.EMPTY);
         }
         Main.notifyAction(time, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
         map.put("METHOD", he.getRequestMethod());
@@ -53,18 +53,52 @@ public class ExpectationHandler implements HttpHandler {
         if (path != null) {
             Main.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
             map.put("PATH", he.getRequestURI().getPath());
+            splitIntoMap(map, "PATH", '/');
         }
         String query = Util.trimmedNull(he.getRequestURI().getQuery());
         if (query != null) {
             Main.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
             map.put("QUERY", he.getRequestURI().getQuery());
+            splitIntoMap(map, "QUERY", '&');
         }
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             String value = Util.asString(he.getRequestHeaders().get(head));
-            map.put(head, value);
+            map.put("HEAD."+head, value);
             Main.notifyAction(time, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
         }
         ExpectationMatcher.getResponse(time, he, map);
+    }
+
+    private void splitIntoMap(Map<String, Object> map, String name, char delim) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        Object s = map.get(name);
+        if (s == null) {
+            return;
+        }
+        for (char c : s.toString().trim().toCharArray()) {
+            if (c == delim) {
+                count = addValueToMap(map, sb, name, count);
+             } else {
+                sb.append(c);
+            }
+        }
+        addValueToMap(map, sb, name, count++);
+    }
+
+    private int addValueToMap(Map<String, Object> map, StringBuilder sb, String name, int count) {
+        if (sb.length()==0) {
+            return count;
+        }
+        String part = sb.toString().trim();
+        int pos = part.indexOf('=');
+        if (pos > 0) {
+            map.put(name + "." + part.substring(0, pos), part.substring(pos + 1));
+        } else {
+            map.put(name + "[" + count++ + "]", part);
+        }
+        sb.setLength(0);
+        return count;
     }
 }

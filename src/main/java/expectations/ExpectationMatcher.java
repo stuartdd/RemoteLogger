@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import json.JsonUtils;
 import main.ConfigData;
 import main.Main;
@@ -83,8 +82,9 @@ public class ExpectationMatcher {
                 map.put("STATUS", "" + statusCode);
                 response = Template.parse(response, map, true);
                 logResponse(time, response, statusCode, "RESP");
-            } catch (IOException | ExpectationException io) {
-                Main.log(time, new IOException("Read file failed for expectation: " + found.getName() + ". " + io.getMessage(), io));
+            } catch (ExpectationException ee) {
+                statusCode = ee.getStatus();
+                Main.log(time, new IOException("Read file failed for expectation: " + found.getName() + ". " + ee.getMessage(), ee));
             }
         } else {
             Main.log(time, "Expectation not met");
@@ -99,6 +99,7 @@ public class ExpectationMatcher {
                 os.write(response.getBytes());
             }
         } catch (IOException io) {
+            statusCode = 500;
             Main.log(time, new IOException("Output Stream write failed for " + found, io));
         }
     }
@@ -114,7 +115,7 @@ public class ExpectationMatcher {
             if (is == null) {
                 is = ConfigData.class.getResourceAsStream("/" + fileName);
                 if (is == null) {
-                    throw new ExpectationException("Expectations file: " + fileName + " not found (File or classpath)");
+                    throw new ExpectationException("Expectations file: " + fileName + " not found (File or classpath)", 500);
                 }
             }
             ExpectationMatcher.expectationsFile = null;
@@ -124,7 +125,7 @@ public class ExpectationMatcher {
         Map<String, String> map = new HashMap<>();
         for (Expectation e : ExpectationMatcher.expectations.getExpectations()) {
             if (map.containsKey(e.getName())) {
-                throw new ExpectationException("Duplicate Expectation name found: " + e.getName());
+                throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);
             }
             map.put(e.getName(), e.getName());
         }
@@ -228,7 +229,7 @@ public class ExpectationMatcher {
                     tempMap.putAll(JsonUtils.flatMap(body));
             }
         } catch (Exception pe) {
-            throw new ExpectationException("Failed to parse body text: Type:" + bodyType, pe);
+            throw new ExpectationException("Failed to parse body text: Type:" + bodyType, 500, pe);
         }
         return tempMap;
     }
@@ -259,14 +260,14 @@ public class ExpectationMatcher {
         sb.append("* ").append(id).append(' ').append(LS);
         sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
-        sb.append(resp);
+        sb.append(resp).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
         Main.log(time, sb.toString().trim());
     }
 
-    private static String locateResponseFile(String fileName, Map map) throws FileNotFoundException {
+    private static String locateResponseFile(String fileName, Map map)  {
         if (fileName == null) {
-            throw new FileNotFoundException("File for Expectation is not defined");
+            throw new ExpectationException("File for Expectation is not defined", 500);
         }
         String file = Template.parse(fileName, map, true);
         StringBuilder sb = new StringBuilder();
@@ -277,14 +278,14 @@ public class ExpectationMatcher {
                 try {
                     return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
                 } catch (IOException ex) {
-                    throw new ExpectationException("File [" + file + "] Not readable from file", ex);
+                    throw new ExpectationException("File [" + file + "] Not readable from file", 500, ex);
                 }
             }
         }
         try {
             return readResource(file, sb.toString());
         } catch (IOException ex) {
-            throw new ExpectationException("File [" + file + "] Not readable from class path", ex);
+            throw new ExpectationException("File [" + file + "] Not readable from class path", 500, ex);
         }
     }
 
@@ -294,7 +295,7 @@ public class ExpectationMatcher {
             is = ExpectationMatcher.class.getResourceAsStream("/" + file);
         }
         if (is == null) {
-            throw new ExpectationException("File [" + file + "] Not Found in paths [" + list + "] or on the class path");
+            throw new ExpectationException("File [" + file + "] Not Found in paths [" + list + "] or on the class path", 404);
         }
         StringBuilder sb = new StringBuilder();
         int content;
