@@ -53,8 +53,8 @@
             "path": "/grb",
             "response": {
                 "status" : 200,
-                "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
-                "headers" : {"Accept":"%{Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
+                "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{HEAD.Host}.\nAccept:%{HEAD.Accept}.\nxxx:%{xxx}",
+                "headers" : {"Accept":"%{HEAD.Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
             }
         },
         {
@@ -64,7 +64,7 @@
             "response": {
                 "status" : 200,
                 "body": "PATH[0]=%{PATH[0]} PATH[1]=%{PATH[1]} PATH[2]=%{PATH[2]} [%{PATH[3]}] QUERY.q1=%{QUERY.q1} QUERY.q2=%{QUERY.q2} [%{QUERY.q3}]",
-                "headers" : {"Accept":"%{Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
+                "headers" : {"Accept":"%{HEAD.Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
             }
         }
     ],
