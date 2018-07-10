@@ -18,7 +18,6 @@ package expectations;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +33,6 @@ import main.Main;
 import main.Util;
 import template.Template;
 import xml.MappedXml;
-import xml.ParseXmlException;
 
 /**
  *
@@ -129,6 +127,10 @@ public class ExpectationMatcher {
             }
             map.put(e.getName(), e.getName());
         }
+    }
+
+    public static Expectations getExpectations() {
+        return expectations;
     }
 
     private static Expectation findMatchingExpectation(long time, Map<String, Object> map) {
