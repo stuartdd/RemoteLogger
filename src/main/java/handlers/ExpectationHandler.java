@@ -18,21 +18,32 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import expectations.BodyType;
+import common.BodyType;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import main.Action;
-import main.Main;
-import main.Util;
+import common.Action;
+import common.Util;
 import expectations.ExpectationMatcher;
+import common.Notifier;
 
 /**
  *
  * @author stuart
  */
 public class ExpectationHandler implements HttpHandler {
+
+    private final int port;
+    private final ExpectationMatcher expectationMatcher;
+    private final Notifier serverNotifier;
+
+    public ExpectationHandler(int port, ExpectationMatcher expectationMatcher, Notifier serverNotifier) {
+        this.port = port;
+        this.expectationMatcher = expectationMatcher;
+        this.serverNotifier = serverNotifier;
+    }
+
 
     @Override
     public void handle(HttpExchange he) throws IOException {
@@ -41,33 +52,48 @@ public class ExpectationHandler implements HttpHandler {
         String body = Util.readStream(he.getRequestBody());
         if (body != null) {
             String bodyTrim = body.trim();
-            Main.notifyAction(time, Action.LOG_BODY, bodyTrim);
+            if (serverNotifier != null) {
+                serverNotifier.notifyAction(time, Action.LOG_BODY, bodyTrim);
+            }
             map.put("BODY", bodyTrim);
             map.put("BODY-TYPE", Util.detirmineBodyType(bodyTrim));
         } else {
             map.put("BODY-TYPE", BodyType.EMPTY);
         }
-        Main.notifyAction(time, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+        if (serverNotifier != null) {
+            serverNotifier.notifyAction(time, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+        }
         map.put("METHOD", he.getRequestMethod());
         String path = Util.trimmedNull(he.getRequestURI().getPath());
         if (path != null) {
-            Main.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
+            if (serverNotifier != null) {
+                serverNotifier.notifyAction(time, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
+            }
             map.put("PATH", he.getRequestURI().getPath());
             splitIntoMap(map, "PATH", '/');
         }
         String query = Util.trimmedNull(he.getRequestURI().getQuery());
         if (query != null) {
-            Main.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
+            if (serverNotifier != null) {
+                serverNotifier.notifyAction(time, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
+            }
             map.put("QUERY", he.getRequestURI().getQuery());
             splitIntoMap(map, "QUERY", '&');
         }
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             String value = Util.asString(he.getRequestHeaders().get(head));
-            map.put("HEAD."+head, value);
-            Main.notifyAction(time, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
+            map.put("HEAD." + head, value);
+            if (serverNotifier != null) {
+                serverNotifier.notifyAction(time, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
+            }
         }
-        ExpectationMatcher.getResponse(time, he, map);
+        if (expectationMatcher!=null) {
+            expectationMatcher.getResponse(time, he, map);
+        } else {
+            ExpectationMatcher.respond(he, 404, "No Expectation defined");
+        }
+        
     }
 
     private void splitIntoMap(Map<String, Object> map, String name, char delim) {
@@ -80,7 +106,7 @@ public class ExpectationHandler implements HttpHandler {
         for (char c : s.toString().trim().toCharArray()) {
             if (c == delim) {
                 count = addValueToMap(map, sb, name, count);
-             } else {
+            } else {
                 sb.append(c);
             }
         }
@@ -88,7 +114,7 @@ public class ExpectationHandler implements HttpHandler {
     }
 
     private int addValueToMap(Map<String, Object> map, StringBuilder sb, String name, int count) {
-        if (sb.length()==0) {
+        if (sb.length() == 0) {
             return count;
         }
         String part = sb.toString().trim();

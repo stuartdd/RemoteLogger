@@ -16,6 +16,7 @@
  */
 package main;
 
+import common.Action;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -34,6 +35,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import server.ServerConfig;
 
 /**
  *
@@ -90,7 +92,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.addApplicationController(this);
         if (Main.getConfig().getAutoConnect()) {
-            Main.startServerThread(Main.getConfig().getPort());
+            Main.startServer(new ServerConfig(Main.getConfig().getPort(), Main.getConfig().getExpectationsFile(), Main.getConfig().isVerbose()));
         }
         resetMainLog();
         updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
@@ -136,7 +138,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (buttonConnect.getText().equalsIgnoreCase("start")) {
             try {
                 int port = Integer.parseInt(textFieldPortNumber.getText());
-                Main.startServerThread(port);
+                Main.startServer(new ServerConfig(port, Main.getConfig().getExpectationsFile(), Main.getConfig().isVerbose()));
             } catch (NumberFormatException nfe) {
                 Main.log(System.currentTimeMillis(), nfe);
                 Main.notifyAction(System.currentTimeMillis(), Action.PORT_NUMBER_ERROR, "Invalid port number");

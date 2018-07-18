@@ -16,6 +16,7 @@
  */
 package main;
 
+import common.Action;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
@@ -35,17 +36,17 @@ import javafx.stage.WindowEvent;
 import json.JsonUtils;
 import expectations.ExpectationMatcher;
 import org.joda.time.DateTime;
-import server.ServerThread;
+import server.Server;
+import server.ServerConfig;
+import common.Notifier;
 
 public class Main extends Application {
 
     private static final int PORT_NUMBER = 1088;
     private static final Charset CHARSET = Charset.forName("UTF-8");
     private static boolean headless = false;
-
     private static final List<ApplicationController> CONTROLLERS = new ArrayList<>();
     private static Stage mainStage;
-    private static ServerThread serverThread;
     private static ConfigData config;
     private static String configName;
 
@@ -116,10 +117,12 @@ public class Main extends Application {
         CONTROLLERS.add(applicationController);
     }
 
-    public static void startServerThread(int port) {
-        config.setPort(port);
-        serverThread = new ServerThread(port);
-        serverThread.start();
+    public static void startServer(ServerConfig config) {
+        Server.startServer(config, new MainNotifier());
+    }
+
+    public static void stopServerThread() {
+        Server.stopAllServers();
     }
 
     public static void controlStopEventAction() {
@@ -139,13 +142,6 @@ public class Main extends Application {
         }).start();
     }
 
-    public static void stopServerThread() {
-        if (serverThread != null) {
-            serverThread.stopServer();
-            serverThread = null;
-        }
-    }
-
     public static void closeApplication(boolean force) {
         log(System.currentTimeMillis(), "Shutting down");
         if (!headless) {
@@ -154,11 +150,7 @@ public class Main extends Application {
                 config.setY(mainStage.getY());
                 config.setWidth(mainStage.getWidth());
                 config.setHeight(mainStage.getHeight());
-                if (serverThread == null) {
-                    config.setAutoConnect(false);
-                } else {
-                    config.setAutoConnect(serverThread.isRunning());
-                }
+                config.setAutoConnect(Server.countServersRunning() > 0);
                 try {
                     Files.write(
                             FileSystems.getDefault().getPath(ConfigData.writeFileName()),
@@ -220,14 +212,11 @@ public class Main extends Application {
         return "";
     }
 
-    public static void startHeadless(int port, String configFile) {
-        main(new String[]{"-h", "-p" + port, configFile});
-    }
-
-    /**
+   /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
         headless = false;
         config = new ConfigData();
         config.setWidth(600);
@@ -271,26 +260,8 @@ public class Main extends Application {
         if (config.getLogDateFormat() == null) {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
-        if (config.getExpectationsFile() != null) {
-            String exFile = config.getExpectationsFile().trim();
-            if (exFile.length() == 0) {
-                config.setExpectationsFile(null);
-                exFile = null;
-            }
-            if (exFile != null) {
-                try {
-                    ExpectationMatcher.setExpectations(exFile);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                    if (headless) {
-                        return;
-                    }
-                    System.exit(1);
-                }
-            }
-        }
         if (headless) {
-            startServerThread(config.getPort());
+            startServer(new ServerConfig(config.getPort(), config.getExpectationsFile(), config.isVerbose()));
         } else {
             launch(args);
         }

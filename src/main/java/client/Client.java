@@ -5,6 +5,7 @@
  */
 package client;
 
+import common.Notifier;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
@@ -26,8 +27,10 @@ public class Client {
     private static final String NL = System.getProperty("line.separator");
 
     private ClientConfig config;
+    private Notifier clientNotifier;
 
-    public Client(ClientConfig config) {
+    public Client(ClientConfig config, Notifier clientNotifier) {
+        this.clientNotifier = clientNotifier;
         this.config = config;
     }
 
@@ -35,7 +38,10 @@ public class Client {
         String fullHost = config.getHost()
                 + (config.getPort() == null ? "" : ":" + config.getPort())
                 + (path == null ? "" : "/" + path);
-        System.out.println("URL:" + fullHost);
+        if (clientNotifier != null) {
+            clientNotifier.log(System.currentTimeMillis(), "URL:" + fullHost);
+        }
+
         URL obj;
         DataOutputStream wr = null;
         BufferedReader in = null;
@@ -60,8 +66,14 @@ public class Client {
             InputStream is = null;
             try {
                 is = con.getInputStream();
-            } catch (FileNotFoundException fnfe) {
-                return new ClientResponse(responseCode, "Not Found");
+            } catch (IOException fnfe) {
+                is = con.getErrorStream();
+                if (is == null) {
+                    if (clientNotifier != null) {
+                        clientNotifier.log(System.currentTimeMillis(), "RESPONSE [" + responseCode + "]: No Response");
+                    }
+                    return new ClientResponse(responseCode, "");
+                }
             }
             in = new BufferedReader(new InputStreamReader(is));
             String inputLine;
@@ -72,8 +84,14 @@ public class Client {
             }
             in.close();
             in = null;
+            if (clientNotifier != null) {
+                clientNotifier.log(System.currentTimeMillis(), "RESPONSE [" + responseCode + "]:" + response.toString().trim());
+            }
             return new ClientResponse(responseCode, response.toString().trim());
         } catch (ClientException | IOException e) {
+            if (clientNotifier != null) {
+                clientNotifier.log(System.currentTimeMillis(), "Failed to send to:" + fullHost, e);
+            }
             throw new ClientException("Failed to send to:" + fullHost, e);
         } finally {
             try {

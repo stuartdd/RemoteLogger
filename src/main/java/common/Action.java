@@ -14,23 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main.expectations;
-
-import java.util.Map;
+package common;
 
 /**
  *
- * @author 802996013
+ * @author stuart
  */
-public class RequestContent {
-    private Map<String,String> asserts;
-
-    public Map<String, String> getAsserts() {
-        return asserts;
-    }
-
-    public void setAsserts(Map<String, String> asserts) {
-        this.asserts = asserts;
-    }
-    
+public enum Action {
+    SERVER_START,
+    SERVER_STOPPING,
+    SERVER_STOP,
+    SERVER_FAIL,
+    LOG,
+    LOG_BODY,
+    LOG_HEADER,
+    LOG_REFRESH,
+    PORT_NUMBER_ERROR,
+    CONFIG_SAVE_ERROR,
+    CLEAR_MAIN_LOGS,
+    CLEAR_LOGS,
+    SCROLL_TO_END
 }

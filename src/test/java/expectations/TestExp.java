@@ -7,13 +7,15 @@ package expectations;
 
 import client.Client;
 import client.ClientConfig;
+import client.ClientNotifier;
 import client.ClientResponse;
-import main.Main;
-import main.Util;
+import common.Util;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import server.Server;
+import server.ServerConfig;
 
 /**
  *
@@ -45,11 +47,16 @@ public class TestExp {
             + "xxx:%{xxx}";
 
     private static final int PORT = 1999;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT));
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier());
 
     @BeforeClass
     public static void beforeClass() {
-        Main.startHeadless(PORT, "/config/test001.json");
+        Server.startServer(new ServerConfig(PORT, "/config/expectationsResource.json",true), new TestNotifier());
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            
+        }
     }
 
     @AfterClass
@@ -105,4 +112,5 @@ public class TestExp {
         assertEquals("Not Found", r.getBody());
         assertEquals(404, r.getStatus());
     }
-}
+
+ }

@@ -18,21 +18,37 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import expectations.ExpectationMatcher;
 import java.io.IOException;
 import java.io.OutputStream;
-import main.Main;
+import common.Action;
+import server.Server;
+import common.Notifier;
 
 /**
  *
  * @author stuart
  */
 public class ControlHandler implements HttpHandler {
+    private final int port;
+    private final ExpectationMatcher expectationMatcher;
+    private final Notifier serverNotifier;
+
+    public ControlHandler(int port, ExpectationMatcher expectationMatcher, Notifier serverNotifier) {
+        this.port = port;
+        this.expectationMatcher = expectationMatcher;
+        this.serverNotifier = serverNotifier;
+    }
+
 
     @Override
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
-            Main.controlStopEventAction();
-            String response = "Server will stop";
+            if (serverNotifier!= null) {
+                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Server on port "+port+" is shutting down");
+            }
+            Server.stopServer(port);
+            String response = "Server on port "+port+" will stop";
             he.sendResponseHeaders(200, response.length());
             OutputStream os = he.getResponseBody();
             os.write(response.getBytes());

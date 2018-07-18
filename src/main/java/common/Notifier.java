@@ -14,24 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main;
+package common;
 
-/**
- *
- * @author stuart
- */
-public enum Action {
-    SERVER_START,
-    SERVER_STOPPING,
-    SERVER_STOP,
-    SERVER_FAIL,
-    LOG,
-    LOG_BODY,
-    LOG_HEADER,
-    LOG_REFRESH,
-    PORT_NUMBER_ERROR,
-    CONFIG_SAVE_ERROR,
-    CLEAR_MAIN_LOGS,
-    CLEAR_LOGS,
-    SCROLL_TO_END
+import common.Action;
+
+public interface Notifier {
+    void notifyAction(long time, Action action, String message);
+    void log(long time, String message);
+    void log(long time, Throwable throwable);
+    void log(long time, String message, Throwable throwable);
 }

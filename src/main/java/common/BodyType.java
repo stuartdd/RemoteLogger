@@ -14,14 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main;
-
-import common.Action;
+package common;
 
 /**
  *
  * @author stuart
  */
-public interface ApplicationController {
-    boolean notifyAction(long time, Action s, String message);
+public enum BodyType {
+    XML, JSON, HTML, TXT, EMPTY
 }

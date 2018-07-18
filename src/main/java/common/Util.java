@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package main;
+package common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import expectations.BodyType;
 
 /**
  *
@@ -84,11 +83,11 @@ public class Util {
     }
 
     public static String readResource(final String resourceName) {
-        InputStream is = ConfigData.class.getResourceAsStream(resourceName);
+        InputStream is = Util.class.getResourceAsStream(resourceName);
         if (is == null) {
-            is = ConfigData.class.getResourceAsStream("/" + resourceName);
+            is = Util.class.getResourceAsStream("/" + resourceName);
             if (is == null) {
-                throw new ConfigDataException("Resource data [" + resourceName + "] could not be found.");
+                throw new ServerException("Resource data [" + resourceName + "] could not be found.", 500);
             }
         }
         return readStream(is);
@@ -106,7 +105,6 @@ public class Util {
             }
             return trimmedNull(sb.toString());
         } catch (IOException ex) {
-            Main.log(time, "readStream:", ex);
             return null;
         } finally {
             try {
@@ -114,7 +112,6 @@ public class Util {
                     br.close();
                 }
             } catch (IOException ex) {
-                Main.log(time, "readStream:", ex);
             }
         }
 

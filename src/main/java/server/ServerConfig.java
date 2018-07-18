@@ -14,14 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package expectations;
+package server;
 
-import main.*;
+public class ServerConfig {
 
-/**
- *
- * @author stuart
- */
-public enum BodyType {
-    XML, JSON, HTML, TXT, EMPTY
+    private int port;
+    private String expectationsFile;
+    private boolean verbose = false;
+
+    public ServerConfig(int port, String expectationsFile, boolean verbose) {
+        this.port = port;
+        this.expectationsFile = expectationsFile;
+        this.verbose = verbose;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getExpectationsFile() {
+        return expectationsFile;
+    }
+
+    public boolean getVerbose() {
+        return verbose;
+    }
+
 }
