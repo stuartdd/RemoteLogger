@@ -23,7 +23,6 @@ import java.util.List;
  * @author 802996013
  */
 public class Expectations {
-    private static final String NL = System.getProperty("line.separator");
 
     private List<Expectation> expectations;
     private String[] paths;
@@ -52,13 +51,5 @@ public class Expectations {
     public void setListMap(boolean listMap) {
         this.listMap = listMap;
     }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Expectation exp : expectations) {
-            sb.append(exp.toString()).append(NL);
-        }
-        return sb.toString();
-    }
-
+   
 }
