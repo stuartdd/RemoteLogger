@@ -25,10 +25,6 @@ import common.Action;
 import server.Server;
 import common.Notifier;
 
-/**
- *
- * @author stuart
- */
 public class ControlHandler implements HttpHandler {
     private final int port;
     private final ExpectationMatcher expectationMatcher;

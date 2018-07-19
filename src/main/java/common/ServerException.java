@@ -16,10 +16,6 @@
  */
 package common;
 
-/**
- *
- * @author stuar
- */
 public class ServerException extends RuntimeException {
 
     private int status = 200;
