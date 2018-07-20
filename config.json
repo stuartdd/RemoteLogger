@@ -1,10 +1,8 @@
 {
-  "port" : 1999,
+  "servers" : {"1999" : {"expectationsFile" : "expectations.json","verbose" : true}},
   "logDateFormat" : "",
   "autoConnect" : true,
   "timeFormat" : "HH:mm:ss.SSS",
-  "expectationsFile" : "expectations.json",
-  "verbose" : true,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,

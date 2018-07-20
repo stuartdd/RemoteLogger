@@ -29,10 +29,11 @@ public class Server {
     private static Map<Integer, ServerThread> serverThreads = new ConcurrentHashMap<>();
     
 
-    public static ServerThread startServer(ServerConfig config, Notifier serverNotifier) {
-        ServerThread serverThread = new ServerThread(config, serverNotifier);
-        serverThreads.put(config.getPort(), serverThread);
+    public static ServerThread startServer(int port, ServerConfig config, Notifier serverNotifier) {
+        ServerThread serverThread = new ServerThread(port, config, serverNotifier);
+        serverThreads.put(port, serverThread);
         serverThread.start();
+        serverNotifier.log(System.currentTimeMillis(), "Started server on port:"+port);
         return serverThread;
     }
     

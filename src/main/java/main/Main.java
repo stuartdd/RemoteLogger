@@ -17,6 +17,7 @@
 package main;
 
 import common.Action;
+import common.Util;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
@@ -34,11 +35,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
-import expectations.ExpectationMatcher;
 import org.joda.time.DateTime;
 import server.Server;
 import server.ServerConfig;
-import common.Notifier;
 
 public class Main extends Application {
 
@@ -87,6 +86,8 @@ public class Main extends Application {
                     }
                 }
             });
+        } else {
+            Main.logFinal(time, action.name() + ":" + message);
         }
     }
 
@@ -117,8 +118,14 @@ public class Main extends Application {
         CONTROLLERS.add(applicationController);
     }
 
-    public static void startServer(ServerConfig config) {
-        Server.startServer(config, new MainNotifier());
+    public static void startServer(String portStr, ServerConfig config) {
+        int port;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (Exception ex) {
+            throw new ConfigDataException("Port number [" + portStr + "] is invalid");
+        }
+        Server.startServer(port, config, new MainNotifier(config.isVerbose()));
     }
 
     public static void stopServerThread() {
@@ -129,10 +136,7 @@ public class Main extends Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ex) {
-                }
+                Util.sleep(200);
                 if (headless) {
                     closeApplication(true);
                 } else {
@@ -174,24 +178,28 @@ public class Main extends Application {
     }
 
     public static void log(long time, String message) {
-        if ((message != null) && (config.isVerbose())) {
+        if (message != null) {
             notifyAction(time, Action.LOG, message);
-            System.out.println(getTimeStamp(time) + message);
+            logFinal(time, message);
         }
     }
 
     public static void log(long time, Throwable throwable) {
         if (throwable != null) {
             notifyAction(time, Action.LOG, "ERROR:" + throwable.getMessage());
-            System.out.println(getTimeStamp(time) + "ERROR:" + throwable.getMessage());
+            logFinal(time, "ERROR:" + throwable.getMessage());
         }
     }
 
     public static void log(long time, String message, Throwable throwable) {
         if (throwable != null) {
             notifyAction(time, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
-            System.out.println(getTimeStamp(time) + "ERROR:" + message + ": " + throwable.getMessage());
+            logFinal(time, "ERROR:" + message + ": " + throwable.getMessage());
         }
+    }
+
+    public static void logFinal(long time, String message) {
+        System.out.println(getTimeStamp(time) + message);
     }
 
     public static ConfigData getConfig() {
@@ -212,7 +220,7 @@ public class Main extends Application {
         return "";
     }
 
-   /**
+    /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -239,20 +247,12 @@ public class Main extends Application {
                     configName = ConfigData.readFileName();
                 }
             }
-            for (String arg : args) {
-                if (arg.startsWith("-p")) {
-                    config.setPort(Integer.parseInt(arg.substring(2)));
-                }
-            }
         } catch (Exception e) {
             e.printStackTrace(System.err);
             if (headless) {
                 return;
             }
             System.exit(1);
-        }
-        if (config.getPort() == null) {
-            config.setPort(PORT_NUMBER);
         }
         if (config.getAutoConnect() == null) {
             config.setAutoConnect(false);
@@ -261,7 +261,14 @@ public class Main extends Application {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
         if (headless) {
-            startServer(new ServerConfig(config.getPort(), config.getExpectationsFile(), config.isVerbose()));
+            for (String portStr : config.getServers().keySet()) {
+                startServer(portStr, config.getServers().get(portStr));
+            }
+            while (Server.countServersRunning() > 0) {
+                Util.sleep(1000);
+                logFinal(System.currentTimeMillis(), "Servers running :" + Server.countServersRunning());
+            }
+            System.exit(0);
         } else {
             launch(args);
         }

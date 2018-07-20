@@ -19,9 +19,12 @@ package main;
 import config.Config;
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import server.ServerConfig;
 
 /**
  *
@@ -29,12 +32,10 @@ import org.joda.time.format.DateTimeFormatter;
  */
 public class ConfigData extends Config {
 
-    private Integer port;
+    private Map<String, ServerConfig> servers = new HashMap<>();
     private String logDateFormat;
-    private Boolean autoConnect;
     private String timeFormat;
-    private String expectationsFile;
-    private boolean verbose = false;
+    private Boolean autoConnect;
     private boolean includeHeaders = true;
     private boolean includeBody = true;
     private boolean includeEmpty = false;
@@ -58,31 +59,32 @@ public class ConfigData extends Config {
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
-                is = ConfigData.class.getResourceAsStream("/"+fileName);
+                is = ConfigData.class.getResourceAsStream("/" + fileName);
                 if (is == null) {
                     throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
                 }
-             }
+            }
             writeFileName = null;
             readFileName = fileName;
             return (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
         }
     }
 
+    public Map<String, ServerConfig> getServers() {
+        return servers;
+    }
+
+    public void setServers(Map<String, ServerConfig> servers) {
+        this.servers = servers;
+    }
+
+ 
     public String timeStamp(long time) {
         DateTime dt = new DateTime(time);
         if (ts == null) {
             ts = DateTimeFormat.forPattern(getTimeFormat());
         }
         return dt.toString(ts);
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
     }
 
     public String getLogDateFormat() {
@@ -99,14 +101,6 @@ public class ConfigData extends Config {
 
     public void setAutoConnect(Boolean autoConnect) {
         this.autoConnect = autoConnect;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
     }
 
     public double getX() {
@@ -182,14 +176,6 @@ public class ConfigData extends Config {
 
     public void setShowTime(boolean showTime) {
         this.showTime = showTime;
-    }
-
-    public String getExpectationsFile() {
-        return expectationsFile;
-    }
-
-    public void setExpectationsFile(String expectationsFile) {
-        this.expectationsFile = expectationsFile;
     }
 
     public static String writeFileName() {

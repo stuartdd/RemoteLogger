@@ -24,6 +24,11 @@ import common.Notifier;
  * @author stuart
  */
 public class MainNotifier implements Notifier {
+    private final boolean verbose ;
+
+    public MainNotifier(boolean verbose) {
+        this.verbose = verbose;
+    }
 
     @Override
     public void notifyAction(long time, Action action, String message) {
@@ -32,7 +37,9 @@ public class MainNotifier implements Notifier {
 
     @Override
     public void log(long time, String message) {
-        Main.log(time, message);
+        if (verbose) {
+            Main.log(time, message);
+        }
     }
 
     @Override

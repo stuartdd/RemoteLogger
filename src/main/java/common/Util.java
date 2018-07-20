@@ -128,4 +128,11 @@ public class Util {
         return BodyType.TXT;
     }
 
+    public static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ex) {
+            System.out.print("");
+        }
+    }
 }

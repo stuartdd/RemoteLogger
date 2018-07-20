@@ -19,6 +19,7 @@ package expectations;
 import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
+import common.Util;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.AfterClass;
@@ -35,16 +36,12 @@ import server.ServerConfig;
 public class TestNoExp {
 
     private static final int PORT = 1889;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier());
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
 
     @BeforeClass
     public static void beforeClass() {
-        Server.startServer(new ServerConfig(PORT, null, true), new TestNotifier());
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            
-        }
+        Server.startServer(PORT, new ServerConfig(null, true), new TestNotifier());
+        Util.sleep(200);
     }
 
     @AfterClass
@@ -52,8 +49,8 @@ public class TestNoExp {
         CLIENT.send("control/stop", null, Client.Method.PUT);
     }
 
-   @Test
-   public void testNoExpGet() {
+    @Test
+    public void testNoExpGet() {
         String e = "ClientResponse{status=404, body=No Expectation defined}";
         String r = CLIENT.send("gettest", null, Client.Method.GET).toString();
         assertEquals(e, r);

@@ -18,26 +18,32 @@ package server;
 
 public class ServerConfig {
 
-    private int port;
     private String expectationsFile;
     private boolean verbose = false;
 
-    public ServerConfig(int port, String expectationsFile, boolean verbose) {
-        this.port = port;
+    public ServerConfig(String expectationsFile, boolean verbose) {
         this.expectationsFile = expectationsFile;
         this.verbose = verbose;
     }
 
-    public int getPort() {
-        return port;
+    public ServerConfig() {
     }
-
+    
     public String getExpectationsFile() {
         return expectationsFile;
     }
 
-    public boolean getVerbose() {
+    public void setExpectationsFile(String expectationsFile) {
+        this.expectationsFile = expectationsFile;
+    }
+
+    public boolean isVerbose() {
         return verbose;
     }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
 
 }

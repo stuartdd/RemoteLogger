@@ -58,16 +58,12 @@ public class TestExp {
             + "xxx:%{xxx}";
 
     private static final int PORT = 1999;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier());
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
 
     @BeforeClass
     public static void beforeClass() {
-        Server.startServer(new ServerConfig(PORT, "/config/expectationsResource.json",true), new TestNotifier());
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            
-        }
+        Server.startServer(PORT, new ServerConfig("/config/expectationsResource.json",true), new TestNotifier());
+        Util.sleep(200);
     }
 
     @AfterClass

@@ -29,16 +29,15 @@ import common.Notifier;
 
 public class ServerThread extends Thread {
 
-    private final ServerConfig config;
+    private final int port;
     private boolean running;
     private boolean canRun;
-    private HttpServer server;
     private ExpectationMatcher expectationMatcher;
     private final Notifier serverNotifier;
 
-    public ServerThread(ServerConfig config, Notifier serverNotifier) {
+    public ServerThread(int port, ServerConfig config, Notifier serverNotifier) {
+        this.port = port;
         this.serverNotifier = serverNotifier;
-        this.config = config;
         this.running = false;
         this.canRun = true;
         if (config.getExpectationsFile() != null) {
@@ -49,21 +48,22 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
         running = true;
+        HttpServer server;
         try {
-            server = HttpServer.create(new InetSocketAddress(config.getPort()), 0);
-            server.createContext("/control", new ControlHandler(config.getPort(), expectationMatcher, serverNotifier));
-            server.createContext("/", new ExpectationHandler(config.getPort(), expectationMatcher, serverNotifier));
+            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server.createContext("/control", new ControlHandler(port, expectationMatcher, serverNotifier));
+            server.createContext("/", new ExpectationHandler(port, expectationMatcher, serverNotifier));
             server.setExecutor(null); // creates a default executor
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server starting on port " + config.getPort());
+                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server starting on port " + port);
             }
             server.start();
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server started on port " + config.getPort());
+                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server started on port " + port);
             }
         } catch (IOException ex) {
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_FAIL, ex.getClass().getSimpleName() + ": port:" + config.getPort() + " Error:" + ex.getMessage());
+                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_FAIL, ex.getClass().getSimpleName() + ": port:" + port + " Error:" + ex.getMessage());
             }
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             return;
@@ -72,16 +72,13 @@ public class ServerThread extends Thread {
             sleeep(500);
         }
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING, "Server on port " + config.getPort() + " is stopping");
+            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING, "Server on port " + port + " is stopping");
         }
-        sleeep(500);
-        if (server != null) {
-            server.stop(1);
-            server = null;
-        }
+        server.stop(1);
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Ready to start the server");
+            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING, "Server on port " + port + " Stopped");
         }
+        server = null;
         running = false;
     }
 

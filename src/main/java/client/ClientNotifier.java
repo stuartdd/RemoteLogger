@@ -26,13 +26,21 @@ import org.joda.time.DateTime;
  */
 public class ClientNotifier implements Notifier {
 
+    private final boolean verbose;
+
+    public ClientNotifier(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     @Override
     public void notifyAction(long time, Action action, String message) {
-        System.out.println(getTimeStamp(time) + action.name() + " " + message);
+        if (verbose && (message != null) && (action != null)) {
+            System.out.println(getTimeStamp(time) + action.name() + " " + message);
+        }
     }
 
     public void log(long time, String message) {
-        if (message != null) {
+        if (verbose && (message != null)) {
             System.out.println(getTimeStamp(time) + "CLIENT: " + message);
         }
     }

@@ -18,6 +18,7 @@ package main;
 
 import common.Action;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -35,6 +36,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import static main.Main.startServer;
 import server.ServerConfig;
 
 /**
@@ -50,6 +52,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private LogLine firstLog = null;
     private LogLine lastLog = firstLog;
+
+    private Map<String, ServerConfig> servers;
+    private Map.Entry<String, ServerConfig> server;
 
     @FXML
     private CheckBox checkBoxTime;
@@ -80,7 +85,13 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        textFieldPortNumber.setText("" + Main.getConfig().getPort());
+        servers = Main.getConfig().getServers();
+        for (Map.Entry<String, ServerConfig> svr : servers.entrySet()) {
+            server = svr;
+            break;
+        }
+
+        textFieldPortNumber.setText("" + server.getKey());
         buttonConnect.setText("Start");
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
@@ -92,7 +103,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.addApplicationController(this);
         if (Main.getConfig().getAutoConnect()) {
-            Main.startServer(new ServerConfig(Main.getConfig().getPort(), Main.getConfig().getExpectationsFile(), Main.getConfig().isVerbose()));
+            Main.startServer(server.getKey(), server.getValue());
         }
         resetMainLog();
         updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
@@ -138,7 +149,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (buttonConnect.getText().equalsIgnoreCase("start")) {
             try {
                 int port = Integer.parseInt(textFieldPortNumber.getText());
-                Main.startServer(new ServerConfig(port, Main.getConfig().getExpectationsFile(), Main.getConfig().isVerbose()));
+                Main.startServer(server.getKey(), server.getValue());
             } catch (NumberFormatException nfe) {
                 Main.log(System.currentTimeMillis(), nfe);
                 Main.notifyAction(System.currentTimeMillis(), Action.PORT_NUMBER_ERROR, "Invalid port number");
