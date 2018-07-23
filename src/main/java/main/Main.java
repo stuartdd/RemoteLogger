@@ -36,7 +36,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
 import org.joda.time.DateTime;
-import server.Server;
+import server.ServerManager;
 import server.ServerConfig;
 
 public class Main extends Application {
@@ -118,24 +118,12 @@ public class Main extends Application {
         CONTROLLERS.add(applicationController);
     }
 
-    public static void startServer(String portStr, ServerConfig config) {
-        int port;
-        try {
-            port = Integer.parseInt(portStr);
-        } catch (Exception ex) {
-            throw new ConfigDataException("Port number [" + portStr + "] is invalid");
-        }
-        Server.startServer(port, config, new MainNotifier(config.isVerbose()));
+    public static void startServer(int port) {
+        ServerManager.startServer(port);
     }
 
-    public static void stopServerThread(String portStr) {
-        int port;
-        try {
-            port = Integer.parseInt(portStr);
-        } catch (Exception ex) {
-            throw new ConfigDataException("Port number [" + portStr + "] is invalid");
-        }
-        Server.stopServer(port);
+    public static void stopServer(int port) {
+        ServerManager.stopServer(port);
     }
 
     public static void controlStopEventAction() {
@@ -146,7 +134,7 @@ public class Main extends Application {
                 if (headless) {
                     closeApplication(true);
                 } else {
-                    Server.stopAllServers();
+                    ServerManager.stopAllServers();
                 }
             }
         }).start();
@@ -160,7 +148,7 @@ public class Main extends Application {
                 config.setY(mainStage.getY());
                 config.setWidth(mainStage.getWidth());
                 config.setHeight(mainStage.getHeight());
-                config.setAutoConnect(Server.countServersRunning() > 0);
+                config.setAutoConnect(ServerManager.countServersRunning() > 0);
                 try {
                     Files.write(
                             FileSystems.getDefault().getPath(ConfigData.writeFileName()),
@@ -175,7 +163,7 @@ public class Main extends Application {
                 }
             }
         }
-        Server.stopAllServers();
+        ServerManager.stopAllServers();
         if (mainStage != null) {
             mainStage.close();
         } else {
@@ -237,6 +225,7 @@ public class Main extends Application {
         config.setHeight(600);
         config.setX(0);
         config.setY(0);
+        config.setDefaultPort(0);
         configName = null;
         try {
             for (String arg : args) {
@@ -266,19 +255,33 @@ public class Main extends Application {
         if (config.getLogDateFormat() == null) {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
-        if ((config.getServers() == null ) || (config.getServers().isEmpty())) {
-            config.getServers().put("1080", new ServerConfig("", true));
+        if ((config.getServers() == null) || (config.getServers().isEmpty())) {
+            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", true));
+            config.setDefaultPort(PORT_NUMBER);
+        }
+        for (String portStr : config.getServers().keySet()) {
+            ServerConfig serverConfig = config.getServers().get(portStr);
+            ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
         if (headless) {
-            for (String portStr : config.getServers().keySet()) {
-                startServer(portStr, config.getServers().get(portStr));
-            }
-            while (Server.countServersRunning() > 0) {
+            ServerManager.startAllServers();
+            while (ServerManager.countServersRunning() > 0) {
                 Util.sleep(1000);
-                logFinal(System.currentTimeMillis(), "Servers running :" + Server.countServersRunning());
+                logFinal(System.currentTimeMillis(), "Servers running :" + ServerManager.countServersRunning());
             }
             System.exit(0);
         } else {
+            if (config.getDefaultPort() == 0) {
+                if (config.getServers().size() != 1) {
+                    System.err.println("Default port is not defined");
+                    System.exit(1);
+                }
+               config.setDefaultPort(ServerManager.ports()[0]);
+            }
+            if (!ServerManager.hasPort(config.getDefaultPort())) {
+                System.err.println("Default port ["+config.getDefaultPort()+"] is not listed in the servers "+ServerManager.ports());
+                System.exit(1);
+            }
             launch(args);
         }
     }

@@ -25,7 +25,7 @@ import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import server.Server;
+import server.ServerManager;
 import server.ServerConfig;
 
 /**
@@ -62,7 +62,8 @@ public class TestExp {
 
     @BeforeClass
     public static void beforeClass() {
-        Server.startServer(PORT, new ServerConfig("/config/expectationsResource.json",true), new TestNotifier());
+        ServerManager.addServer(""+PORT, new ServerConfig("/config/expectationsResource.json",true), new TestNotifier());
+        ServerManager.startServer(PORT);
         Util.sleep(200);
     }
 

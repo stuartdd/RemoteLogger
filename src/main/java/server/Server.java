@@ -16,8 +16,6 @@
  */
 package server;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import common.Notifier;
 
 /**
@@ -26,46 +24,39 @@ import common.Notifier;
  */
 public class Server {
 
-    private static Map<Integer, ServerThread> serverThreads = new ConcurrentHashMap<>();
-    
+    int port;
+    Notifier serverNotifier;
+    ServerConfig serverConfig;
+    ServerThread serverThread;
 
-    public static ServerThread startServer(int port, ServerConfig config, Notifier serverNotifier) {
-        ServerThread serverThread = new ServerThread(port, config, serverNotifier);
-        serverThreads.put(port, serverThread);
+    public Server(int port, ServerConfig serverConfig, Notifier serverNotifier) {
+        if (serverConfig == null) {
+            throw new ServerConfigException("Server serverConfig is null");
+        }
+        this.port = port;
+        this.serverNotifier = serverNotifier;
+        this.serverConfig = serverConfig;
+        this.serverThread = null;
+    }
+
+    public void start() {
+        serverThread = new ServerThread(port, serverConfig, serverNotifier);
         serverThread.start();
-        serverNotifier.log(System.currentTimeMillis(), "Started server on port:"+port);
-        return serverThread;
+        serverNotifier.log(System.currentTimeMillis(), "Started server on port:" + port);
     }
-    
-    public static ServerThread stopServer(int port) {
-        ServerThread serverThread = serverThreads.get(port);
-        if (serverThread!=null) {
+
+    public void stop() {
+        if (serverThread != null) {
             serverThread.stopServer();
-            serverThreads.remove(port);
+            serverThread = null;
         }
-        return serverThread;
-    }
-    
-    public static void stopAllServers() {
-        for (ServerThread serverThread:serverThreads.values()) {
-            serverThread.stopServer();
-        }
-        serverThreads.clear();
-    }
-    
-    public static int countServersRunning() {
-        int count = 0;
-        for (ServerThread serverThread:serverThreads.values()) {
-            if (serverThread.isRunning()) {
-                count++;
-            }
-        }
-        return count;
     }
 
-
-    public static void main(String[] args) {
-
+    public boolean isRunning() {
+        if (serverThread != null) {
+            return serverThread.isRunning();
+        }
+        return false;
     }
 
 }

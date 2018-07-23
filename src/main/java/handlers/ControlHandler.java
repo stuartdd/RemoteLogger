@@ -22,7 +22,7 @@ import expectations.ExpectationMatcher;
 import java.io.IOException;
 import java.io.OutputStream;
 import common.Action;
-import server.Server;
+import server.ServerManager;
 import common.Notifier;
 
 public class ControlHandler implements HttpHandler {
@@ -43,7 +43,7 @@ public class ControlHandler implements HttpHandler {
             if (serverNotifier!= null) {
                 serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Server on port "+port+" is shutting down");
             }
-            Server.stopServer(port);
+            ServerManager.stopServer(port);
             String response = "Server on port "+port+" will stop";
             he.sendResponseHeaders(200, response.length());
             OutputStream os = he.getResponseBody();

@@ -36,6 +36,7 @@ public class ConfigData extends Config {
     private String logDateFormat;
     private String timeFormat;
     private Boolean autoConnect;
+    private int defaultPort;
     private boolean includeHeaders = true;
     private boolean includeBody = true;
     private boolean includeEmpty = false;
@@ -103,7 +104,15 @@ public class ConfigData extends Config {
         this.autoConnect = autoConnect;
     }
 
-    public double getX() {
+    public int getDefaultPort() {
+        return defaultPort;
+    }
+
+    public void setDefaultPort(int defaultPort) {
+        this.defaultPort = defaultPort;
+    }
+
+     public double getX() {
         return x;
     }
 

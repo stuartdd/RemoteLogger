@@ -20,13 +20,11 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import common.Util;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import server.Server;
+import server.ServerManager;
 import server.ServerConfig;
 
 /**
@@ -40,7 +38,8 @@ public class TestNoExp {
 
     @BeforeClass
     public static void beforeClass() {
-        Server.startServer(PORT, new ServerConfig(null, true), new TestNotifier());
+        ServerManager.addServer("" + PORT, new ServerConfig("/config/testNoExp.json", true), new TestNotifier());
+        ServerManager.startServer(PORT);
         Util.sleep(200);
     }
 
@@ -54,7 +53,6 @@ public class TestNoExp {
         String e = "ClientResponse{status=404, body=No Expectation defined}";
         String r = CLIENT.send("gettest", null, Client.Method.GET).toString();
         assertEquals(e, r);
-
     }
 
     @Test

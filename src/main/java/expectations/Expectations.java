@@ -16,6 +16,7 @@
  */
 package expectations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class Expectations {
 
-    private List<Expectation> expectations;
+    private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;
     private boolean listMap;
 

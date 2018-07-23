@@ -88,7 +88,7 @@ public class ExpectationHandler implements HttpHandler {
                 serverNotifier.notifyAction(time, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
             }
         }
-        if (expectationMatcher!=null) {
+        if (!expectationMatcher.hasNoExpectations()) {
             expectationMatcher.getResponse(time, he, map);
         } else {
             ExpectationMatcher.respond(he, 404, "No Expectation defined");

@@ -79,7 +79,7 @@ public class ServerThread extends Thread {
         }
         server.stop(1);
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING, "Server on port " + port + " Stopped");
+            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Server on port " + port + " Stopped");
         }
         running = false;
     }

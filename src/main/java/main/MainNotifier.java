@@ -33,6 +33,9 @@ public class MainNotifier implements Notifier {
     @Override
     public void notifyAction(long time, Action action, String message) {
         Main.notifyAction(time, action, message);
+        if (verbose) {
+            Main.log(time, "Action:"+action.name()+":"+message);
+        }
     }
 
     @Override

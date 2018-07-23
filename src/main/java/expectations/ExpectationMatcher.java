@@ -355,6 +355,6 @@ public class ExpectationMatcher {
     }
 
     public boolean hasNoExpectations() {
-        return (expectations == null);
+        return ((expectations == null) || (expectations.getExpectations().isEmpty()));
     }
 }
