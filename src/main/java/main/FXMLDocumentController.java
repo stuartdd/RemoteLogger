@@ -36,7 +36,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
-import static main.Main.startServer;
 import server.ServerConfig;
 
 /**
@@ -90,7 +89,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             server = svr;
             break;
         }
-
+        
         textFieldPortNumber.setText("" + server.getKey());
         buttonConnect.setText("Start");
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
@@ -148,14 +147,13 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public void connectAction() {
         if (buttonConnect.getText().equalsIgnoreCase("start")) {
             try {
-                int port = Integer.parseInt(textFieldPortNumber.getText());
                 Main.startServer(server.getKey(), server.getValue());
             } catch (NumberFormatException nfe) {
                 Main.log(System.currentTimeMillis(), nfe);
                 Main.notifyAction(System.currentTimeMillis(), Action.PORT_NUMBER_ERROR, "Invalid port number");
             }
         } else {
-            Main.stopServerThread();
+            Main.stopServerThread(server.getKey());
         }
     }
 

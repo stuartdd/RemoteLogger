@@ -19,7 +19,7 @@ package server;
 public class ServerConfig {
 
     private String expectationsFile;
-    private boolean verbose = false;
+    private boolean verbose = true;
 
     public ServerConfig(String expectationsFile, boolean verbose) {
         this.expectationsFile = expectationsFile;

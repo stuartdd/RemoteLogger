@@ -51,6 +51,11 @@ public class ExpectationMatcher {
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
         this.serverNotifier = serverNotifier;
+        if ((fileName == null) || (fileName.trim().length()==0)) {
+            expectations = null;
+            expectationsFile = null;
+            return;
+        }
         File file = new File(fileName);
         if (file.exists()) {
             expectationsFile = file;
@@ -347,5 +352,9 @@ public class ExpectationMatcher {
             sb.append((char) content);
         }
         return sb.toString();
+    }
+
+    public boolean hasNoExpectations() {
+        return (expectations == null);
     }
 }

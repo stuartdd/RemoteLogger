@@ -128,8 +128,14 @@ public class Main extends Application {
         Server.startServer(port, config, new MainNotifier(config.isVerbose()));
     }
 
-    public static void stopServerThread() {
-        Server.stopAllServers();
+    public static void stopServerThread(String portStr) {
+        int port;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (Exception ex) {
+            throw new ConfigDataException("Port number [" + portStr + "] is invalid");
+        }
+        Server.stopServer(port);
     }
 
     public static void controlStopEventAction() {
@@ -140,7 +146,7 @@ public class Main extends Application {
                 if (headless) {
                     closeApplication(true);
                 } else {
-                    stopServerThread();
+                    Server.stopAllServers();
                 }
             }
         }).start();
@@ -169,7 +175,7 @@ public class Main extends Application {
                 }
             }
         }
-        stopServerThread();
+        Server.stopAllServers();
         if (mainStage != null) {
             mainStage.close();
         } else {
@@ -259,6 +265,9 @@ public class Main extends Application {
         }
         if (config.getLogDateFormat() == null) {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
+        }
+        if ((config.getServers() == null ) || (config.getServers().isEmpty())) {
+            config.getServers().put("1080", new ServerConfig("", true));
         }
         if (headless) {
             for (String portStr : config.getServers().keySet()) {
