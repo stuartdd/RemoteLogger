@@ -41,6 +41,7 @@ public class ConfigData extends Config {
     private boolean includeBody = true;
     private boolean includeEmpty = false;
     private boolean showTime = true;
+    private boolean showPort = true;
     private double x;
     private double y;
     private double width;
@@ -94,14 +95,6 @@ public class ConfigData extends Config {
 
     public void setLogDateFormat(String logDateFormat) {
         this.logDateFormat = logDateFormat;
-    }
-
-    public Boolean getAutoConnect() {
-        return autoConnect;
-    }
-
-    public void setAutoConnect(Boolean autoConnect) {
-        this.autoConnect = autoConnect;
     }
 
     public int getDefaultPort() {
@@ -185,6 +178,14 @@ public class ConfigData extends Config {
 
     public void setShowTime(boolean showTime) {
         this.showTime = showTime;
+    }
+
+    public boolean isShowPort() {
+        return showPort;
+    }
+
+    public void setShowPort(boolean showPort) {
+        this.showPort = showPort;
     }
 
     public static String writeFileName() {

@@ -2,23 +2,27 @@
   "servers" : {
     "1998" : {
       "expectationsFile" : "expectations.json",
+      "autoStart" : true,
+      "showPort" : true,
       "verbose" : true
     },
     "1999" : {
       "expectationsFile" : "expectations.json",
+      "autoStart" : true,
+      "showPort" : true,
       "verbose" : true
     }
   },
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
-  "autoConnect" : true,
   "defaultPort" : 1999,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,
   "showTime" : true,
-  "x" : 4509.0,
-  "y" : 50.0,
-  "width" : 1185.0,
+  "showPort" : true,
+  "x" : 893.0,
+  "y" : 63.0,
+  "width" : 1414.0,
   "height" : 863.0
 }

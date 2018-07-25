@@ -22,6 +22,8 @@ package main;
  */
 public class LogLine {
 
+    private static final String NL = System.getProperty("line.separator");
+
     private final long time;
     private final int port;
     private final LogCatagory catagory;
@@ -63,6 +65,16 @@ public class LogLine {
 
     public void setNext(LogLine next) {
         this.next = next;
+    }
+
+    public void render(StringBuilder sb, ConfigData config) {
+        if (Main.getConfig().isShowTime()) {
+            sb.append(Main.getConfig().timeStamp(time)).append(":");
+        }
+        if ((port > 0) && (config.isShowPort())) {
+            sb.append("[").append(port).append("] ");
+        }
+        sb.append(text).append(NL);
     }
 
     @Override

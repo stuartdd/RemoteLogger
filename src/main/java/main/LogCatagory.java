@@ -21,5 +21,5 @@ package main;
  * @author stuart
  */
 public enum LogCatagory {
-    EMPTY, BODY, HEADER, LOG;    
+    EMPTY, BODY, HEADER, LOG, ACTION, CLEAR;    
  }

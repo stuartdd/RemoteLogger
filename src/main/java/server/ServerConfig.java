@@ -19,6 +19,8 @@ package server;
 public class ServerConfig {
 
     private String expectationsFile;
+    private boolean autoStart = false;
+    private boolean showPort = false;
     private boolean verbose = true;
 
     public ServerConfig(String expectationsFile, boolean verbose) {
@@ -35,6 +37,22 @@ public class ServerConfig {
 
     public void setExpectationsFile(String expectationsFile) {
         this.expectationsFile = expectationsFile;
+    }
+
+    public boolean isAutoStart() {
+        return autoStart;
+    }
+
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
+    }
+
+    public boolean isShowPort() {
+        return showPort;
+    }
+
+    public void setShowPort(boolean showPort) {
+        this.showPort = showPort;
     }
 
     public boolean isVerbose() {

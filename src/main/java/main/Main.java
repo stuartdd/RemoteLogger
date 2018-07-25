@@ -96,21 +96,21 @@ public class Main extends Application {
             switch (option) {
                 case FILTER_HEADERS:
                     config.setIncludeHeaders(selected);
-                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case FILTER_BODY:
                     config.setIncludeBody(selected);
-                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case FILTER_EMPTY:
                     config.setIncludeEmpty(selected);
-                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case TIME:
                     config.setShowTime(selected);
-                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
+                    break;
+                case PORT:
+                    config.setShowPort(selected);
                     break;
             }
+            notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
         }
     }
 
@@ -148,7 +148,6 @@ public class Main extends Application {
                 config.setY(mainStage.getY());
                 config.setWidth(mainStage.getWidth());
                 config.setHeight(mainStage.getHeight());
-                config.setAutoConnect(ServerManager.countServersRunning() > 0);
                 try {
                     Files.write(
                             FileSystems.getDefault().getPath(ConfigData.writeFileName()),
@@ -193,7 +192,7 @@ public class Main extends Application {
     }
 
     public static void logFinal(long time, int port, String message) {
-        System.out.println(getTimeStamp(time) + (port <= 0?"":"["+port+"] ") + message);
+        System.out.println(getTimeStamp(time) + (port <= 0 ? "" : "[" + port + "] ") + message);
     }
 
     public static ConfigData getConfig() {
@@ -229,9 +228,6 @@ public class Main extends Application {
         configName = null;
         try {
             for (String arg : args) {
-                if (arg.startsWith("-a")) {
-                    config.setAutoConnect(true);
-                }
                 if (arg.startsWith("-h")) {
                     headless = true;
                 }
@@ -249,9 +245,6 @@ public class Main extends Application {
             }
             System.exit(1);
         }
-        if (config.getAutoConnect() == null) {
-            config.setAutoConnect(false);
-        }
         if (config.getLogDateFormat() == null) {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
@@ -264,7 +257,7 @@ public class Main extends Application {
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
         if (headless) {
-            ServerManager.startAllServers();
+            ServerManager.autoStartServers();
             while (ServerManager.countServersRunning() > 0) {
                 Util.sleep(1000);
                 logFinal(System.currentTimeMillis(), -1, "Servers running :" + ServerManager.countServersRunning());

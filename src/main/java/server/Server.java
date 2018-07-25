@@ -64,4 +64,20 @@ public class Server {
         return ServerState.SERVER_STOPPED;        
     }
 
+    public void setAutoStart(boolean selected) {
+        serverConfig.setAutoStart(selected);
+    }
+
+    public boolean isAutoStart() {
+        return serverConfig.isAutoStart();
+    }
+
+    void setShowPort(boolean selected) {
+        serverConfig.setShowPort(selected);
+    }
+
+    boolean isShowPort() {
+        return serverConfig.isShowPort();
+    }
+
 }

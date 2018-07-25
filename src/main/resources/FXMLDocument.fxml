@@ -24,8 +24,14 @@
                 <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#connectAction" text="Connect" />
                 <Label text="Port:" />
                 <ChoiceBox fx:id="textFieldPortNumber" prefHeight="25.0" prefWidth="86.0" />
+            <Separator disable="true" orientation="VERTICAL" prefHeight="0.0" prefWidth="2.0" visible="false" />
+            <CheckBox fx:id="checkBoxAutoStart" mnemonicParsing="false" onAction="#checkBoxAutoStartAction" text="Auto-Start" />
+            <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="9.0" visible="false" />
+            <CheckBox fx:id="checkBoxShowPort" mnemonicParsing="false" onAction="#checkBoxShowPortAction" text="Show" />
                 <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="19.0" />
                 <CheckBox fx:id="checkBoxTime" mnemonicParsing="false" onAction="#checkBoxTimeAction" text="Time" />
+            <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="0.0" />
+            <CheckBox fx:id="checkBoxPort" mnemonicParsing="false" onAction="#checkBoxPortAction" text="Port" />
             </items>
         </ToolBar>
     </top>

@@ -46,18 +46,18 @@ public class ServerManager {
         Server server = servers.get(port);
         if (server != null) {
             return server.isRunning();
-        }        
+        }
         return false;
     }
-    
+
     public static ServerState state(int port) {
         Server server = servers.get(port);
         if (server != null) {
             return server.state();
-        }        
+        }
         return ServerState.SERVER_STOPPED;
     }
-    
+
     public static void startServer(int port) {
         Server server = servers.get(port);
         if (server != null) {
@@ -78,10 +78,41 @@ public class ServerManager {
         }
     }
 
-    public static void startAllServers() {
+    public static void autoStartServers() {
         for (Server server : servers.values()) {
-            server.start();
+            if (server.isAutoStart()) {
+                server.start();
+            }
         }
+    }
+    public static void setShowPort(int port, boolean selected) {
+         Server server = servers.get(port);
+        if (server != null) {
+            server.setShowPort(selected);
+        }
+    }
+
+    public static boolean isShowPort(int port) {
+        Server server = servers.get(port);
+        if (server != null) {
+            return server.isShowPort();
+        }
+        return false;
+    }
+    
+    public static void setAutoStart(int port, boolean selected) {
+        Server server = servers.get(port);
+        if (server != null) {
+            server.setAutoStart(selected);
+        }
+    }
+
+    public static boolean isAutoStart(int port) {
+        Server server = servers.get(port);
+        if (server != null) {
+            return server.isAutoStart();
+        }
+        return false;
     }
 
     public static int countServersRunning() {
@@ -93,27 +124,29 @@ public class ServerManager {
         }
         return count;
     }
-    
+
     public static boolean hasPort(int port) {
         return servers.containsKey(port);
     }
-    
+
     public static int[] ports() {
         int[] in = new int[servers.size()];
         int pos = 0;
-        for (Integer port:servers.keySet()) {
+        for (Integer port : servers.keySet()) {
             in[pos] = port;
             pos++;
         }
         Arrays.sort(in);
         return in;
     }
-    
+
     public static List<String> portList() {
         List<String> l = new ArrayList<>();
-        for (int p:ports()) {
-            l.add(""+p);
+        for (int p : ports()) {
+            l.add("" + p);
         }
         return l;
     }
- }
+
+
+}

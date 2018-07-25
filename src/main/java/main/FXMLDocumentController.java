@@ -35,7 +35,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
@@ -59,6 +58,15 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private CheckBox checkBoxTime;
+
+    @FXML
+    private CheckBox checkBoxPort;
+
+    @FXML
+    private CheckBox checkBoxAutoStart;
+
+    @FXML
+    private CheckBox checkBoxShowPort;
 
     @FXML
     private CheckBox checkBoxHeaders;
@@ -96,19 +104,23 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
             }
         });
+        if (!ServerManager.isShowPort(Main.getConfig().getDefaultPort())) {
+            ServerManager.setShowPort(Main.getConfig().getDefaultPort(), true);
+        }
         updatePortStatus();
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
         checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
         checkBoxTime.setSelected(Main.getConfig().isShowTime());
+        checkBoxPort.setSelected(Main.getConfig().isShowPort());
+        checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
+        checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.addApplicationController(this);
         resetMainLog();
-        if (Main.getConfig().getAutoConnect()) {
-            Main.startServer(Main.getConfig().getDefaultPort());
-        }
+        ServerManager.autoStartServers();
         updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
     }
 
@@ -123,6 +135,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             @Override
             public void run() {
                 updatePortStatus();
+
             }
         });
     }
@@ -143,8 +156,24 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @FXML
+    public void checkBoxPortAction() {
+        Main.notifyOption(Option.PORT, -1, checkBoxPort.isSelected(), "");
+    }
+
+    @FXML
     public void checkBoxHeadersAction() {
         Main.notifyOption(Option.FILTER_HEADERS, -1, checkBoxHeaders.isSelected(), "");
+    }
+
+    @FXML
+    public void checkBoxAutoStartAction() {
+        ServerManager.setAutoStart(getSelectedPort(), checkBoxAutoStart.isSelected());
+    }
+
+    @FXML
+    public void checkBoxShowPortAction() {
+        ServerManager.setShowPort(getSelectedPort(), checkBoxShowPort.isSelected());
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.LOG_REFRESH, "Log has been Updated");
     }
 
     @FXML
@@ -171,11 +200,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         switch (action) {
             case CLEAR_LOGS:
                 resetLog();
-                updateLog(time, port, null, null);
+                updateLog(time, port, LogCatagory.CLEAR, null);
                 break;
             case CLEAR_MAIN_LOGS:
                 resetMainLog();
-                updateMainLog(time, port, null, null);
+                updateMainLog(time, port, LogCatagory.CLEAR, null);
                 break;
             case LOG_BODY:
                 updateMainLog(time, port, LogCatagory.BODY, message);
@@ -184,8 +213,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 updateMainLog(time, port, LogCatagory.HEADER, message);
                 break;
             case LOG_REFRESH:
-                updateMainLog(time, port, null, null);
-                updateLog(time, port, null, null);
+                updateMainLog(time, port, LogCatagory.ACTION, null);
+                updateLog(time, port, LogCatagory.ACTION, null);
                 labelStatus.setText("Log display refreshed");
                 break;
             case LOG:
@@ -208,39 +237,52 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void updateMainLog(long time, int port, LogCatagory cat, String message) {
-        if (firstMainLog == null) {
-            if ((message == null) || (message.trim().length() == 0)) {
+        switch (cat) {
+            case ACTION:
+                break;
+            case CLEAR:
                 textAreaLogging.setText("Log is empty 1");
                 labelStatus.setText("Log message is empty!");
-            } else {
-                firstMainLog = new LogLine(time, port, message, cat);
+                firstMainLog = null;
                 lastMainLog = firstMainLog;
-                textAreaLogging.setText(filterMainLog());
-                labelStatus.setText("Log 1st line:" + message);
-            }
-        } else {
-            lastMainLog.setNext(new LogLine(time, port, message, cat));
-            lastMainLog = lastMainLog.getNext();
-            textAreaLogging.setText(filterMainLog());
+                break;
+            default:
+                LogLine ll = new LogLine(time, port, message, cat);
+                if (firstMainLog == null) {
+                    firstMainLog = ll;
+                    lastMainLog = firstMainLog;
+                    labelStatus.setText("Log 1st line:" + message);
+                } else {
+                    lastMainLog.setNext(ll);
+                    lastMainLog = ll;
+                }
         }
+        textAreaLogging.setText(filterMainLog());
     }
 
     private void updateLog(long time, int port, LogCatagory cat, String message) {
-        if (firstLog == null) {
-            if ((message == null) || (message.trim().length() == 0)) {
-                textAreaLog.setText("Log is empty 1");
+        switch (cat) {
+            case ACTION:
+                break;
+            case CLEAR:
+                textAreaLogging.setText("Log is empty 1");
                 labelStatus.setText("Log message is empty!");
-            } else {
-                firstLog = new LogLine(time, port, message, cat);
+                firstLog = null;
                 lastLog = firstLog;
-                textAreaLog.setText(filterLog());
-                labelStatus.setText("Log 1st line:" + message);
-            }
-        } else {
-            lastLog.setNext(new LogLine(time, port, message, cat));
-            lastLog = lastLog.getNext();
-            textAreaLog.setText(filterLog());
+                break;
+            default:
+                LogLine ll = new LogLine(time, port, message, cat);
+                if (firstLog == null) {
+                    firstLog = ll;
+                    lastLog = firstLog;
+                    labelStatus.setText("Log 1st line:" + message);
+                } else {
+                    lastLog.setNext(ll);
+                    lastLog = ll;
+                    textAreaLog.setText(filterLog());
+                }
         }
+        textAreaLog.setText(filterLog());
     }
 
     private void resetMainLog() {
@@ -257,34 +299,24 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         StringBuilder sb = new StringBuilder();
         LogLine line = firstMainLog;
         while (line != null) {
-            switch (line.getCatagory()) {
-                case EMPTY:
-                    if (Main.getConfig().isIncludeEmpty()) {
-                        sb.append(NL);
-                    }
-                    break;
-                case BODY:
-                    if (Main.getConfig().isIncludeBody()) {
-                        if (Main.getConfig().isShowTime()) {
-                            sb.append(Main.getConfig().timeStamp(line.getTime())).append(":");
+            if (ServerManager.isShowPort(line.getPort())) {
+                switch (line.getCatagory()) {
+                    case EMPTY:
+                        if (Main.getConfig().isIncludeEmpty()) {
+                            sb.append(NL);
                         }
-                        if (line.getPort() > 0) {
-                            sb.append("[").append(line.getPort()).append("] ");
+                        break;
+                    case BODY:
+                        if (Main.getConfig().isIncludeBody()) {
+                            line.render(sb, Main.getConfig());
                         }
-                        sb.append(line.getText()).append(NL);
-                    }
-                    break;
-                case HEADER:
-                    if (Main.getConfig().isIncludeHeaders()) {
-                        if (Main.getConfig().isShowTime()) {
-                            sb.append(Main.getConfig().timeStamp(line.getTime())).append(":");
+                        break;
+                    case HEADER:
+                        if (Main.getConfig().isIncludeHeaders()) {
+                            line.render(sb, Main.getConfig());
                         }
-                        if (line.getPort() > 0) {
-                            sb.append("[").append(line.getPort()).append("] ");
-                        }
-                        sb.append(line.getText()).append(NL);
-                    }
-                    break;
+                        break;
+                }
             }
             line = line.getNext();
         }
@@ -295,13 +327,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         StringBuilder sb = new StringBuilder();
         LogLine line = firstLog;
         while (line != null) {
-            if (Main.getConfig().isShowTime()) {
-                sb.append(Main.getConfig().timeStamp(line.getTime())).append(":");
+            if (ServerManager.isShowPort(line.getPort())) {
+                line.render(sb, Main.getConfig());
             }
-            if (line.getPort() > 0) {
-                sb.append("[").append(line.getPort()).append("] ");
-            }
-            sb.append(line.getText()).append(NL);
             line = line.getNext();
         }
         return sb.toString().trim();
@@ -312,6 +340,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void updatePortStatus() {
+        checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
+        checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
         switch (ServerManager.state(getSelectedPort())) {
             case SERVER_STARTING:
             case SERVER_STOPPING:
