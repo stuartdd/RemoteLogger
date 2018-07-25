@@ -50,14 +50,6 @@ public class ServerThread extends Thread {
         }
     }
 
-    private void newState(ServerState state, String additional) {
-        serverState = state;
-        if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STATE, "");
-            serverNotifier.log(System.currentTimeMillis(), serverState + ". Port:" + port + (additional == null ? "" : ". " + additional));
-        }
-    }
-
     @Override
     public void run() {
         running = true;
@@ -82,6 +74,14 @@ public class ServerThread extends Thread {
         server.stop(1);
         newState(ServerState.SERVER_STOPPED, null);
         running = false;
+    }
+
+    private synchronized void newState(ServerState state, String additional) {
+        serverState = state;
+        if (serverNotifier != null) {
+            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STATE, "");
+            serverNotifier.log(System.currentTimeMillis(), serverState + ". Port:" + port + (additional == null ? "" : ". " + additional));
+        }
     }
 
     public ServerState state() {

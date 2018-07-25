@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
-
 import common.Notifier;
 
 /**
@@ -42,7 +41,6 @@ public class Server {
     public void start() {
         serverThread = new ServerThread(port, serverConfig, serverNotifier);
         serverThread.start();
-        serverNotifier.log(System.currentTimeMillis(), "Started server on port:" + port);
     }
 
     public void stop() {
@@ -63,7 +61,7 @@ public class Server {
         if (serverThread != null) {
             return serverThread.state();
         }
-        return ServerState.SERVER_PENDING;        
+        return ServerState.SERVER_STOPPED;        
     }
 
 }

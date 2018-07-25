@@ -1,5 +1,9 @@
 {
   "servers" : {
+    "1998" : {
+      "expectationsFile" : "expectations.json",
+      "verbose" : true
+    },
     "1999" : {
       "expectationsFile" : "expectations.json",
       "verbose" : true
@@ -13,8 +17,8 @@
   "includeBody" : true,
   "includeEmpty" : false,
   "showTime" : true,
-  "x" : 4329.0,
-  "y" : 195.0,
-  "width" : 1297.0,
+  "x" : 4509.0,
+  "y" : 50.0,
+  "width" : 1185.0,
   "height" : 863.0
 }

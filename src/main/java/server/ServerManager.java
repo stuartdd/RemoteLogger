@@ -55,7 +55,7 @@ public class ServerManager {
         if (server != null) {
             return server.state();
         }        
-        return ServerState.SERVER_PENDING;
+        return ServerState.SERVER_STOPPED;
     }
     
     public static void startServer(int port) {
@@ -103,6 +103,7 @@ public class ServerManager {
         int pos = 0;
         for (Integer port:servers.keySet()) {
             in[pos] = port;
+            pos++;
         }
         Arrays.sort(in);
         return in;

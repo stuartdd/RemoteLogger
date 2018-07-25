@@ -19,6 +19,9 @@ package main;
 import common.Action;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -54,8 +57,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private LogLine firstLog = null;
     private LogLine lastLog = firstLog;
 
-    private int serverPort;
-
     @FXML
     private CheckBox checkBoxTime;
 
@@ -85,10 +86,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        serverPort = Main.getConfig().getDefaultPort();
         textFieldPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
-        textFieldPortNumber.getSelectionModel().select(""+serverPort);
-        buttonConnect.setText("Start");
+        textFieldPortNumber.getSelectionModel().select("" + Main.getConfig().getDefaultPort());
+        textFieldPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if (oldValue != newValue) {
+                    portNumberChanged();
+                }
+            }
+        });
+        updatePortStatus();
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
         checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
@@ -99,7 +107,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         Main.addApplicationController(this);
         resetMainLog();
         if (Main.getConfig().getAutoConnect()) {
-            Main.startServer(serverPort);
+            Main.startServer(Main.getConfig().getDefaultPort());
         }
         updateMainLog(System.currentTimeMillis(), LogCatagory.EMPTY, null);
     }
@@ -107,6 +115,16 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void closeAction() {
         Main.closeApplication(false);
+    }
+
+    @FXML
+    public void portNumberChanged() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePortStatus();
+            }
+        });
     }
 
     @FXML
@@ -175,7 +193,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 labelStatus.setText("Log display refreshed");
                 break;
             case SERVER_STATE:
-                updatePortStatus(serverPort);
+                updatePortStatus();
                 break;
             case CONFIG_SAVE_ERROR:
                 Alert alert = new Alert(AlertType.CONFIRMATION, message + "\n\nConfiguration data was not updated. \n\nPress OK to exit");
@@ -283,26 +301,31 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private int getSelectedPort() {
         return Integer.parseInt(textFieldPortNumber.getSelectionModel().getSelectedItem().toString());
     }
-    private void updatePortStatus(int port) {
-        switch (ServerManager.state(port)) {
+
+    private void updatePortStatus() {
+        switch (ServerManager.state(getSelectedPort())) {
             case SERVER_STARTING:
             case SERVER_STOPPING:
                 buttonConnect.setDisable(true);
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_STOPPED:
+                buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_RUNNING:
+                buttonConnect.setDisable(false);
                 buttonConnect.setText("Stop");
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_FAIL:
+                buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_PENDING:
+                buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
                 textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
