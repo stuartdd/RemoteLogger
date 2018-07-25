@@ -41,7 +41,7 @@ public class ControlHandler implements HttpHandler {
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
             if (serverNotifier!= null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Server on port "+port+" is shutting down");
+                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STATE, "Server on port "+port+" is shutting down");
             }
             ServerManager.stopServer(port);
             String response = "Server on port "+port+" will stop";

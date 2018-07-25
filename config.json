@@ -12,9 +12,9 @@
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,
-  "showTime" : false,
-  "x" : 784.0,
-  "y" : 445.0,
+  "showTime" : true,
+  "x" : 4329.0,
+  "y" : 195.0,
   "width" : 1297.0,
   "height" : 863.0
 }

@@ -59,4 +59,11 @@ public class Server {
         return false;
     }
 
+    public ServerState state() {
+        if (serverThread != null) {
+            return serverThread.state();
+        }
+        return ServerState.SERVER_PENDING;        
+    }
+
 }

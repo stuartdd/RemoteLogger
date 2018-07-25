@@ -14,20 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package common;
+package server;
 
 /**
  *
  * @author stuart
  */
-public enum Action {
-    LOG,
-    LOG_BODY,
-    LOG_HEADER,
-    LOG_REFRESH,
-    CONFIG_SAVE_ERROR,
-    CLEAR_MAIN_LOGS,
-    CLEAR_LOGS,
-    SCROLL_TO_END,
-    SERVER_STATE
+public enum ServerState {
+    SERVER_PENDING("Server is waiting to start"),
+    SERVER_STARTING("Server is Starting"),
+    SERVER_RUNNING("Server is Running"),
+    SERVER_STOPPING("Server is Stopping"),
+    SERVER_STOPPED("Server is Stopped"),
+    SERVER_FAIL("Server error");
+    private String info;
+
+    private ServerState(String info) {
+        this.info = info;
+    }
+    public String getInfo() {
+        return info;
+    }
+
+    @Override
+    public String toString() {
+        return name() + ":"+info;
+    }
+    
 }

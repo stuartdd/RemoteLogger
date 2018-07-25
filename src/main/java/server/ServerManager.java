@@ -19,7 +19,9 @@ package server;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import common.Notifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import main.ConfigDataException;
 
 /**
@@ -40,6 +42,22 @@ public class ServerManager {
         servers.put(port, new Server(port, config, serverNotifier));
     }
 
+    public static boolean isPortRunning(int port) {
+        Server server = servers.get(port);
+        if (server != null) {
+            return server.isRunning();
+        }        
+        return false;
+    }
+    
+    public static ServerState state(int port) {
+        Server server = servers.get(port);
+        if (server != null) {
+            return server.state();
+        }        
+        return ServerState.SERVER_PENDING;
+    }
+    
     public static void startServer(int port) {
         Server server = servers.get(port);
         if (server != null) {
@@ -90,4 +108,11 @@ public class ServerManager {
         return in;
     }
     
-}
+    public static List<String> portList() {
+        List<String> l = new ArrayList<>();
+        for (int p:ports()) {
+            l.add(""+p);
+        }
+        return l;
+    }
+ }

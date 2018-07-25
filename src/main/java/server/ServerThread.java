@@ -29,6 +29,7 @@ import common.Notifier;
 
 public class ServerThread extends Thread {
 
+    private ServerState serverState = ServerState.SERVER_STOPPED;
     private final int port;
     private boolean running;
     private boolean canRun;
@@ -40,11 +41,20 @@ public class ServerThread extends Thread {
         this.serverNotifier = serverNotifier;
         this.running = false;
         this.canRun = true;
+        newState(ServerState.SERVER_PENDING, null);
         expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
         if (expectationMatcher.hasNoExpectations()) {
-            if(serverNotifier!=null) {
-                serverNotifier.log(System.currentTimeMillis(), "Server on "+port+" does not have any expectations defined. 404 will be returned");
+            if (serverNotifier != null) {
+                serverNotifier.log(System.currentTimeMillis(), "Server on " + port + " does not have any expectations defined. 404 will be returned");
             }
+        }
+    }
+
+    private void newState(ServerState state, String additional) {
+        serverState = state;
+        if (serverNotifier != null) {
+            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STATE, "");
+            serverNotifier.log(System.currentTimeMillis(), serverState + ". Port:" + port + (additional == null ? "" : ". " + additional));
         }
     }
 
@@ -53,37 +63,31 @@ public class ServerThread extends Thread {
         running = true;
         HttpServer server;
         try {
+            newState(ServerState.SERVER_STARTING, null);
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/control", new ControlHandler(port, expectationMatcher, serverNotifier));
             server.createContext("/", new ExpectationHandler(port, expectationMatcher, serverNotifier));
             server.setExecutor(null); // creates a default executor
-            if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server starting on port " + port);
-            }
             server.start();
-            if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_START, "Server started on port " + port);
-            }
+            newState(ServerState.SERVER_RUNNING, null);
         } catch (IOException ex) {
-            if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_FAIL, ex.getClass().getSimpleName() + ": port:" + port + " Error:" + ex.getMessage());
-            }
+            newState(ServerState.SERVER_FAIL, ex.getMessage());
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
         while (canRun) {
             sleeep(500);
         }
-        if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOPPING, "Server on port " + port + " is stopping");
-        }
+        newState(ServerState.SERVER_STOPPING, null);
         server.stop(1);
-        if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STOP, "Server on port " + port + " Stopped");
-        }
+        newState(ServerState.SERVER_STOPPED, null);
         running = false;
     }
 
+    public ServerState state() {
+        return serverState;
+    }
+    
     public boolean isRunning() {
         return running;
     }
