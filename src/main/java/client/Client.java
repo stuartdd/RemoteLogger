@@ -19,7 +19,6 @@ package client;
 import common.Notifier;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,7 +49,7 @@ public class Client {
                 + (config.getPort() == null ? "" : ":" + config.getPort())
                 + (path == null ? "" : "/" + path);
         if (clientNotifier != null) {
-            clientNotifier.log(System.currentTimeMillis(), "URL:" + fullHost);
+            clientNotifier.log(System.currentTimeMillis(), -1, "URL:" + fullHost);
         }
 
         URL obj;
@@ -81,7 +80,7 @@ public class Client {
                 is = con.getErrorStream();
                 if (is == null) {
                     if (clientNotifier != null) {
-                        clientNotifier.log(System.currentTimeMillis(), "RESPONSE [" + responseCode + "]: No Response");
+                        clientNotifier.log(System.currentTimeMillis(), -1, "RESPONSE [" + responseCode + "]: No Response");
                     }
                     return new ClientResponse(responseCode, "");
                 }
@@ -96,12 +95,12 @@ public class Client {
             in.close();
             in = null;
             if (clientNotifier != null) {
-                clientNotifier.log(System.currentTimeMillis(), "RESPONSE [" + responseCode + "]:" + response.toString().trim());
+                clientNotifier.log(System.currentTimeMillis(), -1, "RESPONSE [" + responseCode + "]:" + response.toString().trim());
             }
             return new ClientResponse(responseCode, response.toString().trim());
         } catch (ClientException | IOException e) {
             if (clientNotifier != null) {
-                clientNotifier.log(System.currentTimeMillis(), "Failed to send to:" + fullHost, e);
+                clientNotifier.log(System.currentTimeMillis(), -1, "Failed to send to:" + fullHost, e);
             }
             throw new ClientException("Failed to send to:" + fullHost, e);
         } finally {

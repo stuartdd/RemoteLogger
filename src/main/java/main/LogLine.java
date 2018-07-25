@@ -23,11 +23,12 @@ package main;
 public class LogLine {
 
     private final long time;
+    private final int port;
     private final LogCatagory catagory;
     private final String text;
     private LogLine next;
 
-    public LogLine(long time, String text, LogCatagory catagory) {
+    public LogLine(long time, int port, String text, LogCatagory catagory) {
         if ((text == null) || (text.trim().length() == 0)) {
             this.text = "";
             this.catagory = LogCatagory.EMPTY;
@@ -36,11 +37,16 @@ public class LogLine {
             this.catagory = catagory;
         }
         this.time = time;
+        this.port = port;
         this.next = null;
     }
 
     public long getTime() {
         return time;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public String getText() {

@@ -23,7 +23,7 @@
                 <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="1.0" />
                 <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#connectAction" text="Connect" />
                 <Label text="Port:" />
-                <ChoiceBox fx:id="textFieldPortNumber" onInputMethodTextChanged="#portNumberChanged" prefHeight="25.0" prefWidth="86.0" />
+                <ChoiceBox fx:id="textFieldPortNumber" prefHeight="25.0" prefWidth="86.0" />
                 <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="19.0" />
                 <CheckBox fx:id="checkBoxTime" mnemonicParsing="false" onAction="#checkBoxTimeAction" text="Time" />
             </items>

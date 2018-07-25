@@ -51,7 +51,7 @@ public class ExpectationMatcher {
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
         this.serverNotifier = serverNotifier;
-        if ((fileName == null) || (fileName.trim().length()==0)) {
+        if ((fileName == null) || (fileName.trim().length() == 0)) {
             expectations = null;
             expectationsFile = null;
             return;
@@ -101,15 +101,15 @@ public class ExpectationMatcher {
         }
     }
 
-    public void getResponse(long time, HttpExchange he, Map<String, Object> map) {
+    public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map) {
         String response = "Not Found";
         int statusCode = 404;
         Map<String, String> headers = new HashMap<>();
-        Expectation found = findMatchingExpectation(time, map);
+        Expectation found = findMatchingExpectation(time, port, map);
         if (found != null) {
             try {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, "Met " + found);
+                    serverNotifier.log(time, port, "Met " + found);
                 }
                 if (found.getMethod().equalsIgnoreCase("get")) {
                     statusCode = 200;
@@ -136,16 +136,16 @@ public class ExpectationMatcher {
                 }
                 map.put("STATUS", "" + statusCode);
                 response = Template.parse(response, map, true);
-                logResponse(time, response, statusCode, "RESP");
+                logResponse(time, port, response, statusCode, "RESP");
             } catch (ExpectationException ee) {
                 statusCode = ee.getStatus();
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, new IOException("Read file failed for expectation: " + found.getName() + ". " + ee.getMessage(), ee));
+                    serverNotifier.log(time, port, new IOException("Read file failed for expectation: " + found.getName() + ". " + ee.getMessage(), ee));
                 }
             }
         } else {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "Expectation not met");
+                serverNotifier.log(time, port, "Expectation not met");
             }
         }
         for (Map.Entry<String, String> s : headers.entrySet()) {
@@ -158,10 +158,10 @@ public class ExpectationMatcher {
         return expectations;
     }
 
-    private Expectation findMatchingExpectation(long time, Map<String, Object> map) {
+    private Expectation findMatchingExpectation(long time, int port, Map<String, Object> map) {
         if (expectations == null) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "No Expectation have been set!");
+                serverNotifier.log(time, port, "No Expectation have been set!");
             }
             return null;
         }
@@ -171,45 +171,45 @@ public class ExpectationMatcher {
                         expectationsFile);
                 expectationsLoadTime = expectationsFile.lastModified();
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+                    serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
                 }
             }
         }
         Expectation found = null;
         for (Expectation exp : expectations.getExpectations()) {
-            found = testExpectationMatches(time, exp, map);
+            found = testExpectationMatches(time, port, exp, map);
             if (found != null) {
                 break;
             }
         }
         if (expectations.isListMap()) {
-            logMap(time, map);
+            logMap(time, port, map);
         }
         return found;
     }
 
-    private Expectation testExpectationMatches(long time, Expectation exp, Map<String, Object> map1) {
+    private Expectation testExpectationMatches(long time, int port, Expectation exp, Map<String, Object> map1) {
         if (doesNotMatchStringOrNullExp(exp.getMethod(), map1.get("METHOD"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + ": METHOD:'" + exp.getMethod() + "' != '" + map1.get("METHOD") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": METHOD:'" + exp.getMethod() + "' != '" + map1.get("METHOD") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getPath(), map1.get("PATH"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + " PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getQuery(), map1.get("QUERY"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + " QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getBodyType(), map1.get("BODY-TYPE"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + " BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
             }
             return null;
         }
@@ -224,12 +224,12 @@ public class ExpectationMatcher {
                     for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
                         map1.put(bodyType + "." + ent.getKey(), ent.getValue());
                     }
-                    if (doesNotMatchRequestAssertions(time, exp, map1)) {
+                    if (doesNotMatchRequestAssertions(time, port, exp, map1)) {
                         return null;
                     }
                 } catch (ExpectationException pe) {
                     if (serverNotifier != null) {
-                        serverNotifier.log(time, "Expectation [" + exp.getName() + "] not met! Failed to map body content", pe.getCause());
+                        serverNotifier.log(time, port, "Expectation [" + exp.getName() + "] not met! Failed to map body content", pe.getCause());
                     }
                     return null;
                 }
@@ -238,7 +238,7 @@ public class ExpectationMatcher {
         return exp;
     }
 
-    private boolean doesNotMatchRequestAssertions(long time, Expectation exp, Map<String, Object> map) {
+    private boolean doesNotMatchRequestAssertions(long time, int port, Expectation exp, Map<String, Object> map) {
         if ((exp.getBody().getAsserts() == null) || exp.getBody().getAsserts().isEmpty()) {
             return false;
         }
@@ -246,14 +246,14 @@ public class ExpectationMatcher {
             Object actual = map.get(ass.getKey());
             if (actual == null) {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' Not Found");
+                    serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' Not Found");
                 }
                 return true;
             }
             if (!ass.getValue().equalsIgnoreCase("*")) {
                 if (doesNotMatchString(ass.getValue(), actual)) {
                     if (serverNotifier != null) {
-                        serverNotifier.log(time, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' != " + "'" + ass.getValue() + "'");
+                        serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' != " + "'" + ass.getValue() + "'");
                     }
                     return true;
                 }
@@ -290,7 +290,7 @@ public class ExpectationMatcher {
         return (!exp.equalsIgnoreCase(subject.toString()));
     }
 
-    private void logMap(long time, Map<String, Object> map) {
+    private void logMap(long time, int port, Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
         sb.append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
@@ -298,11 +298,11 @@ public class ExpectationMatcher {
         }
         sb.append(LS);
         if (serverNotifier != null) {
-            serverNotifier.log(time, sb.toString().trim());
+            serverNotifier.log(time, port, sb.toString().trim());
         }
     }
 
-    private void logResponse(long time, String resp, int statusCode, String id) {
+    private void logResponse(long time, int port, String resp, int statusCode, String id) {
         StringBuilder sb = new StringBuilder();
         sb.append("* ").append(id).append(' ').append(LS);
         sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
@@ -310,7 +310,7 @@ public class ExpectationMatcher {
         sb.append(resp).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
         if (serverNotifier != null) {
-            serverNotifier.log(time, sb.toString().trim());
+            serverNotifier.log(time, port, sb.toString().trim());
         }
     }
 

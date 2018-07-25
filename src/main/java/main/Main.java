@@ -76,39 +76,39 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void notifyAction(long time, Action action, String message) {
+    public static void notifyAction(long time, int port, Action action, String message) {
         if (!headless) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     for (ApplicationController ap : CONTROLLERS) {
-                        ap.notifyAction(time, action, message);
+                        ap.notifyAction(time, port, action, message);
                     }
                 }
             });
         } else {
-            Main.logFinal(time, action.name() + ":" + message);
+            Main.logFinal(time, port, action.name() + ":" + message);
         }
     }
 
-    public static void notifyOption(Option option, boolean selected, String message) {
+    public static void notifyOption(Option option, int port, boolean selected, String message) {
         if (!headless) {
             switch (option) {
                 case FILTER_HEADERS:
                     config.setIncludeHeaders(selected);
-                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case FILTER_BODY:
                     config.setIncludeBody(selected);
-                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case FILTER_EMPTY:
                     config.setIncludeEmpty(selected);
-                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
                 case TIME:
                     config.setShowTime(selected);
-                    notifyAction(System.currentTimeMillis(), Action.LOG_REFRESH, "");
+                    notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
                     break;
             }
         }
@@ -141,7 +141,7 @@ public class Main extends Application {
     }
 
     public static void closeApplication(boolean force) {
-        log(System.currentTimeMillis(), "Shutting down");
+        log(System.currentTimeMillis(), -1, "Shutting down");
         if (!headless) {
             if (ConfigData.writeFileName() != null) {
                 config.setX(mainStage.getX());
@@ -157,7 +157,7 @@ public class Main extends Application {
                             StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException io) {
                     if (!force) {
-                        Main.notifyAction(System.currentTimeMillis(), Action.CONFIG_SAVE_ERROR, io.toString());
+                        Main.notifyAction(System.currentTimeMillis(), -1, Action.CONFIG_SAVE_ERROR, io.toString());
                         return;
                     }
                 }
@@ -171,29 +171,29 @@ public class Main extends Application {
         }
     }
 
-    public static void log(long time, String message) {
+    public static void log(long time, int port, String message) {
         if (message != null) {
-            notifyAction(time, Action.LOG, message);
-            logFinal(time, message);
+            notifyAction(time, port, Action.LOG, message);
+            logFinal(time, port, message);
         }
     }
 
-    public static void log(long time, Throwable throwable) {
+    public static void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(time, Action.LOG, "ERROR:" + throwable.getMessage());
-            logFinal(time, "ERROR:" + throwable.getMessage());
+            notifyAction(time, port, Action.LOG, "ERROR:" + throwable.getMessage());
+            logFinal(time, port, "ERROR:" + throwable.getMessage());
         }
     }
 
-    public static void log(long time, String message, Throwable throwable) {
+    public static void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(time, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
-            logFinal(time, "ERROR:" + message + ": " + throwable.getMessage());
+            notifyAction(time, port, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
+            logFinal(time, port, "ERROR:" + message + ": " + throwable.getMessage());
         }
     }
 
-    public static void logFinal(long time, String message) {
-        System.out.println(getTimeStamp(time) + message);
+    public static void logFinal(long time, int port, String message) {
+        System.out.println(getTimeStamp(time) + (port <= 0?"":"["+port+"] ") + message);
     }
 
     public static ConfigData getConfig() {
@@ -267,7 +267,7 @@ public class Main extends Application {
             ServerManager.startAllServers();
             while (ServerManager.countServersRunning() > 0) {
                 Util.sleep(1000);
-                logFinal(System.currentTimeMillis(), "Servers running :" + ServerManager.countServersRunning());
+                logFinal(System.currentTimeMillis(), -1, "Servers running :" + ServerManager.countServersRunning());
             }
             System.exit(0);
         } else {
@@ -276,10 +276,10 @@ public class Main extends Application {
                     System.err.println("Default port is not defined");
                     System.exit(1);
                 }
-               config.setDefaultPort(ServerManager.ports()[0]);
+                config.setDefaultPort(ServerManager.ports()[0]);
             }
             if (!ServerManager.hasPort(config.getDefaultPort())) {
-                System.err.println("Default port ["+config.getDefaultPort()+"] is not listed in the servers "+ServerManager.ports());
+                System.err.println("Default port [" + config.getDefaultPort() + "] is not listed in the servers " + ServerManager.ports());
                 System.exit(1);
             }
             launch(args);

@@ -23,5 +23,5 @@ import common.Action;
  * @author stuart
  */
 public interface ApplicationController {
-    boolean notifyAction(long time, Action s, String message);
+    boolean notifyAction(long time, int port, Action s, String message);
 }

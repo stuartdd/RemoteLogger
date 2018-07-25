@@ -32,25 +32,25 @@ public class MainNotifier implements Notifier {
     }
 
     @Override
-    public void notifyAction(long time, Action action, String message) {
-        Main.notifyAction(time, action, message);
+    public void notifyAction(long time, int port, Action action, String message) {
+        Main.notifyAction(time, port, action, message);
     }
 
     @Override
-    public void log(long time, String message) {
+    public void log(long time, int port, String message) {
         if (verbose) {
-            Main.log(time, message);
+            Main.log(time, port, message);
         }
     }
 
     @Override
-    public void log(long time, Throwable throwable) {
-        Main.log(time, throwable);
+    public void log(long time, int port, Throwable throwable) {
+        Main.log(time, port, throwable);
     }
 
     @Override
-    public void log(long time, String message, Throwable throwable) {
-        Main.log(time, message, throwable);
+    public void log(long time, int port, String message, Throwable throwable) {
+        Main.log(time, port, message, throwable);
     }
 
 }

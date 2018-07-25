@@ -45,7 +45,7 @@ public class ServerThread extends Thread {
         expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
         if (expectationMatcher.hasNoExpectations()) {
             if (serverNotifier != null) {
-                serverNotifier.log(System.currentTimeMillis(), "Server on " + port + " does not have any expectations defined. 404 will be returned");
+                serverNotifier.log(System.currentTimeMillis(), port, "Server on " + port + " does not have any expectations defined. 404 will be returned");
             }
         }
     }
@@ -79,8 +79,8 @@ public class ServerThread extends Thread {
     private synchronized void newState(ServerState state, String additional) {
         serverState = state;
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), Action.SERVER_STATE, "");
-            serverNotifier.log(System.currentTimeMillis(), serverState + ". Port:" + port + (additional == null ? "" : ". " + additional));
+            serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, "");
+            serverNotifier.log(System.currentTimeMillis(), port, serverState + (additional == null ? "" : ". " + additional));
         }
     }
 

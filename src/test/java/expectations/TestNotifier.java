@@ -16,7 +16,6 @@
  */
 package expectations;
 
-
 import common.Action;
 import common.Notifier;
 import org.joda.time.DateTime;
@@ -28,25 +27,25 @@ import org.joda.time.DateTime;
 public class TestNotifier implements Notifier {
 
     @Override
-    public void notifyAction(long time, Action action, String message) {
+    public void notifyAction(long time, int port, Action action, String message) {
         System.out.println(getTimeStamp(time) + action.name() + " " + message);
     }
 
-    public void log(long time, String message) {
+    public void log(long time, int port, String message) {
         if (message != null) {
-            System.out.println(getTimeStamp(time) + message);
+            System.out.println(getTimeStamp(time) + "Port:" + port + " " + message);
         }
     }
 
-    public void log(long time, Throwable throwable) {
+    public void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "ERROR:" + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "Port:" + port + " ERROR:" + throwable.getMessage());
         }
     }
 
-    public void log(long time, String message, Throwable throwable) {
+    public void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "ERROR:" + message + ": " + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "Port:" + port + " ERROR:" + message + ": " + throwable.getMessage());
         }
     }
 

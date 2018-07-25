@@ -19,8 +19,8 @@ package common;
 import common.Action;
 
 public interface Notifier {
-    void notifyAction(long time, Action action, String message);
-    void log(long time, String message);
-    void log(long time, Throwable throwable);
-    void log(long time, String message, Throwable throwable);
+    void notifyAction(long time, int port, Action action, String message);
+    void log(long time, int port, String message);
+    void log(long time, int port, Throwable throwable);
+    void log(long time, int port, String message, Throwable throwable);
 }
