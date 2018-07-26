@@ -28,24 +28,27 @@ public class TestNotifier implements Notifier {
 
     @Override
     public void notifyAction(long time, int port, Action action, String message) {
-        System.out.println(getTimeStamp(time) + action.name() + " " + message);
+        if (action.equals(Action.SERVER_STATE)) {
+            return;
+        }
+        System.out.println(getTimeStamp(time) + "Port:" + port + " <test> " + action.name() + " " + message);
     }
 
     public void log(long time, int port, String message) {
         if (message != null) {
-            System.out.println(getTimeStamp(time) + "Port:" + port + " " + message);
+            System.out.println(getTimeStamp(time) + "Port:" + port + " <test> " + message);
         }
     }
 
     public void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "Port:" + port + " ERROR:" + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "Port:" + port + " <test> ERROR:" + throwable.getMessage());
         }
     }
 
     public void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "Port:" + port + " ERROR:" + message + ": " + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + "Port:" + port + " <test> ERROR:" + message + ": " + throwable.getMessage());
         }
     }
 

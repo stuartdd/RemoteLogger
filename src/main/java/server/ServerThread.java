@@ -41,7 +41,7 @@ public class ServerThread extends Thread {
         this.serverNotifier = serverNotifier;
         this.running = false;
         this.canRun = true;
-        newState(ServerState.SERVER_PENDING, null);
+        newState(ServerState.SERVER_PENDING, "");
         expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
         if (expectationMatcher.hasNoExpectations()) {
             if (serverNotifier != null) {
@@ -55,7 +55,7 @@ public class ServerThread extends Thread {
         running = true;
         HttpServer server;
         try {
-            newState(ServerState.SERVER_STARTING, null);
+            newState(ServerState.SERVER_STARTING, "");
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/control", new ControlHandler(port, expectationMatcher, serverNotifier));
             server.createContext("/", new ExpectationHandler(port, expectationMatcher, serverNotifier));

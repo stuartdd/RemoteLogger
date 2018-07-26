@@ -109,7 +109,7 @@ public class ExpectationMatcher {
         if (found != null) {
             try {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "Met " + found);
+                    serverNotifier.log(time, port, "Matched " + found);
                 }
                 if (found.getMethod().equalsIgnoreCase("get")) {
                     statusCode = 200;
@@ -122,7 +122,7 @@ public class ExpectationMatcher {
                             response = found.getResponse().getBody();
                         }
                     } else {
-                        response = locateResponseFile(found.getResponse().getTemplate(), map);
+                        response = locateResponseFile(port, found.getResponse().getTemplate(), map);
                     }
                     statusCode = found.getResponse().getStatus();
                     headers = found.getResponse().getHeaders();
@@ -179,6 +179,9 @@ public class ExpectationMatcher {
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
             if (found != null) {
+                if (serverNotifier != null) {
+                    serverNotifier.log(time, port, "----MATCH:'" + exp.getName() + "' This expectation was met!");
+                }
                 break;
             }
         }
@@ -191,25 +194,25 @@ public class ExpectationMatcher {
     private Expectation testExpectationMatches(long time, int port, Expectation exp, Map<String, Object> map1) {
         if (doesNotMatchStringOrNullExp(exp.getMethod(), map1.get("METHOD"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": METHOD:'" + exp.getMethod() + "' != '" + map1.get("METHOD") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' METHOD:'" + exp.getMethod() + "' != '" + map1.get("METHOD") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getPath(), map1.get("PATH"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getQuery(), map1.get("QUERY"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
             }
             return null;
         }
         if (doesNotMatchStringOrNullExp(exp.getBodyType(), map1.get("BODY-TYPE"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + " BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
             }
             return null;
         }
@@ -292,13 +295,17 @@ public class ExpectationMatcher {
 
     private void logMap(long time, int port, Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
-        sb.append(LS);
+        sb.append("REQUEST PROPERTIES: ").append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
-            sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
+            if (e.getKey().equals("BODY")) {
+                sb.append(e.getKey()).append('=').append("<-- Excluded. See elsewhere in the logs -->").append(NL);
+            } else {
+                sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
+            }
         }
-        sb.append(LS);
+        sb.append("REQUEST PROPERTIES: ").append(LS);
         if (serverNotifier != null) {
-            serverNotifier.log(time, port, sb.toString().trim());
+            serverNotifier.log(time, port, NL + sb.toString().trim());
         }
     }
 
@@ -310,11 +317,11 @@ public class ExpectationMatcher {
         sb.append(resp).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
         if (serverNotifier != null) {
-            serverNotifier.log(time, port, sb.toString().trim());
+            serverNotifier.log(time, port, NL + sb.toString().trim());
         }
     }
 
-    private String locateResponseFile(String fileName, Map map) {
+    private String locateResponseFile(int port, String fileName, Map map) {
         if (fileName == null) {
             throw new ExpectationException("File for Expectation is not defined", 500);
         }
@@ -325,26 +332,39 @@ public class ExpectationMatcher {
             Path p = Paths.get(path, file);
             if (Files.exists(p)) {
                 try {
+                    if (serverNotifier != null) {
+                        serverNotifier.log(System.currentTimeMillis(), port, "Template file found:    " + p.toString());
+                    }
                     return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
                 } catch (IOException ex) {
                     throw new ExpectationException("File [" + file + "] Not readable from file", 500, ex);
                 }
+            } else {
+                if (serverNotifier != null) {
+                    serverNotifier.log(System.currentTimeMillis(), port, "Template file NOT found:    " + p.toString());
+                }
             }
         }
         try {
-            return readResource(file, sb.toString());
+            return readResource(port, file, sb.toString());
         } catch (IOException ex) {
             throw new ExpectationException("File [" + file + "] Not readable from class path", 500, ex);
         }
     }
 
-    private static String readResource(String file, String list) throws IOException {
+    private String readResource(int port, String file, String list) throws IOException {
         InputStream is = ExpectationMatcher.class.getResourceAsStream(file);
         if (is == null) {
             is = ExpectationMatcher.class.getResourceAsStream("/" + file);
         }
         if (is == null) {
+            if (serverNotifier != null) {
+                serverNotifier.log(System.currentTimeMillis(), port, "Template resource NOT found:" + file);
+            }
             throw new ExpectationException("File [" + file + "] Not Found in paths [" + list + "] or on the class path", 404);
+        }
+        if (serverNotifier != null) {
+            serverNotifier.log(System.currentTimeMillis(), port, "Template resource found:    " + file);
         }
         StringBuilder sb = new StringBuilder();
         int content;

@@ -35,25 +35,25 @@ public class ClientNotifier implements Notifier {
     @Override
     public void notifyAction(long time, int port, Action action, String message) {
         if (verbose && (message != null) && (action != null)) {
-            System.out.println(getTimeStamp(time) + action.name() + " " + message);
+            System.out.println(getTimeStamp(time) + (port <= 0?"":" ["+port+"] ") + action.name() + " " + message);
         }
     }
 
     public void log(long time, int port, String message) {
         if (verbose && (message != null)) {
-            System.out.println(getTimeStamp(time) + "CLIENT: " + message);
+            System.out.println(getTimeStamp(time) + (port <= 0?"":" ["+port+"] ") + "CLIENT: " + message);
         }
     }
 
     public void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "CLIENT: " + "ERROR:" + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + (port <= 0?"":" ["+port+"] ") + "CLIENT: ERROR:" + throwable.getMessage());
         }
     }
 
     public void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
-            System.out.println(getTimeStamp(time) + "CLIENT: " + "ERROR:" + message + ": " + throwable.getMessage());
+            System.out.println(getTimeStamp(time) + (port <= 0?"":" ["+port+"] ") + "CLIENT: ERROR:" + message + ": " + throwable.getMessage());
         }
     }
 

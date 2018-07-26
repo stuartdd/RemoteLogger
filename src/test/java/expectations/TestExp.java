@@ -34,31 +34,31 @@ import server.ServerConfig;
  */
 public class TestExp {
 
-    private static final String POST_RESPONSE_JSON = "{\n"
+    private static final String POST_RESPONSE_JSON = Util.cleanString("{\n"
             + "  \"showTime\" : \"/bea\",\n"
             + "  \"x\" : 788.0,\n"
             + "  \"y\" : 228.0,\n"
             + "  \"width\" : 897.0,\n"
             + "  \"height\" : 863.0\n"
-            + "}";
+            + "}");
 
-    private static final String POST_RESPONSE_XML = "<bottom>\n"
+    private static final String POST_RESPONSE_XML = Util.cleanString("<bottom>\n"
             + "    <FlowPane prefHeight=\"25.0\" prefWidth=\"600.0\" BorderPane.alignment=\"CENTER\">\n"
             + "        <children>\n"
             + "            <Separator valueFromRequestXml=\"UNAVAILABLE\" prefHeight=\"31.0\" prefWidth=\"15.0\" />\n"
             + "            <Label prefHeight=\"22.0\" prefWidth=\"539.0\" text=\"Label\" />\n"
             + "        </children>\n"
             + "    </FlowPane>\n"
-            + "</bottom>";
+            + "</bottom>");
 
-    private static final String GET_RESPONSE = "Method GET.\n"
+    private static final String GET_RESPONSE = Util.cleanString("Method GET.\n"
             + "URL:'/grb'.\n"
             + "HOST:localhost:1999.\n"
             + "Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.\n"
-            + "xxx:%{xxx}";
+            + "xxx:%{xxx}");
 
     private static final int PORT = 1999;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
 
     @BeforeClass
     public static void beforeClass() {
@@ -75,14 +75,14 @@ public class TestExp {
     @Test
     public void testPostJson() {
         ClientResponse r = CLIENT.send("test/post/json", Util.readResource("config/testPostData.json"), Client.Method.POST);
-        assertEquals(POST_RESPONSE_JSON, r.getBody());
+        assertEquals(POST_RESPONSE_JSON, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
 
     @Test
     public void testPostXml() {
         ClientResponse r = CLIENT.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST);
-        assertEquals(POST_RESPONSE_XML, r.getBody());
+        assertEquals(POST_RESPONSE_XML, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
 
@@ -103,7 +103,7 @@ public class TestExp {
     @Test
     public void testGrb() {
         ClientResponse r = CLIENT.send("grb", null, Client.Method.GET);
-        assertEquals(GET_RESPONSE, r.getBody());
+        assertEquals(GET_RESPONSE, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
 

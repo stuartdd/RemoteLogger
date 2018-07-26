@@ -135,4 +135,18 @@ public class Util {
             System.out.print("");
         }
     }
+
+    public static String cleanString(String in) {
+        if (in == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (char c : in.trim().toCharArray()) {
+            if ((c >= ' ') && (c < 127)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
 }
