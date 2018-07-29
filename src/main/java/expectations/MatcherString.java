@@ -15,8 +15,10 @@ public class MatcherString {
     private static final int ESCAPE = 1;
     private static final int END = 2;
 
-    private static char ESCAPE_CHAR = '\\';
-    private static char ANY_CHAR = '*';
+    private static final char ESCAPE_CHAR = '\\';
+    private static final char ANY_CHAR = '*';
+
+ 
     private enum TYPE {
         start, mid, end, any, exact
     };
@@ -25,6 +27,22 @@ public class MatcherString {
     private final String start;
     private final String end;
 
+   boolean match(String with) {
+        switch (type) {
+            case any:
+                return true;
+            case exact:
+                return with.equals(start);
+            case start:
+                return with.startsWith(start);
+            case end:
+                return with.endsWith(end);
+             case mid:
+                return (with.startsWith(start) && with.endsWith(end)); 
+        }
+        return false;
+    }
+        
     public MatcherString(String value) {
         if (value == null) {
             this.type = TYPE.any;
@@ -39,6 +57,7 @@ public class MatcherString {
             } else {
                 StringBuilder st = new StringBuilder();
                 StringBuilder en = new StringBuilder();
+                boolean split = false;
                 int flag = START;
                 for (char c : value.toCharArray()) {
                     switch (flag) {
@@ -48,6 +67,7 @@ public class MatcherString {
                             } else {
                                 if (c == ANY_CHAR) {
                                     flag = END;
+                                    split = true;
                                 } else {
                                     st.append(c);
                                 }
@@ -55,7 +75,9 @@ public class MatcherString {
                             break;
                         case ESCAPE:
                             vaLen--;
-                            flag = START;
+                            if (c != ESCAPE_CHAR) {
+                                flag = START;
+                            }
                             st.append(c);
                             break;
                         default:
@@ -67,7 +89,7 @@ public class MatcherString {
 
                 if (stLen == vaLen) {
                     this.type = TYPE.exact;
-                    this.start = value;
+                    this.start = st.toString();
                     this.end = null;
                 } else {
                     if (stLen == 0) {
@@ -82,7 +104,7 @@ public class MatcherString {
                         }
                     } else {
                         if (enLen == 0) {
-                            this.type = TYPE.start;
+                            this.type = (split?TYPE.start:TYPE.exact);
                             this.start = st.toString();
                             this.end = null;
                         } else {
@@ -96,10 +118,6 @@ public class MatcherString {
         }
     }
 
-    public static void setEscapeChar(char newChar) {
-        ESCAPE_CHAR = newChar;
-    }
-    
     @Override
     public String toString() {
         return type.name() + "[" + (start + '|' + end) + ']';

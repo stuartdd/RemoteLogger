@@ -6,7 +6,9 @@
 package expectations;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import json.JsonUtils;
 
@@ -16,7 +18,7 @@ import json.JsonUtils;
  */
 public class TestData {
 
-    Map<String, String> map = new HashMap<>();
+    Map<String, List<String>> map = new HashMap<>();
 
     public static TestData load(String fileName) {
         InputStream is = TestData.class.getResourceAsStream(fileName);
@@ -27,19 +29,28 @@ public class TestData {
         return td;
     }
 
-    public Map<String, String> getMap() {
+    public Map<String, List<String>> getMap() {
         return map;
     }
 
-    public void setMap(Map<String, String> map) {
+    public void setMap(Map<String, List<String>> map) {
         this.map = map;
     }
 
-    public String map(String key) {
-        String val = map.get(key);
+    public List<String>  keys() {
+        List<String>  l = new ArrayList<>();
+        for (String s:map.keySet()) {
+            l.add(s);
+        }
+        return l;
+    }
+    
+    public List map(String key) {
+        List<String> val = map.get(key);
         if (val == null) {
             throw new TestDataException("KEY:" + key + " Not found");
         }
         return val;
     }
 }
+ 

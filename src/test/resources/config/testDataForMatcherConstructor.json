@@ -1,0 +1,21 @@
+{"map": 
+{
+"mid_003":["mid[H|I]", "H*I"],
+"mid_003":["mid[ HI | IH ]", " HI * IH "],
+"mid_002":["mid[HI|IH]", "HI*IH"],
+"mid_001":["mid[HI | IH]", "HI * IH"],
+"end_003":["end[null| HI ]", "* HI "],
+"end_002":["end[null|HI]", "*HI"],
+"end_001":["end[null|  ]", "*  "],
+"start_002":["start[  |null]", "  *"],
+"start_001":["start[HI|null]", "HI*"],
+"exact_006":["exact[  |null]", "  "],
+"exact_005":["exact[ HI |null]", " HI "],
+"exact_004":["exact[ \\*b |null]", " \\\\*b "],
+"exact_003":["exact[a\\*b|null]", "a\\\\*b"],
+"exact_002":["exact[a*b|null]", "a\\*b"],
+"exact_001":["exact[|null]", ""],
+"any_002":["any[null|null]"],
+"any_001":["any[null|null]", "*"]
+}
+}

@@ -5,6 +5,7 @@
  */
 package expectations;
 
+import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -15,64 +16,52 @@ import org.junit.Before;
  */
 public class MatcherStringTest {
 
-    private TestData td;
+    private TestData tdConstr;
+    private TestData tdMatch;
+
     @Before
     public void before() {
-        td = TestData.load("/config/testData.json");
+        tdConstr = TestData.load("/config/testDataForMatcherConstructor.json");
+        tdMatch = TestData.load("/config/testDataForMatch.json");
+    }
+
+    private void testConstruct(String data) {
+        List<String> testData = tdConstr.map(data);
+        String actual;
+        if (testData.size() == 1) {
+            actual = (new MatcherString(null)).toString();
+            System.out.println("Test:" + data + " Expect[" + testData.get(0) + " for[null] actual[" + actual + "]");
+        } else {
+            actual = (new MatcherString(testData.get(1))).toString();
+            System.out.println("Test:" + data + " Expect[" + testData.get(0) + " for[" + testData.get(1) + "] actual[" + actual + "]");
+        }
+        assertEquals(testData.get(0), actual);
+    }
+
+    private void testMatch(String data) {
+        List<String> testData = tdMatch.map(data);
+        MatcherString ms = new MatcherString(testData.get(0));
+        for (int i=1; i<testData.size(); i++) {
+            if (data.startsWith("miss")) {
+                assertFalse("["+testData.get(0) + "] Should NOT match["+testData.get(i)+"]", ms.match(testData.get(i)));
+            } else {
+                assertTrue("["+testData.get(0) + "] Should match["+testData.get(i)+"]", ms.match(testData.get(i)));
+            }
+        }
+     }
+
+    @Test
+    public void testConstructor() {
+        for (String testKey : tdConstr.keys()) {
+            testConstruct(testKey);
+        }
     }
     
     @Test
-    public void testConstructor() {
-        assertEquals("exact[*|null]", (new MatcherString("\\*")).toString());
-        assertEquals("exact[ \\*\\a \\n|null]", (new MatcherString(" \\*\\a \\n")).toString());
-    }
-
-    @Test
-    public void testConstructorsAny() {
-        assertEquals("any[null|null]", (new MatcherString(null)).toString());
-        assertEquals("any[null|null]", (new MatcherString("*")).toString());
-    }
-
-    @Test
-    public void testConstructorsExact() {
-        assertEquals("exact[ \\*\\a|null]", (new MatcherString(" \\*\\a")).toString());
-        assertEquals("exact[ \\\\ a|null]", (new MatcherString(" \\\\ a")).toString());
-        assertEquals("exact[  |null]", (new MatcherString("  ")).toString());
-        assertEquals("exact[ |null]", (new MatcherString(" ")).toString());
-        assertEquals("exact[|null]", (new MatcherString("")).toString());
-        assertEquals("exact[a  |null]", (new MatcherString("a  ")).toString());
-        assertEquals("exact[a |null]", (new MatcherString("a ")).toString());
-        assertEquals("exact[a|null]", (new MatcherString("a")).toString());
-        assertEquals("exact[  a|null]", (new MatcherString("  a")).toString());
-        assertEquals("exact[ a|null]", (new MatcherString(" a")).toString());
-    }
-
-    @Test
-    public void testConstructorsStart() {
-        assertEquals("MatcherString{type=start, match=a}", (new MatcherString("a*")).toString());
-        assertEquals("MatcherString{type=start, match= This }", (new MatcherString(" This *")).toString());
-        assertEquals("MatcherString{type=start, match= This}", (new MatcherString(" This*")).toString());
-        assertEquals("MatcherString{type=start, match=This}", (new MatcherString("This*")).toString());
-        assertEquals("MatcherString{type=start, match=Th\nis}", (new MatcherString("Th\nis*")).toString());
-    }
-
-    @Test
-    public void testConstructorsEnd() {
-        assertEquals("MatcherString{type=end, match=a}", (new MatcherString("*a")).toString());
-        assertEquals("MatcherString{type=end, match= This }", (new MatcherString("* This ")).toString());
-        assertEquals("MatcherString{type=end, match= This}", (new MatcherString("* This")).toString());
-        assertEquals("MatcherString{type=end, match=This}", (new MatcherString("*This")).toString());
-        assertEquals("MatcherString{type=end, match=Th\nis}", (new MatcherString("*Th\nis")).toString());
-    }
-
-    @Test
-    public void testConstructorsMid() {
-        assertEquals("MatcherString{type=mid, match=a}", (new MatcherString(" *a")).toString());
-        assertEquals("MatcherString{type=mid, match= This }", (new MatcherString(" * This ")).toString());
-        assertEquals("MatcherString{type=mid, match= This }", (new MatcherString(" This * ")).toString());
-        assertEquals("MatcherString{type=mid, match= This}", (new MatcherString("This * This")).toString());
-        assertEquals("MatcherString{type=mid, match=This}", (new MatcherString("This*This")).toString());
-        assertEquals("MatcherString{type=mid, match=Th\nis}", (new MatcherString("This*Th\nis")).toString());
+    public void testMatcher() {
+        for (String testKey : tdMatch.keys()) {
+            testMatch(testKey);
+        }
     }
 
 }
