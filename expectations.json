@@ -15,6 +15,15 @@
             }
         },
         {
+            "name": "Get Country Name",
+            "method": "get",
+            "path": "/services.groupkt.com/country/get/iso2code/IN",
+            "response": {
+                "status" : 200,
+                "body": "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n"
+            }
+        },
+        {
             "name": "Test Post Response Empty",
             "method": "post",
             "path": "/pre"
