@@ -1,5 +1,6 @@
 {"map": 
 {
+"cont_001":["contains[start|null]", "*start*"],
 "mid_003":["mid[H|I]", "H*I"],
 "mid_003":["mid[ HI | IH ]", " HI * IH "],
 "mid_002":["mid[HI|IH]", "HI*IH"],

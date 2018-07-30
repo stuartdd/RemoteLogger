@@ -1,6 +1,7 @@
 {
     "map": 
             {
+                "cont_005": ["*start*", "this is the start.", "start", "starting"],
                 "miss_005": [" ab*cd ", "ab*cd ", " ab cd", "ab x\ny cd", " ab*cb "],
                 "mid_005": [" ab*cd ", " abcd ", " ab cd ", " ab x\ny cd "],
                 "miss_004": ["* ab ", "Any*Charsab ", " ab", "a\nab "],

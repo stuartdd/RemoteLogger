@@ -18,16 +18,15 @@ public class MatcherString {
     private static final char ESCAPE_CHAR = '\\';
     private static final char ANY_CHAR = '*';
 
- 
     private enum TYPE {
-        start, mid, end, any, exact
+        start, mid, end, any, exact, contains
     };
 
     private final TYPE type;
     private final String start;
     private final String end;
 
-   boolean match(String with) {
+    boolean match(String with) {
         switch (type) {
             case any:
                 return true;
@@ -37,12 +36,14 @@ public class MatcherString {
                 return with.startsWith(start);
             case end:
                 return with.endsWith(end);
-             case mid:
-                return (with.startsWith(start) && with.endsWith(end)); 
+            case contains:
+                return (with.contains(start));
+            case mid:
+                return (with.startsWith(start) && with.endsWith(end));
         }
         return false;
     }
-        
+
     public MatcherString(String value) {
         if (value == null) {
             this.type = TYPE.any;
@@ -55,62 +56,68 @@ public class MatcherString {
                 this.start = value;
                 this.end = null;
             } else {
-                StringBuilder st = new StringBuilder();
-                StringBuilder en = new StringBuilder();
-                boolean split = false;
-                int flag = START;
-                for (char c : value.toCharArray()) {
-                    switch (flag) {
-                        case START:
-                            if (c == ESCAPE_CHAR) {
-                                flag = ESCAPE;
-                            } else {
-                                if (c == ANY_CHAR) {
-                                    flag = END;
-                                    split = true;
-                                } else {
-                                    st.append(c);
-                                }
-                            }
-                            break;
-                        case ESCAPE:
-                            vaLen--;
-                            if (c != ESCAPE_CHAR) {
-                                flag = START;
-                            }
-                            st.append(c);
-                            break;
-                        default:
-                            en.append(c);
-                    }
-                }
-                int stLen = st.length();
-                int enLen = en.length();
-
-                if (stLen == vaLen) {
-                    this.type = TYPE.exact;
-                    this.start = st.toString();
+                if ((value.charAt(0) == ANY_CHAR) && (value.charAt(vaLen - 1) == '*') && (vaLen>1)) {
+                    this.type = TYPE.contains;
+                    this.start = value.substring(1, vaLen-1);
                     this.end = null;
                 } else {
-                    if (stLen == 0) {
-                        if (enLen == 0) {
-                            this.type = TYPE.any;
-                            this.start = null;
-                            this.end = null;
-                        } else {
-                            this.type = TYPE.end;
-                            this.start = null;
-                            this.end = en.toString();
+                    StringBuilder st = new StringBuilder();
+                    StringBuilder en = new StringBuilder();
+                    boolean split = false;
+                    int flag = START;
+                    for (char c : value.toCharArray()) {
+                        switch (flag) {
+                            case START:
+                                if (c == ESCAPE_CHAR) {
+                                    flag = ESCAPE;
+                                } else {
+                                    if (c == ANY_CHAR) {
+                                        flag = END;
+                                        split = true;
+                                    } else {
+                                        st.append(c);
+                                    }
+                                }
+                                break;
+                            case ESCAPE:
+                                vaLen--;
+                                if (c != ESCAPE_CHAR) {
+                                    flag = START;
+                                }
+                                st.append(c);
+                                break;
+                            default:
+                                en.append(c);
                         }
+                    }
+                    int stLen = st.length();
+                    int enLen = en.length();
+
+                    if (stLen == vaLen) {
+                        this.type = TYPE.exact;
+                        this.start = st.toString();
+                        this.end = null;
                     } else {
-                        if (enLen == 0) {
-                            this.type = (split?TYPE.start:TYPE.exact);
-                            this.start = st.toString();
-                            this.end = null;
+                        if (stLen == 0) {
+                            if (enLen == 0) {
+                                this.type = TYPE.any;
+                                this.start = null;
+                                this.end = null;
+                            } else {
+                                this.type = TYPE.end;
+                                this.start = null;
+                                this.end = en.toString();
+                            }
                         } else {
-                            this.type = TYPE.mid;
-                            this.start = st.toString();
-                            this.end = en.toString();
+                            if (enLen == 0) {
+                                this.type = (split ? TYPE.start : TYPE.exact);
+                                this.start = st.toString();
+                                this.end = null;
+                            } else {
+                                this.type = TYPE.mid;
+                                this.start = st.toString();
+                                this.end = en.toString();
+                            }
                         }
                     }
                 }
