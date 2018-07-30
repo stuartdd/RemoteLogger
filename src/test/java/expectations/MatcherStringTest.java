@@ -40,15 +40,23 @@ public class MatcherStringTest {
 
     private void testMatch(String data) {
         List<String> testData = tdMatch.map(data);
-        MatcherString ms = new MatcherString(testData.get(0));
-        for (int i=1; i<testData.size(); i++) {
+        String matchString = testData.get(0);
+        if (matchString.equals("null")) {
+            matchString = null;
+        }
+        MatcherString ms = new MatcherString(matchString);
+        for (int i = 1; i < testData.size(); i++) {
+            String matchValue = testData.get(i);
+            if (matchValue.equals("null")) {
+                matchValue = null;
+            }
             if (data.startsWith("miss")) {
-                assertFalse("["+testData.get(0) + "] Should NOT match["+testData.get(i)+"]", ms.match(testData.get(i)));
+                assertFalse("[" + matchString + "] Should NOT match[" + matchValue + "]", ms.match(matchValue));
             } else {
-                assertTrue("["+testData.get(0) + "] Should match["+testData.get(i)+"]", ms.match(testData.get(i)));
+                assertTrue("[" + matchString + "] Should match[" + matchValue + "]", ms.match(matchValue));
             }
         }
-     }
+    }
 
     @Test
     public void testConstructor() {
@@ -56,7 +64,7 @@ public class MatcherStringTest {
             testConstruct(testKey);
         }
     }
-    
+
     @Test
     public void testMatcher() {
         for (String testKey : tdMatch.keys()) {

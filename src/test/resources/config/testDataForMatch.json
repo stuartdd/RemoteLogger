@@ -1,6 +1,15 @@
-{"map": 
 {
-"any_001":["*", "abc", "" ," ", "\\*"],
-"any_001":["*", "abc", "" ," ", "\\*"]
-}
+    "map": 
+            {
+                "miss_005": [" ab*cd ", "ab*cd ", " ab cd", "ab x\ny cd", " ab*cb "],
+                "mid_005": [" ab*cd ", " abcd ", " ab cd ", " ab x\ny cd "],
+                "miss_004": ["* ab ", "Any*Charsab ", " ab", "a\nab "],
+                "end_004": ["* ab ", "Any*Chars ab ", " ab ", "a\n ab "],
+                "miss_001": [" ab *", "ab Any*Chars", " ab", " ab/n"],
+                "start_001": [" ab *", " ab Any*Chars", " ab ", " ab /n"],
+                "miss_001": ["ab\\*", "ab\\*"],
+                "exact_001": ["ab\\*", "ab*"],
+                "any_002": ["null", "abc", "", " ", "\\*", "null"],
+                "any_001": ["*", "abc", "", " ", "\\*"]
+            }
 }
