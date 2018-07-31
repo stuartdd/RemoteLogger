@@ -82,25 +82,6 @@ public class ExpectationMatcher {
         }
     }
 
-    public static void respond(HttpExchange he, int status, String response) {
-        OutputStream os = he.getResponseBody();
-        try {
-            he.sendResponseHeaders(status, response.length());
-            os.write(response.getBytes());
-            os.flush();
-        } catch (IOException ex) {
-            throw new ServerException("Failed to write '" + response + "' to output stream ", status, ex);
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException ex) {
-                    throw new ServerException("Failed to close output stream ", status, ex);
-                }
-            }
-        }
-    }
-
     public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map) {
         String response = "Not Found";
         int statusCode = 404;
@@ -110,9 +91,6 @@ public class ExpectationMatcher {
             try {
                 if (serverNotifier != null) {
                     serverNotifier.log(time, port, "MATCHED " + found);
-                }
-                if (found.getMethod().equalsIgnoreCase("get")) {
-                    statusCode = 200;
                 }
                 if (found.getResponse() != null) {
                     if (Util.isEmpty(found.getResponse().getTemplate())) {
@@ -153,9 +131,33 @@ public class ExpectationMatcher {
         }
         respond(he, statusCode, response);
     }
+    
+    public static void respond(HttpExchange he, int status, String response) {
+        OutputStream os = he.getResponseBody();
+        try {
+            he.sendResponseHeaders(status, response.length());
+            os.write(response.getBytes());
+            os.flush();
+        } catch (IOException ex) {
+            throw new ServerException("Failed to write '" + response + "' to output stream ", status, ex);
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException ex) {
+                    throw new ServerException("Failed to close output stream ", status, ex);
+                }
+            }
+        }
+    }
+
 
     public Expectations getExpectations() {
         return expectations;
+    }
+
+    public boolean hasNoExpectations() {
+        return ((expectations == null) || (expectations.getExpectations().isEmpty()));
     }
 
     private Expectation findMatchingExpectation(long time, int port, Map<String, Object> map) {
@@ -172,7 +174,7 @@ public class ExpectationMatcher {
             logMap(time, port, map, "REQUEST PROPERTIES");
         }
 
-        Expectation found = null;
+        Expectation found;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
             if (found != null) {
@@ -191,7 +193,7 @@ public class ExpectationMatcher {
         }
         if (doesNotMatchStringOrNullExp(exp.getBodyType(), map1.get("BODY-TYPE"))) {
             if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' BODY-TYPE:'" + exp.getBodyType() + "' != '" + map1.get("BODY-TYPE") + "'");
             }
             return null;
         }
@@ -270,7 +272,7 @@ public class ExpectationMatcher {
 
     private void logMap(long time, int port, Map<String, Object> map, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append(id + ": ").append(LS);
+        sb.append(id).append(": ").append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
             if (e.getKey().equals("BODY")) {
                 sb.append(e.getKey()).append('=').append("<-- Excluded. See elsewhere in the logs -->").append(NL);
@@ -278,7 +280,7 @@ public class ExpectationMatcher {
                 sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
             }
         }
-        sb.append(id + ": ").append(LS);
+        sb.append(id).append(": ").append(LS);
         if (serverNotifier != null) {
             serverNotifier.log(time, port, NL + sb.toString().trim());
         }
@@ -347,10 +349,6 @@ public class ExpectationMatcher {
             sb.append((char) content);
         }
         return sb.toString();
-    }
-
-    public boolean hasNoExpectations() {
-        return ((expectations == null) || (expectations.getExpectations().isEmpty()));
     }
 
     private void reloadDefinitions(long time, int port) {

@@ -44,17 +44,18 @@ public class ControlHandler implements HttpHandler {
                 serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, "Server on port "+port+" is shutting down");
             }
             ServerManager.stopServer(port);
+            
             String response = "Server on port "+port+" will stop";
             he.sendResponseHeaders(200, response.length());
-            OutputStream os = he.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            try (OutputStream os = he.getResponseBody()) {
+                os.write(response.getBytes());
+            }
         } else {
             String response = "control/?";
             he.sendResponseHeaders(404, response.length());
-            OutputStream os = he.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            try (OutputStream os = he.getResponseBody()) {
+                os.write(response.getBytes());
+            }
         }
     }
 }
