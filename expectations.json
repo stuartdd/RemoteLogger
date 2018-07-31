@@ -4,10 +4,8 @@
             "name": "TestPost XML body",
             "method": "post",
             "path": "/test/post/xml",
-            "body": {
-                "asserts": {
-                    "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
-                }
+            "asserts": {
+                "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
             },
             "response": {
                 "status": 200,
@@ -19,7 +17,7 @@
             "method": "get",
             "path": "/services.groupkt.com/country/get/iso2code/IN",
             "response": {
-                "status" : 200,
+                "status": 200,
                 "body": "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n"
             }
         },
@@ -38,9 +36,13 @@
             "method": "get",
             "path": "/grb",
             "response": {
-                "status" : 200,
+                "status": 200,
                 "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
-                "headers" : {"Accept":"%{Accept}", "Connection":"%{Connection}", "zzz":"%{zzz}"}
+                "headers": {
+                    "Accept": "%{Accept}",
+                    "Connection": "%{Connection}",
+                    "zzz": "%{zzz}"
+                }
             }
         }
     ],

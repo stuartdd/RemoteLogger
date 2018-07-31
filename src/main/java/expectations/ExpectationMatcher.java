@@ -109,7 +109,7 @@ public class ExpectationMatcher {
         if (found != null) {
             try {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "Matched " + found);
+                    serverNotifier.log(time, port, "MATCHED " + found);
                 }
                 if (found.getMethod().equalsIgnoreCase("get")) {
                     statusCode = 200;
@@ -135,9 +135,6 @@ public class ExpectationMatcher {
                     response = "Response is undefined";
                 }
                 map.put("STATUS", "" + statusCode);
-                if (map.get("INFO.BodyMapped").equals("false")) {
-                    loadPropertiesFromBody(map, (String) map.get("BODY"));
-                }
                 response = Template.parse(response, map, true);
                 logResponse(time, port, response, statusCode, "RESP");
             } catch (ExpectationException ee) {
@@ -170,20 +167,19 @@ public class ExpectationMatcher {
         }
         reloadDefinitions(time, port);
 
+        loadPropertiesFromBody(map, (String) map.get("BODY"));
+        if (expectations.isListMap() && (serverNotifier != null)) {
+            logMap(time, port, map, "REQUEST PROPERTIES");
+        }
+
         Expectation found = null;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
             if (found != null) {
-                if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "----MATCH:'" + exp.getName() + "' This expectation was met!");
-                }
-                break;
+                return found;
             }
         }
-        if (expectations.isListMap()) {
-            logMap(time, port, map);
-        }
-        return found;
+        return null;
     }
 
     private Expectation testExpectationMatches(long time, int port, Expectation exp, Map<String, Object> map1) {
@@ -206,15 +202,7 @@ public class ExpectationMatcher {
             return null;
         }
         if ((exp.getAsserts() != null) && (!exp.getAsserts().isEmpty())) {
-            try {
-                loadPropertiesFromBody(map1, (String) map1.get("BODY"));
-                if (doesNotMatchAllAssertions(time, port, exp, map1)) {
-                    return null;
-                }
-            } catch (ExpectationException pe) {
-                if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "Expectation [" + exp.getName() + "] not met! Failed to map body content", pe.getCause());
-                }
+            if (doesNotMatchAllAssertions(time, port, exp, map1)) {
                 return null;
             }
         }
@@ -223,7 +211,6 @@ public class ExpectationMatcher {
 
     private void loadPropertiesFromBody(Map map, String bodyTrimmed) {
         if ((bodyTrimmed == null) || (bodyTrimmed.isEmpty())) {
-            map.put("INFO.BodyMapped", "empty");
             return;
         }
         BodyType bodyType = (BodyType) map.get("BODY-TYPE");
@@ -232,7 +219,6 @@ public class ExpectationMatcher {
         for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
             map.put(bodyTypeName + "." + ent.getKey(), ent.getValue());
         }
-        map.put("INFO.BodyMapped", "true");
     }
 
     private boolean doesNotMatchAllAssertions(long time, int port, Expectation exp, Map<String, Object> map) {
@@ -240,17 +226,15 @@ public class ExpectationMatcher {
             Object actual = map.get(ass.getKey());
             if (actual == null) {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' Not Found");
+                    serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "': ASSERT:' " + ass.getKey() + "' Not Found");
                 }
                 return true;
             }
-            if (!ass.getValue().equalsIgnoreCase("*")) {
-                if (doesNotMatchString(ass.getValue(), actual)) {
-                    if (serverNotifier != null) {
-                        serverNotifier.log(time, port, "MIS-MATCH:" + exp.getName() + ": ASSERT:'" + ass.getKey() + "' != " + "'" + ass.getValue() + "'");
-                    }
-                    return true;
+            if (!exp.assertMatch(ass.getKey(), actual.toString())) {
+                if (serverNotifier != null) {
+                    serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "': ASSERT:' " + ass.getKey() + "'='" + ass.getValue() + "'. Does not match '" + actual + "'");
                 }
+                return true;
             }
         }
         return false;
@@ -284,9 +268,9 @@ public class ExpectationMatcher {
         return (!exp.equalsIgnoreCase(subject.toString()));
     }
 
-    private void logMap(long time, int port, Map<String, Object> map) {
+    private void logMap(long time, int port, Map<String, Object> map, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append("REQUEST PROPERTIES: ").append(LS);
+        sb.append(id + ": ").append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
             if (e.getKey().equals("BODY")) {
                 sb.append(e.getKey()).append('=').append("<-- Excluded. See elsewhere in the logs -->").append(NL);
@@ -294,7 +278,7 @@ public class ExpectationMatcher {
                 sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
             }
         }
-        sb.append("REQUEST PROPERTIES: ").append(LS);
+        sb.append(id + ": ").append(LS);
         if (serverNotifier != null) {
             serverNotifier.log(time, port, NL + sb.toString().trim());
         }
@@ -302,7 +286,7 @@ public class ExpectationMatcher {
 
     private void logResponse(long time, int port, String resp, int statusCode, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append("* ").append(id).append(' ').append(LS);
+        sb.append("**").append(id).append(' ').append(LS);
         sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
         sb.append(resp).append(NL);

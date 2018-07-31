@@ -17,6 +17,7 @@
 package expectations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,6 +31,9 @@ public class Expectation {
     private String path;
     private String bodyType;
     private Map<String, String> asserts;
+
+    @JsonIgnore
+    private Map<String, StringMatcher> stringMatchers;
 
     private ResponseContent response;
 
@@ -71,8 +75,17 @@ public class Expectation {
 
     public void setAsserts(Map<String, String> asserts) {
         this.asserts = asserts;
+        this.stringMatchers = mapAssertsToStringMatchers(asserts);
     }
-
+    
+    public boolean assertMatch(String key, String value) {
+        StringMatcher sm = stringMatchers.get(key);
+        if (sm == null) {
+            return false;
+        }
+        return sm.match(value);
+    }
+    
     public ResponseContent getResponse() {
         return response;
     }
@@ -92,6 +105,14 @@ public class Expectation {
     @Override
     public String toString() {
         return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response == null ? "Undefined" : response) + '}';
+    }
+
+    private Map<String, StringMatcher> mapAssertsToStringMatchers(Map<String, String> stringAsserts) {
+        Map<String, StringMatcher> map = new HashMap<>();
+        for (Map.Entry<String, String> e:stringAsserts.entrySet()) {
+            map.put(e.getKey(), new StringMatcher(e.getValue()));
+        }
+        return map;
     }
 
 }

@@ -35,7 +35,7 @@ public class TestNotifier implements Notifier {
     }
 
     public void log(long time, int port, String message) {
-        if (message != null) {
+        if ((message != null) || (message.trim().length() >0)) {
             System.out.println(getTimeStamp(time) + "Port:" + port + " <test> " + message);
         }
     }

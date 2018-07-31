@@ -5,7 +5,7 @@
             "method": "post",
             "path": "/test/post/xml",
             "asserts": {
-                "XML.BorderPane.center.TabPane.tabs.Tab[1].(text)": "Loggs"
+                "XML.BorderPane.center.TabPane.tabs.Tab[1].(text)": "*ggs"
             },
             "response": {
                 "status": 200,
