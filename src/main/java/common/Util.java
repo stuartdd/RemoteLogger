@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -149,4 +150,20 @@ public class Util {
         return sb.toString();
     }
 
+    public static List<String> split(String s, char delim) {
+        StringBuilder sb = new StringBuilder();
+        List<String> list = new ArrayList<>();
+        for (char c : s.toCharArray()) {
+            if (c == delim) {
+                list.add(sb.toString());
+                sb.setLength(0);
+            } else {
+                sb.append(c);
+            }
+        }
+        if (sb.length() > 0) {
+            list.add(sb.toString());
+        }
+        return list;
+    }
 }

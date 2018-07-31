@@ -16,19 +16,26 @@
  */
 package expectations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Map;
+
 /**
  *
  * @author 802996013
  */
 public class Expectation {
+
     private String name;
     private String method;
     private String path;
-    private String query;
     private String bodyType;
-    private RequestContent body;
+    private Map<String, String> asserts;
+
     private ResponseContent response;
- 
+
+    @JsonIgnore
+    private MultiStringMatch multiPathMatcher;
+
     public String getName() {
         return name;
     }
@@ -51,23 +58,19 @@ public class Expectation {
 
     public void setPath(String path) {
         this.path = path;
+        this.multiPathMatcher = new MultiStringMatch(path, '/');
     }
 
-
-    public String getQuery() {
-        return query;
+    public boolean multiPathMatch(Object path) {
+        return multiPathMatcher.match(path);
     }
 
-    public void setQuery(String query) {
-        this.query = query;
+    public Map<String, String> getAsserts() {
+        return asserts;
     }
 
-    public RequestContent getBody() {
-        return body;
-    }
-
-    public void setBody(RequestContent body) {
-        this.body = body;
+    public void setAsserts(Map<String, String> asserts) {
+        this.asserts = asserts;
     }
 
     public ResponseContent getResponse() {
@@ -88,7 +91,7 @@ public class Expectation {
 
     @Override
     public String toString() {
-        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response==null?"Undefined":response)  + '}';
+        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response == null ? "Undefined" : response) + '}';
     }
-    
+
 }

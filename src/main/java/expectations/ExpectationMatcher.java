@@ -135,6 +135,9 @@ public class ExpectationMatcher {
                     response = "Response is undefined";
                 }
                 map.put("STATUS", "" + statusCode);
+                if (map.get("INFO.BodyMapped").equals("false")) {
+                    loadPropertiesFromBody(map, (String) map.get("BODY"));
+                }
                 response = Template.parse(response, map, true);
                 logResponse(time, port, response, statusCode, "RESP");
             } catch (ExpectationException ee) {
@@ -165,16 +168,8 @@ public class ExpectationMatcher {
             }
             return null;
         }
-        if (expectationsFile != null) {
-            if (expectationsFile.lastModified() != expectationsLoadTime) {
-                expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class,
-                        expectationsFile);
-                expectationsLoadTime = expectationsFile.lastModified();
-                if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
-                }
-            }
-        }
+        reloadDefinitions(time, port);
+
         Expectation found = null;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
@@ -198,54 +193,50 @@ public class ExpectationMatcher {
             }
             return null;
         }
-        if (doesNotMatchStringOrNullExp(exp.getPath(), map1.get("PATH"))) {
-            if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
-            }
-            return null;
-        }
-        if (doesNotMatchStringOrNullExp(exp.getQuery(), map1.get("QUERY"))) {
-            if (serverNotifier != null) {
-                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' QUERY:'" + exp.getQuery() + "' != '" + map1.get("QUERY") + "'");
-            }
-            return null;
-        }
         if (doesNotMatchStringOrNullExp(exp.getBodyType(), map1.get("BODY-TYPE"))) {
             if (serverNotifier != null) {
                 serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' BODY-TYPE:'" + exp.getBodyType().toString() + "' != '" + map1.get("BODY-TYPE") + "'");
             }
             return null;
         }
-        if (exp.getBody() != null) {
-            String bodyTrimmed = Util.trimmedNull(map1.get("BODY"));
-            if (bodyTrimmed == null) {
-                return null;
-            } else {
-                try {
-                    String bodyType = map1.get("BODY-TYPE").toString();
-                    Map<String, Object> tempMap = mapBodyContent(time, bodyTrimmed, (BodyType) map1.get("BODY-TYPE"));
-                    for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
-                        map1.put(bodyType + "." + ent.getKey(), ent.getValue());
-                    }
-                    if (doesNotMatchRequestAssertions(time, port, exp, map1)) {
-                        return null;
-                    }
-                } catch (ExpectationException pe) {
-                    if (serverNotifier != null) {
-                        serverNotifier.log(time, port, "Expectation [" + exp.getName() + "] not met! Failed to map body content", pe.getCause());
-                    }
+        if (!exp.multiPathMatch(map1.get("PATH"))) {
+            if (serverNotifier != null) {
+                serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "' PATH:'" + exp.getPath() + "' != '" + map1.get("PATH") + "'");
+            }
+            return null;
+        }
+        if ((exp.getAsserts() != null) && (!exp.getAsserts().isEmpty())) {
+            try {
+                loadPropertiesFromBody(map1, (String) map1.get("BODY"));
+                if (doesNotMatchAllAssertions(time, port, exp, map1)) {
                     return null;
                 }
+            } catch (ExpectationException pe) {
+                if (serverNotifier != null) {
+                    serverNotifier.log(time, port, "Expectation [" + exp.getName() + "] not met! Failed to map body content", pe.getCause());
+                }
+                return null;
             }
         }
         return exp;
     }
 
-    private boolean doesNotMatchRequestAssertions(long time, int port, Expectation exp, Map<String, Object> map) {
-        if ((exp.getBody().getAsserts() == null) || exp.getBody().getAsserts().isEmpty()) {
-            return false;
+    private void loadPropertiesFromBody(Map map, String bodyTrimmed) {
+        if ((bodyTrimmed == null) || (bodyTrimmed.isEmpty())) {
+            map.put("INFO.BodyMapped", "empty");
+            return;
         }
-        for (Map.Entry<String, String> ass : exp.getBody().getAsserts().entrySet()) {
+        BodyType bodyType = (BodyType) map.get("BODY-TYPE");
+        String bodyTypeName = bodyType.name();
+        Map<String, Object> tempMap = mapBodyContent(System.currentTimeMillis(), bodyTrimmed, bodyType);
+        for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
+            map.put(bodyTypeName + "." + ent.getKey(), ent.getValue());
+        }
+        map.put("INFO.BodyMapped", "true");
+    }
+
+    private boolean doesNotMatchAllAssertions(long time, int port, Expectation exp, Map<String, Object> map) {
+        for (Map.Entry<String, String> ass : exp.getAsserts().entrySet()) {
             Object actual = map.get(ass.getKey());
             if (actual == null) {
                 if (serverNotifier != null) {
@@ -376,5 +367,17 @@ public class ExpectationMatcher {
 
     public boolean hasNoExpectations() {
         return ((expectations == null) || (expectations.getExpectations().isEmpty()));
+    }
+
+    private void reloadDefinitions(long time, int port) {
+        if (expectationsFile != null) {
+            if (expectationsFile.lastModified() != expectationsLoadTime) {
+                expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
+                expectationsLoadTime = expectationsFile.lastModified();
+                if (serverNotifier != null) {
+                    serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+                }
+            }
+        }
     }
 }

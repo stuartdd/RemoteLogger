@@ -9,7 +9,7 @@ package expectations;
  *
  * @author stuart
  */
-public class MatcherString {
+public class StringMatcher {
 
     private static final int START = 0;
     private static final int ESCAPE = 1;
@@ -42,24 +42,24 @@ public class MatcherString {
         }
         return false;
     }
-        
-    public MatcherString(String value) {
-        if (value == null) {
+
+    public StringMatcher(String matchValue) {
+        if (matchValue == null) {
             this.type = TYPE.any;
             this.start = null;
             this.end = null;
         } else {
-            int vaLen = value.length();
-            if (value.trim().length() == 0) {
+            int vaLen = matchValue.length();
+            if (matchValue.trim().length() == 0) {
                 this.type = TYPE.exact;
-                this.start = value;
+                this.start = matchValue;
                 this.end = null;
             } else {
                 StringBuilder st = new StringBuilder();
                 StringBuilder en = new StringBuilder();
                 boolean split = false;
                 int flag = START;
-                for (char c : value.toCharArray()) {
+                for (char c : matchValue.toCharArray()) {
                     switch (flag) {
                         case START:
                             if (c == ESCAPE_CHAR) {

@@ -88,6 +88,7 @@ public class ExpectationHandler implements HttpHandler {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
             }
         }
+        map.put("INFO.BodyMapped", "false");
         if (!expectationMatcher.hasNoExpectations()) {
             expectationMatcher.getResponse(time, port, he, map);
         } else {
