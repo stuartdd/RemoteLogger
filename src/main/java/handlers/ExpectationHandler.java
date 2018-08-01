@@ -27,6 +27,7 @@ import common.Action;
 import common.Util;
 import expectations.ExpectationMatcher;
 import common.Notifier;
+import mockCallBack.MockResponse;
 
 /**
  *
@@ -89,10 +90,10 @@ public class ExpectationHandler implements HttpHandler {
             }
         }
         map.put("INFO.BodyMapped", "false");
-        if (!expectationMatcher.hasNoExpectations()) {
-            expectationMatcher.getResponse(time, port, he, map);
+        if (expectationMatcher.hasNoExpectations()) {
+            MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
-            ExpectationMatcher.respond(he, 404, "No Expectation defined");
+            expectationMatcher.getResponse(time, port, he, map);
         }
         
     }

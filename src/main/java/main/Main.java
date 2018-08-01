@@ -77,7 +77,7 @@ public class Main extends Application {
     }
 
     public static void notifyAction(long time, int port, Action action, String message) {
-        if (!headless) {
+       if (!headless) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {

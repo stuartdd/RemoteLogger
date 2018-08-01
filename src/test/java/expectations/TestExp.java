@@ -62,7 +62,7 @@ public class TestExp {
 
     @BeforeClass
     public static void beforeClass() {
-        ServerManager.addServer(""+PORT, new ServerConfig("/config/expectationsResource.json",true), new TestNotifier());
+        ServerManager.addServer("" + PORT, new ServerConfig("/config/expectationsResource.json", true), new TestNotifier());
         ServerManager.startServer(PORT);
         Util.sleep(200);
     }
@@ -78,7 +78,7 @@ public class TestExp {
         assertEquals(POST_RESPONSE_JSON, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
-    
+
     @Test
     public void testPostSubBody() {
         ClientResponse r = CLIENT.send("test/post/sub/body", Util.readResource("config/testPostData.json"), Client.Method.POST);
@@ -128,4 +128,4 @@ public class TestExp {
         assertEquals(404, r.getStatus());
     }
 
- }
+}

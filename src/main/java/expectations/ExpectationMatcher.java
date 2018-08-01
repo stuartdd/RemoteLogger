@@ -21,7 +21,6 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,12 +28,14 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
+import mockCallBack.ResponseHandler;
+import mockCallBack.MockRequest;
 
 import common.Util;
-import common.ServerException;
 import template.Template;
 import xml.MappedXml;
 import common.Notifier;
+import mockCallBack.MockResponse;
 
 /**
  *
@@ -48,8 +49,14 @@ public class ExpectationMatcher {
     private final Notifier serverNotifier;
     private final File expectationsFile;
     private long expectationsLoadTime;
+    private ResponseHandler responseHandler;
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
+        this(fileName,  null, serverNotifier);
+    }
+    
+    public ExpectationMatcher(String fileName, ResponseHandler responseHandler, Notifier serverNotifier) {
+        this.responseHandler = responseHandler;
         this.serverNotifier = serverNotifier;
         if ((fileName == null) || (fileName.trim().length() == 0)) {
             expectations = null;
@@ -85,7 +92,19 @@ public class ExpectationMatcher {
     public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map) {
         String response = "Not Found";
         int statusCode = 404;
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> responseHeaders = new HashMap<>();
+        loadPropertiesFromBody(map, (String) map.get("BODY"));
+        if (expectations.isListMap() && (serverNotifier != null)) {
+            logMap(time, port, map, "REQUEST PROPERTIES");
+        }
+        
+        if (responseHandler != null) {
+            MockResponse mockResponse = responseHandler.handle(new MockRequest());
+            if (mockResponse != null) {
+                mockResponse.respond(he, map);
+            }
+        }
+        
         Expectation found = findMatchingExpectation(time, port, map);
         if (found != null) {
             try {
@@ -100,10 +119,11 @@ public class ExpectationMatcher {
                             response = found.getResponse().getBody();
                         }
                     } else {
-                        response = locateResponseFile(port, found.getResponse().getTemplate(), map);
+                        String templateName = Template.parse(found.getResponse().getTemplate(), map);
+                        response = locateResponseFile(port, templateName);
                     }
                     statusCode = found.getResponse().getStatus();
-                    headers = found.getResponse().getHeaders();
+                    responseHeaders = found.getResponse().getHeaders();
                 } else {
                     if (found.getMethod().equalsIgnoreCase("GET")) {
                         statusCode = 200;
@@ -113,7 +133,6 @@ public class ExpectationMatcher {
                     response = "Response is undefined";
                 }
                 map.put("STATUS", "" + statusCode);
-                response = Template.parse(response, map, true);
                 logResponse(time, port, response, statusCode, "RESP");
             } catch (ExpectationException ee) {
                 statusCode = ee.getStatus();
@@ -126,30 +145,9 @@ public class ExpectationMatcher {
                 serverNotifier.log(time, port, "Expectation not met");
             }
         }
-        for (Map.Entry<String, String> s : headers.entrySet()) {
-            he.getResponseHeaders().add(s.getKey(), Template.parse(s.getValue(), map, true));
-        }
-        respond(he, statusCode, response);
+        MockResponse.respond(he, statusCode, response, responseHeaders,map);
     }
     
-    public static void respond(HttpExchange he, int status, String response) {
-        OutputStream os = he.getResponseBody();
-        try {
-            he.sendResponseHeaders(status, response.length());
-            os.write(response.getBytes());
-            os.flush();
-        } catch (IOException ex) {
-            throw new ServerException("Failed to write '" + response + "' to output stream ", status, ex);
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException ex) {
-                    throw new ServerException("Failed to close output stream ", status, ex);
-                }
-            }
-        }
-    }
 
 
     public Expectations getExpectations() {
@@ -167,13 +165,7 @@ public class ExpectationMatcher {
             }
             return null;
         }
-        reloadDefinitions(time, port);
-
-        loadPropertiesFromBody(map, (String) map.get("BODY"));
-        if (expectations.isListMap() && (serverNotifier != null)) {
-            logMap(time, port, map, "REQUEST PROPERTIES");
-        }
-
+        reloadDefinitions(time, port);        
         Expectation found;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
@@ -228,7 +220,7 @@ public class ExpectationMatcher {
             Object actual = map.get(ass.getKey());
             if (actual == null) {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "': ASSERT:' " + ass.getKey() + "' Not Found");
+                    serverNotifier.log(time, port, "MIS-MATCH:'" + exp.getName() + "': ASSERT:'" + ass.getKey() + "' Not Found");
                 }
                 return true;
             }
@@ -298,15 +290,14 @@ public class ExpectationMatcher {
         }
     }
 
-    private String locateResponseFile(int port, String fileName, Map map) {
+    private String locateResponseFile(int port, String fileName) {
         if (fileName == null) {
             throw new ExpectationException("File for Expectation is not defined", 500);
         }
-        String file = Template.parse(fileName, map, true);
         StringBuilder sb = new StringBuilder();
         for (String path : expectations.getPaths()) {
             sb.append('"').append(path).append('"').append(',');
-            Path p = Paths.get(path, file);
+            Path p = Paths.get(path, fileName);
             if (Files.exists(p)) {
                 try {
                     if (serverNotifier != null) {
@@ -314,7 +305,7 @@ public class ExpectationMatcher {
                     }
                     return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
                 } catch (IOException ex) {
-                    throw new ExpectationException("File [" + file + "] Not readable from file", 500, ex);
+                    throw new ExpectationException("File [" + fileName + "] Not readable from file", 500, ex);
                 }
             } else {
                 if (serverNotifier != null) {
@@ -323,9 +314,9 @@ public class ExpectationMatcher {
             }
         }
         try {
-            return readResource(port, file, sb.toString());
+            return readResource(port, fileName, sb.toString());
         } catch (IOException ex) {
-            throw new ExpectationException("File [" + file + "] Not readable from class path", 500, ex);
+            throw new ExpectationException("File [" + fileName + "] Not readable from class path", 500, ex);
         }
     }
 
