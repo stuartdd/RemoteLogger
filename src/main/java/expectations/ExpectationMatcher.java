@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
-import mockCallBack.ResponseHandler;
+import server.ResponseHandler;
 import mockCallBack.MockRequest;
 
 import common.Util;
@@ -52,9 +52,9 @@ public class ExpectationMatcher {
     private ResponseHandler responseHandler;
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
-        this(fileName,  null, serverNotifier);
+        this(fileName, null, serverNotifier);
     }
-    
+
     public ExpectationMatcher(String fileName, ResponseHandler responseHandler, Notifier serverNotifier) {
         this.responseHandler = responseHandler;
         this.serverNotifier = serverNotifier;
@@ -89,7 +89,7 @@ public class ExpectationMatcher {
         }
     }
 
-    public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map) {
+    public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries) {
         String response = "Not Found";
         int statusCode = 404;
         Map<String, String> responseHeaders = new HashMap<>();
@@ -97,35 +97,37 @@ public class ExpectationMatcher {
         if (expectations.isListMap() && (serverNotifier != null)) {
             logMap(time, port, map, "REQUEST PROPERTIES");
         }
-        
+
         if (responseHandler != null) {
-            MockResponse mockResponse = responseHandler.handle(new MockRequest());
+            MockRequest mockRequest = new MockRequest(map.get("BODY"), map.get("PATH"), headers, queries, map.get("METHOD"));
+            MockResponse mockResponse = responseHandler.handle(mockRequest);
             if (mockResponse != null) {
                 mockResponse.respond(he, map);
             }
         }
-        
-        Expectation found = findMatchingExpectation(time, port, map);
-        if (found != null) {
+
+        Expectation foundExpectation = findMatchingExpectation(time, port, map);
+        if (foundExpectation != null) {
             try {
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "MATCHED " + found);
+                    serverNotifier.log(time, port, "MATCHED " + foundExpectation);
                 }
-                if (found.getResponse() != null) {
-                    if (Util.isEmpty(found.getResponse().getTemplate())) {
-                        if (Util.isEmpty(found.getResponse().getBody())) {
+                if (foundExpectation.getResponse() != null) {
+                    ResponseContent responseContent = foundExpectation.getResponse();
+                    if (Util.isEmpty(responseContent.getTemplate())) {
+                        if (Util.isEmpty(responseContent.getBody())) {
                             response = "Body is undefined";
                         } else {
-                            response = found.getResponse().getBody();
+                            response = responseContent.getBody();
                         }
                     } else {
-                        String templateName = Template.parse(found.getResponse().getTemplate(), map);
+                        String templateName = Template.parse(responseContent.getTemplate(), map);
                         response = locateResponseFile(port, templateName);
                     }
-                    statusCode = found.getResponse().getStatus();
-                    responseHeaders = found.getResponse().getHeaders();
+                    statusCode = responseContent.getStatus();
+                    responseHeaders = responseContent.getHeaders();
                 } else {
-                    if (found.getMethod().equalsIgnoreCase("GET")) {
+                    if (foundExpectation.getMethod().equalsIgnoreCase("GET")) {
                         statusCode = 200;
                     } else {
                         statusCode = 201;
@@ -137,7 +139,7 @@ public class ExpectationMatcher {
             } catch (ExpectationException ee) {
                 statusCode = ee.getStatus();
                 if (serverNotifier != null) {
-                    serverNotifier.log(time, port, new IOException("Read file failed for expectation: " + found.getName() + ". " + ee.getMessage(), ee));
+                    serverNotifier.log(time, port, new IOException("Read file failed for expectation: " + foundExpectation.getName() + ". " + ee.getMessage(), ee));
                 }
             }
         } else {
@@ -145,13 +147,7 @@ public class ExpectationMatcher {
                 serverNotifier.log(time, port, "Expectation not met");
             }
         }
-        MockResponse.respond(he, statusCode, response, responseHeaders,map);
-    }
-    
-
-
-    public Expectations getExpectations() {
-        return expectations;
+        MockResponse.respond(he, statusCode, response, responseHeaders, map);
     }
 
     public boolean hasNoExpectations() {
@@ -165,7 +161,7 @@ public class ExpectationMatcher {
             }
             return null;
         }
-        reloadDefinitions(time, port);        
+        reloadDefinitions(time, port);
         Expectation found;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);

@@ -36,13 +36,13 @@ public class ServerThread extends Thread {
     private ExpectationMatcher expectationMatcher;
     private final Notifier serverNotifier;
 
-    public ServerThread(int port, ServerConfig config, Notifier serverNotifier) {
+    public ServerThread(int port, ServerConfig config, ResponseHandler responseHandler, Notifier serverNotifier) {
         this.port = port;
         this.serverNotifier = serverNotifier;
         this.running = false;
         this.canRun = true;
         newState(ServerState.SERVER_PENDING, "");
-        expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
+        expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), responseHandler, serverNotifier);
         if (expectationMatcher.hasNoExpectations()) {
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), port, "Server on " + port + " does not have any expectations defined. 404 will be returned");
@@ -68,7 +68,7 @@ public class ServerThread extends Thread {
             return;
         }
         while (canRun) {
-            sleeep(500);
+            sleeep(10);
         }
         newState(ServerState.SERVER_STOPPING, null);
         server.stop(1);

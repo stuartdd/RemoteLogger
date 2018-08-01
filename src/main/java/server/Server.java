@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
+
 import common.Notifier;
 
 /**
@@ -23,23 +24,25 @@ import common.Notifier;
  */
 public class Server {
 
-    int port;
-    Notifier serverNotifier;
-    ServerConfig serverConfig;
-    ServerThread serverThread;
+    private final int port;
+    private final Notifier serverNotifier;
+    private final ServerConfig serverConfig;
+    private final ResponseHandler responseHandler;
+    private ServerThread serverThread;
 
-    public Server(int port, ServerConfig serverConfig, Notifier serverNotifier) {
+    public Server(int port, ServerConfig serverConfig, ResponseHandler responseHandler, Notifier serverNotifier) {
         if (serverConfig == null) {
             throw new ServerConfigException("Server serverConfig is null");
         }
         this.port = port;
         this.serverNotifier = serverNotifier;
         this.serverConfig = serverConfig;
+        this.responseHandler = responseHandler;
         this.serverThread = null;
     }
 
     public void start() {
-        serverThread = new ServerThread(port, serverConfig, serverNotifier);
+        serverThread = new ServerThread(port, serverConfig, responseHandler, serverNotifier);
         serverThread.start();
     }
 
@@ -61,7 +64,7 @@ public class Server {
         if (serverThread != null) {
             return serverThread.state();
         }
-        return ServerState.SERVER_STOPPED;        
+        return ServerState.SERVER_STOPPED;
     }
 
     public void setAutoStart(boolean selected) {

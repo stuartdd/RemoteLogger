@@ -39,7 +39,7 @@ public class ServerManager {
         } catch (NumberFormatException ex) {
             throw new ConfigDataException("Port number [" + portStr + "] is invalid");
         }
-        servers.put(port, new Server(port, config, serverNotifier));
+        servers.put(port, new Server(port, config, null, serverNotifier));
     }
 
     public static boolean isPortRunning(int port) {

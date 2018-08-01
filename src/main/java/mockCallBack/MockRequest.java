@@ -16,10 +16,26 @@
  */
 package mockCallBack;
 
+import java.util.Map;
+
 /**
  *
  * @author stuar
  */
 public class MockRequest {
+    private final String body;
+    private final String path;
+    private final Map<String, String> headers;
+    private final Map<String, String> queries;
+    private final String method;
+
+    public MockRequest(Object body, Object path, Map<String, String> headers, Map<String, String> queries, Object method) {
+        this.body = (body==null?"":body.toString());
+        this.path = (path==null?"":path.toString());
+        this.headers = headers;
+        this.queries = queries;
+        this.method = (method==null?"":method.toString());;
+    }
+    
     
 }
