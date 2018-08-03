@@ -16,13 +16,14 @@
  */
 package server;
 
-import mockCallBack.MockRequest;
-import mockCallBack.MockResponse;
+import java.util.Map;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
 
 /**
  *
  * @author stuar
  */
 public interface ResponseHandler {
-    MockResponse handle(MockRequest mockRequest);
+    MockResponse handle(MockRequest mockRequest, Map<String, Object> map);
 }

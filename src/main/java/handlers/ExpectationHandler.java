@@ -27,7 +27,9 @@ import common.Action;
 import common.Util;
 import expectations.ExpectationMatcher;
 import common.Notifier;
-import mockCallBack.MockResponse;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
+import server.ResponseHandler;
 
 /**
  *
@@ -37,11 +39,13 @@ public class ExpectationHandler implements HttpHandler {
 
     private final int port;
     private final ExpectationMatcher expectationMatcher;
+    private ResponseHandler responseHandler;
     private final Notifier serverNotifier;
 
-    public ExpectationHandler(int port, ExpectationMatcher expectationMatcher, Notifier serverNotifier) {
+    public ExpectationHandler(int port, ExpectationMatcher expectationMatcher, ResponseHandler responseHandler, Notifier serverNotifier) {
         this.port = port;
         this.expectationMatcher = expectationMatcher;
+        this.responseHandler = responseHandler;
         this.serverNotifier = serverNotifier;
     }
 
@@ -92,6 +96,16 @@ public class ExpectationHandler implements HttpHandler {
             }
         }
         map.put("INFO.BodyMapped", "false");
+
+        if (responseHandler != null) {
+            MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationMatcher);
+            MockResponse mockResponse = responseHandler.handle(mockRequest, map);
+            if (mockResponse != null) {
+                mockResponse.respond(he, map);
+                return;
+            }
+        }
+
         if (expectationMatcher.hasNoExpectations()) {
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
@@ -130,8 +144,12 @@ public class ExpectationHandler implements HttpHandler {
             }
         } else {
             map.put(name + "[" + count++ + "]", part);
-         }
+        }
         sb.setLength(0);
         return count;
+    }
+
+    public void setCallBackClass(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
     }
 }

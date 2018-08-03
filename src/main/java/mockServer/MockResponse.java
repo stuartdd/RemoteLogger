@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package mockCallBack;
+package mockServer;
 
 import com.sun.net.httpserver.HttpExchange;
 import common.ServerException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import template.Template;
 
@@ -34,9 +35,9 @@ public class MockResponse {
     private final Map<String, String> headers;
 
     public MockResponse(String responseBody, int status, Map<String, String> headers) {
-        this.responseBody = responseBody;
+        this.responseBody = (responseBody==null?"":responseBody);
         this.status = status;
-        this.headers = headers;
+        this.headers = (headers==null?new HashMap<>():headers);
     }
 
     public void respond(HttpExchange he, Map<String, Object> map) {

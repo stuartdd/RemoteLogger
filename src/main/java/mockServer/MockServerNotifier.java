@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package mockCallBack;
+package mockServer;
 
-import expectations.*;
 import common.Action;
 import common.Notifier;
 import org.joda.time.DateTime;
@@ -34,18 +33,21 @@ public class MockServerNotifier implements Notifier {
         }
     }
 
+    @Override
     public void log(long time, int port, String message) {
-        if ((message != null) || (message.trim().length() >0)) {
+        if ((message != null) && (message.trim().length() > 0)) {
             System.out.println(getTimeStamp(time) + "Port:" + port + " <MOCK> " + message);
         }
     }
 
+    @Override
     public void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
             System.out.println(getTimeStamp(time) + "Port:" + port + " <MOCK> ERROR:" + throwable.getMessage());
         }
     }
 
+    @Override
     public void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
             System.out.println(getTimeStamp(time) + "Port:" + port + " <MOCK> ERROR:" + message + ": " + throwable.getMessage());

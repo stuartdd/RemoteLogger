@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import handlers.ControlHandler;
 import handlers.ExpectationHandler;
 import common.Notifier;
+import common.Util;
 
 public class ServerThread extends Thread {
 
@@ -33,36 +34,43 @@ public class ServerThread extends Thread {
     private final int port;
     private boolean running;
     private boolean canRun;
-    private ExpectationMatcher expectationMatcher;
+    private final ExpectationMatcher expectationMatcher;
+    private final ExpectationHandler expectationHandler;
+    private final ControlHandler controlHandler;
+    private final int timeToClose;
     private final Notifier serverNotifier;
 
     public ServerThread(int port, ServerConfig config, ResponseHandler responseHandler, Notifier serverNotifier) {
         this.port = port;
         this.serverNotifier = serverNotifier;
+        this.timeToClose = config.getTimeToClose();
         this.running = false;
         this.canRun = true;
         newState(ServerState.SERVER_PENDING, "");
         if (config.expectations() == null) {
-            expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), responseHandler, serverNotifier);
+            expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
         } else {
-            expectationMatcher = new ExpectationMatcher(config.expectations(), responseHandler, serverNotifier);            
+            expectationMatcher = new ExpectationMatcher(config.expectations(), serverNotifier);
         }
         if (expectationMatcher.hasNoExpectations()) {
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), port, "Server on " + port + " does not have any expectations defined. 404 will be returned");
             }
         }
+        expectationHandler = new ExpectationHandler(port, expectationMatcher, responseHandler, serverNotifier);
+        controlHandler = new ControlHandler(port, expectationMatcher, serverNotifier);
     }
 
     @Override
     public void run() {
         running = true;
+        canRun = true;
         HttpServer server;
         try {
             newState(ServerState.SERVER_STARTING, "");
             server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/control", new ControlHandler(port, expectationMatcher, serverNotifier));
-            server.createContext("/", new ExpectationHandler(port, expectationMatcher, serverNotifier));
+            server.createContext("/control", controlHandler);
+            server.createContext("/", expectationHandler);
             server.setExecutor(null); // creates a default executor
             server.start();
             newState(ServerState.SERVER_RUNNING, null);
@@ -72,10 +80,10 @@ public class ServerThread extends Thread {
             return;
         }
         while (canRun) {
-            sleeep(10);
+            Util.sleep(2);;
         }
-        newState(ServerState.SERVER_STOPPING, null);
-        server.stop(1);
+        newState(ServerState.SERVER_STOPPING, "Time to close:"+timeToClose);
+        server.stop(timeToClose);
         newState(ServerState.SERVER_STOPPED, null);
         running = false;
     }
@@ -98,13 +106,22 @@ public class ServerThread extends Thread {
 
     public void stopServer() {
         canRun = false;
+        if (serverNotifier != null) {
+            serverNotifier.log(System.currentTimeMillis(), port, "STOP-SERVER");
+        }
     }
 
     private void sleeep(long ms) {
         try {
-            sleep(500);
+            sleep(ms);
         } catch (InterruptedException ex) {
 
+        }
+    }
+
+    void setCallBackClass(ResponseHandler responseHandler) {
+        if (expectationHandler!=null) {
+            expectationHandler.setCallBackClass(responseHandler);
         }
     }
 

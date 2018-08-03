@@ -20,17 +20,21 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
+import java.util.Map;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
 import mockServer.MockServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import server.ResponseHandler;
 
 /**
  *
  * @author stuart
  */
-public class StandAloneWithConfigTest {
+public class StandAloneWithConfigAndCallbackReloaded2Test {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
@@ -49,9 +53,23 @@ public class StandAloneWithConfigTest {
     @Test
     public void test() {
         assertTrue(mockServer.isRunning());
+        mockServer.setCallBackClass(new ResponseHandler() {
+            @Override
+            public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+                /*
+                Add missing data.
+                */
+                map.put("PATH[3]", "PATH[3]");
+                map.put("QUERY.q3", "QUERY.q3");
+                /*
+                Defer to the loaded expectations
+                */
+                return mockRequest.getResponseData(map);
+            }
+        });
+                
         ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
-        assertTrue(r.getBody().contains("PATH[0]=test PATH[1]=get PATH[2]=parts"));
-        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
+        assertEquals("PATH[0]=test PATH[1]=get PATH[2]=parts [PATH[3]] QUERY.q1=ONE QUERY.q2=TWO [QUERY.q3]", r.getBody());
         assertEquals(200, r.getStatus());
     }
 

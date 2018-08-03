@@ -21,12 +21,11 @@ import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
 import common.Util;
+import mockServer.MockServer;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import server.ServerManager;
-import server.ServerConfig;
 
 /**
  *
@@ -57,19 +56,18 @@ public class TestExp {
             + "Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.\n"
             + "xxx:%{xxx}");
 
+    private static MockServer mockServer;
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
 
     @BeforeClass
     public static void beforeClass() {
-        ServerManager.addServer("" + PORT, new ServerConfig("/config/expectationsResource.json", true), new TestNotifier());
-        ServerManager.startServer(PORT);
-        Util.sleep(200);
+        mockServer = (new MockServer(PORT, null, "/config/expectationsResource.json", true)).start();
     }
 
     @AfterClass
     public static void afterClass() {
-        CLIENT.send("control/stop", null, Client.Method.PUT);
+        mockServer.stop();
     }
 
     @Test
@@ -117,7 +115,8 @@ public class TestExp {
     @Test
     public void testGetParts() {
         ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
-        assertEquals("PATH[0]=test PATH[1]=get PATH[2]=parts [%{PATH[3]}] QUERY.q1=ONE QUERY.q2=TWO [%{QUERY.q3}]", r.getBody());
+        assertTrue(r.getBody().contains("PATH[0]=test PATH[1]=get PATH[2]=parts"));
+        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
         assertEquals(200, r.getStatus());
     }
 

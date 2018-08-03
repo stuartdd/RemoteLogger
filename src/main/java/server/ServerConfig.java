@@ -24,20 +24,23 @@ public class ServerConfig {
     private String expectationsFile;
     private boolean autoStart = false;
     private boolean showPort = false;
+    private int timeToClose = 1;
     private boolean verbose = true;
 
     @JsonIgnore
     private Expectations expectations;
 
-    public ServerConfig(String expectationsFile, boolean verbose) {
+    public ServerConfig(String expectationsFile, int timeToClose, boolean verbose) {
         this.expectationsFile = expectationsFile;
         this.expectations = null;
+        this.timeToClose = timeToClose;
         this.verbose = verbose;
     }
 
-    public ServerConfig(Expectations expectations, boolean verbose) {
+    public ServerConfig(Expectations expectations, int timeToClose, boolean verbose) {
         this.expectationsFile = null;
         this.expectations = expectations;
+        this.timeToClose = timeToClose;
         this.verbose = verbose;
     }
 
@@ -66,6 +69,14 @@ public class ServerConfig {
 
     public void setShowPort(boolean showPort) {
         this.showPort = showPort;
+    }
+
+    public int getTimeToClose() {
+        return timeToClose;
+    }
+
+    public void setTimeToClose(int timeToClose) {
+        this.timeToClose = timeToClose;
     }
 
     public boolean isVerbose() {

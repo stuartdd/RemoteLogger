@@ -249,7 +249,7 @@ public class Main extends Application {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
         if ((config.getServers() == null) || (config.getServers().isEmpty())) {
-            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", true));
+            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true));
             config.setDefaultPort(PORT_NUMBER);
         }
         for (String portStr : config.getServers().keySet()) {

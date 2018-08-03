@@ -4,12 +4,14 @@
       "expectationsFile" : "expectations.json",
       "autoStart" : true,
       "showPort" : true,
+      "timeToClose" : 1,
       "verbose" : true
     },
     "1999" : {
       "expectationsFile" : "expectations.json",
       "autoStart" : true,
       "showPort" : true,
+      "timeToClose" : 1,
       "verbose" : true
     }
   },
@@ -21,8 +23,8 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 181.0,
-  "y" : 35.0,
+  "x" : 1096.0,
+  "y" : 163.0,
   "width" : 1439.0,
   "height" : 863.0
 }

@@ -20,25 +20,37 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
+import java.util.Map;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
 import mockServer.MockServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import server.ResponseHandler;
 
 /**
  *
  * @author stuart
  */
-public class StandAloneWithConfigTest {
+public class CallbackWithNoExpectationAndNullResponseTest {
 
     private static final int PORT = 1999;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null, "/config/expectationsResource.json", true)).start();
+        mockServer = (new MockServer(PORT, new ResponseHandler() {
+            @Override
+            public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+                /*
+                * NULL RESPONSE!
+                */
+                return  null;
+            }
+        }, true)).start();
     }
 
     @AfterClass
@@ -47,12 +59,9 @@ public class StandAloneWithConfigTest {
     }
 
     @Test
-    public void test() {
+    public void testHandleResponse() {
         assertTrue(mockServer.isRunning());
-        ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
-        assertTrue(r.getBody().contains("PATH[0]=test PATH[1]=get PATH[2]=parts"));
-        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
-        assertEquals(200, r.getStatus());
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
+        assertEquals("No Expectation defined", r.getBody());
     }
-
 }

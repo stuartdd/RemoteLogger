@@ -20,17 +20,21 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
+import java.util.Map;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
 import mockServer.MockServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import server.ResponseHandler;
 
 /**
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest {
+public class CallbackWithSingleExpectationAndNullResponseTest {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
@@ -52,7 +56,15 @@ public class StandAloneWithSingleExpectationFromStringTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null, expectations.withListMap(true), true)).start();
+        mockServer = (new MockServer(PORT, new ResponseHandler() {
+            @Override
+            public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+                /*
+                * NULL RESPONSE!
+                */
+                return  null;
+            }
+        }, expectations.withListMap(true), true)).start();
     }
 
     @AfterClass
@@ -61,7 +73,7 @@ public class StandAloneWithSingleExpectationFromStringTest {
     }
 
     @Test
-    public void test() {
+    public void testNullHandleResponse() {
         assertTrue(mockServer.isRunning());
         ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
         assertEquals("Method GET.URL:'/pre'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.", r.getBody());

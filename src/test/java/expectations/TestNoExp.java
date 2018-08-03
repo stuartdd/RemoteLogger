@@ -19,33 +19,26 @@ package expectations;
 import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
-import common.Util;
+import mockServer.MockServer;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import server.ServerManager;
-import server.ServerConfig;
 
-/**
- *
- * @author 802996013
- */
 public class TestNoExp {
 
+    private static MockServer mockServer;
     private static final int PORT = 1889;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
 
     @BeforeClass
     public static void beforeClass() {
-        ServerManager.addServer("" + PORT, new ServerConfig("/config/testNoExp.json", true), new TestNotifier());
-        ServerManager.startServer(PORT);
-        Util.sleep(200);
+        mockServer = (new MockServer(PORT, null, "/config/testNoExp.json", true)).start();
     }
 
     @AfterClass
     public static void afterClass() {
-        CLIENT.send("control/stop", null, Client.Method.PUT);
+        mockServer.stop();
     }
 
     @Test

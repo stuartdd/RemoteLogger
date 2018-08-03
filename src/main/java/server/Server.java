@@ -83,4 +83,10 @@ public class Server {
         return serverConfig.isShowPort();
     }
 
+    public void setCallBackClass(ResponseHandler responseHandler) {
+        if (serverThread != null) {
+            serverThread.setCallBackClass(responseHandler);
+        }
+    }
+
 }
