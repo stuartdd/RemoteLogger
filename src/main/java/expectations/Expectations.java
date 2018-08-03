@@ -18,6 +18,7 @@ package expectations;
 
 import java.util.ArrayList;
 import java.util.List;
+import json.JsonUtils;
 
 /**
  *
@@ -52,5 +53,37 @@ public class Expectations {
     public void setListMap(boolean listMap) {
         this.listMap = listMap;
     }
-   
+
+    public Expectations withListMap(boolean listMap) {
+        this.setListMap(listMap);
+        return this;
+    }
+    
+    public Expectations withPaths(String[] paths) {
+        this.setPaths(paths);
+        return this;
+    }
+
+    public Expectations addExpectation(String json) {
+        Expectation ex = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
+        expectations.add(ex);
+        ExpectationMatcher.testExpectations(this);
+        return this;
+    }
+    
+    public static Expectations newExpectation(String json) {
+        Expectations expectations = new Expectations();
+        expectations.addExpectation(json);
+        ExpectationMatcher.testExpectations(expectations);
+        return expectations;
+    }
+    
+    public static Expectations fromString(String json) {
+        Expectations ex = (Expectations) JsonUtils.beanFromJson(Expectations.class, json);
+        ExpectationMatcher.testExpectations(ex);
+        if (ex.getExpectations().isEmpty()) {
+            throw new ExpectationException("Expectations are empty.", 500);
+        }
+        return ex;
+    }
 }

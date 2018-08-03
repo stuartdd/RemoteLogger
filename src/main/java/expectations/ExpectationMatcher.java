@@ -47,9 +47,23 @@ public class ExpectationMatcher {
     private static final String LS = "-----------------------------------------------------------" + NL;
     private Expectations expectations;
     private final Notifier serverNotifier;
-    private final File expectationsFile;
+    private File expectationsFile;
     private long expectationsLoadTime;
     private ResponseHandler responseHandler;
+
+    public ExpectationMatcher(Expectations expectations, Notifier serverNotifier) {
+        this(expectations, null, serverNotifier);
+    }
+
+    public ExpectationMatcher(Expectations expectations, ResponseHandler responseHandler, Notifier serverNotifier) {
+        this.responseHandler = responseHandler;
+        this.serverNotifier = serverNotifier;
+        this.expectations = expectations;
+        testExpectations(expectations);
+        if (expectations.getExpectations().isEmpty()) {
+            throw new ExpectationException("Expectations are empty.", 500);
+        }
+    }
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
         this(fileName, null, serverNotifier);
@@ -63,30 +77,7 @@ public class ExpectationMatcher {
             expectationsFile = null;
             return;
         }
-        File file = new File(fileName);
-        if (file.exists()) {
-            expectationsFile = file;
-            expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
-            expectationsLoadTime = file.lastModified();
-        } else {
-            InputStream is = ExpectationMatcher.class.getResourceAsStream(fileName);
-            if (is == null) {
-                is = ExpectationMatcher.class.getResourceAsStream("/" + fileName);
-                if (is == null) {
-                    throw new ExpectationException("Expectations file: " + fileName + " not found (File or classpath)", 500);
-                }
-            }
-            expectationsFile = null;
-            expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, is);
-            expectationsLoadTime = 0;
-        }
-        Map<String, String> map = new HashMap<>();
-        for (Expectation e : expectations.getExpectations()) {
-            if (map.containsKey(e.getName())) {
-                throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);
-            }
-            map.put(e.getName(), e.getName());
-        }
+        loadExpectations(fileName);
     }
 
     public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries) {
@@ -118,7 +109,7 @@ public class ExpectationMatcher {
                         if (Util.isEmpty(responseContent.getBody())) {
                             response = "Body is undefined";
                         } else {
-                            response = responseContent.getBody();
+                            response = Template.parse(responseContent.getBody(), map);
                         }
                     } else {
                         String templateName = Template.parse(responseContent.getTemplate(), map);
@@ -161,7 +152,7 @@ public class ExpectationMatcher {
             }
             return null;
         }
-        reloadDefinitions(time, port);
+        reloadExpectations(time, port);
         Expectation found;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
@@ -338,15 +329,64 @@ public class ExpectationMatcher {
         return sb.toString();
     }
 
-    private void reloadDefinitions(long time, int port) {
-        if (expectationsFile != null) {
-            if (expectationsFile.lastModified() != expectationsLoadTime) {
-                expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
-                expectationsLoadTime = expectationsFile.lastModified();
-                if (serverNotifier != null) {
-                    serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+    private void loadExpectations(String expectationsFileName) {
+        File file = new File(expectationsFileName);
+        if (file.exists()) {
+            expectationsFile = file;
+            expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
+            expectationsLoadTime = file.lastModified();
+        } else {
+            InputStream is = ExpectationMatcher.class.getResourceAsStream(expectationsFileName);
+            if (is == null) {
+                is = ExpectationMatcher.class.getResourceAsStream("/" + expectationsFileName);
+                if (is == null) {
+                    throw new ExpectationException("Expectations file: " + expectationsFileName + " not found (File or classpath)", 500);
                 }
             }
+            expectationsFile = null;
+            expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, is);
+            expectationsLoadTime = 0;
+        }
+        testExpectations(expectations);
+    }
+
+    private void reloadExpectations(long time, int port) {
+        if (expectationsFile != null) {
+            if (expectationsFile.lastModified() != expectationsLoadTime) {
+
+                Expectations temp = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
+                try {
+                    testExpectations(temp);
+                    expectations = temp;
+                    expectationsLoadTime = expectationsFile.lastModified();
+                    if (serverNotifier != null) {
+                        serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
+                    }
+                } catch (ExpectationException ex) {
+                    if (serverNotifier != null) {
+                        serverNotifier.log(System.currentTimeMillis(), port, "Reload of expectation failed " + expectationsFile.getAbsolutePath(), ex);
+                    } else {
+                        ex.printStackTrace();
+                    }
+                    expectationsFile = null;
+                }
+            }
+        }
+    }
+
+    public static void testExpectations(Expectations expectations) {
+        if (expectations == null) {
+            throw new ExpectationException("Expectations are null.", 500);
+        }
+        if (expectations.getExpectations()==null) {
+            throw new ExpectationException("Expectations are empty.", 500);
+        }
+        Map<String, String> map = new HashMap<>();
+        for (Expectation e : expectations.getExpectations()) {
+            if (map.containsKey(e.getName())) {
+                throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);
+            }
+            map.put(e.getName(), e.getName());
         }
     }
 }

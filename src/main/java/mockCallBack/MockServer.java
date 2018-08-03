@@ -5,6 +5,8 @@
  */
 package mockCallBack;
 
+import common.Util;
+import expectations.Expectations;
 import server.ResponseHandler;
 import server.Server;
 import server.ServerConfig;
@@ -20,6 +22,10 @@ public class MockServer {
     public MockServer(int port, ResponseHandler responseHandler, String expectationFile, boolean verbose) {
         server = new Server(port, new ServerConfig(expectationFile, verbose), responseHandler, new MockServerNotifier());
     }
+    
+    public MockServer(int port, ResponseHandler responseHandler, Expectations expectations, boolean verbose) {
+        server = new Server(port, new ServerConfig(expectations, verbose), responseHandler, new MockServerNotifier());
+    }
 
     public boolean isRunning() {
         if (server != null) {
@@ -31,6 +37,9 @@ public class MockServer {
     public MockServer start() {
         if (server != null) {
             server.start();
+        }
+        while (!server.isRunning()) {
+            Util.sleep(2);
         }
         return this;
     }

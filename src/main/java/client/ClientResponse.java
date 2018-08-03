@@ -16,17 +16,28 @@
  */
 package client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author 802996013
  */
 public class ClientResponse {
+
     private int status;
     private String body;
+    private Map<String, String> headers = new HashMap<>();
 
     public ClientResponse(int status, String body) {
         this.status = status;
         this.body = body;
+    }
+
+    public ClientResponse(int status, String body, Map<String, String> headers) {
+        this.status = status;
+        this.body = body;
+        this.headers = headers;
     }
 
     public int getStatus() {
@@ -37,9 +48,13 @@ public class ClientResponse {
         return body;
     }
 
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+    
     @Override
     public String toString() {
         return "ClientResponse{" + "status=" + status + ", body=" + body + '}';
     }
-    
+
 }

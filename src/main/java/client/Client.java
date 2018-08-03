@@ -24,6 +24,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -45,9 +48,21 @@ public class Client {
     }
 
     public ClientResponse send(String path, String body, Method method) {
-        String fullHost = config.getHost()
-                + (config.getPort() == null ? "" : ":" + config.getPort())
-                + (path == null ? "" : "/" + path);
+        String fullHost;
+        if (path != null) {
+            if (path.startsWith("/")) {
+                fullHost = config.getHost()
+                        + (config.getPort() == null ? "" : ":" + config.getPort())
+                        + path;
+            } else {
+                fullHost = config.getHost()
+                        + (config.getPort() == null ? "" : ":" + config.getPort())
+                        + "/" + path;
+            }
+        } else {
+            fullHost = config.getHost();
+        }
+
         if (clientNotifier != null) {
             clientNotifier.log(System.currentTimeMillis(), -1, "URL:" + fullHost);
         }
@@ -94,10 +109,18 @@ public class Client {
             }
             in.close();
             in = null;
+            Map<String, String> headers = new HashMap<>();
+            for (Map.Entry<String, List<String>> s : con.getHeaderFields().entrySet()) {
+                if (s.getKey() == null) {
+                    headers.put(listToString(s.getValue(), ';'), "");
+                } else {
+                    headers.put(s.getKey(), listToString(s.getValue(), ';'));
+                }
+            }
             if (clientNotifier != null) {
                 clientNotifier.log(System.currentTimeMillis(), -1, "RESPONSE [" + responseCode + "]:" + response.toString().trim());
             }
-            return new ClientResponse(responseCode, response.toString().trim());
+            return new ClientResponse(responseCode, response.toString().trim(), headers);
         } catch (ClientException | IOException e) {
             if (clientNotifier != null) {
                 clientNotifier.log(System.currentTimeMillis(), -1, "Failed to send to:" + fullHost, e);
@@ -115,5 +138,16 @@ public class Client {
             }
         }
     }
+
+    private String listToString(List<String> list, char delim) {
+        StringBuilder sb = new StringBuilder();
+        int mark = 0;
+        for (String s : list) {
+            sb.append(s);
+            mark = sb.length();
+            sb.append(delim);
+        }
+        sb.setLength(mark);
+        return sb.toString();
+    }
 }
-//4442awfy79agy@hpeprint.com

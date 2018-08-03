@@ -16,6 +16,9 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import expectations.Expectations;
+
 public class ServerConfig {
 
     private String expectationsFile;
@@ -23,14 +26,24 @@ public class ServerConfig {
     private boolean showPort = false;
     private boolean verbose = true;
 
+    @JsonIgnore
+    private Expectations expectations;
+
     public ServerConfig(String expectationsFile, boolean verbose) {
         this.expectationsFile = expectationsFile;
+        this.expectations = null;
+        this.verbose = verbose;
+    }
+
+    public ServerConfig(Expectations expectations, boolean verbose) {
+        this.expectationsFile = null;
+        this.expectations = expectations;
         this.verbose = verbose;
     }
 
     public ServerConfig() {
     }
-    
+
     public String getExpectationsFile() {
         return expectationsFile;
     }
@@ -63,5 +76,7 @@ public class ServerConfig {
         this.verbose = verbose;
     }
 
- 
+    public Expectations expectations() {
+        return expectations;
+    }
 }
