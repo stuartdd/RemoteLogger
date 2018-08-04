@@ -17,11 +17,13 @@
 package client;
 
 import common.Notifier;
+import common.Util;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -87,7 +89,24 @@ public class Client {
                 wr.close();
                 wr = null;
             }
-            int responseCode = con.getResponseCode();
+            int responseCode;
+            int connectionFailes = 0;
+            while (true) {
+                try {
+                    responseCode = con.getResponseCode();
+                    break;
+                } catch (ConnectException ex) {
+                    connectionFailes++;
+                    if (clientNotifier != null) {
+                        clientNotifier.log(System.currentTimeMillis(), -1, "Connection Failed [" + connectionFailes + "] " + fullHost);
+                    }
+                    if (connectionFailes > 5) {
+                        throw ex;
+                    }
+                    Util.sleep(500);
+                }
+            }
+
             InputStream is = null;
             try {
                 is = con.getInputStream();
