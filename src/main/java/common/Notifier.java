@@ -17,7 +17,7 @@
 package common;
 
 public interface Notifier {
-    void notifyAction(long time, int port, Action action, String message);
+    void notifyAction(long time, int port, Action action, ActionOn actionOn, String message);
     void log(long time, int port, String message);
     void log(long time, int port, Throwable throwable);
     void log(long time, int port, String message, Throwable throwable);

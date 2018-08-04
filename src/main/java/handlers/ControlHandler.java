@@ -26,6 +26,7 @@ import server.ServerManager;
 import common.Notifier;
 
 public class ControlHandler implements HttpHandler {
+
     private final int port;
     private final ExpectationMatcher expectationMatcher;
     private final Notifier serverNotifier;
@@ -36,16 +37,15 @@ public class ControlHandler implements HttpHandler {
         this.serverNotifier = serverNotifier;
     }
 
-
     @Override
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
-            if (serverNotifier!= null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, "Server on port "+port+" is shutting down");
+            if (serverNotifier != null) {
+                serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, null, "Server on port " + port + " is shutting down");
             }
             ServerManager.stopServer(port);
-            
-            String response = "Server on port "+port+" will stop";
+
+            String response = "Server on port " + port + " will stop";
             he.sendResponseHeaders(200, response.length());
             try (OutputStream os = he.getResponseBody()) {
                 os.write(response.getBytes());

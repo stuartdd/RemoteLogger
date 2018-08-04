@@ -91,7 +91,7 @@ public class ServerThread extends Thread {
     private synchronized void newState(ServerState state, String additional) {
         serverState = state;
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, "");
+            serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, null, "");
             serverNotifier.log(System.currentTimeMillis(), port, serverState + (additional == null ? "" : ". " + additional));
         }
     }

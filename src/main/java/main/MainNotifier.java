@@ -17,6 +17,7 @@
 package main;
 
 import common.Action;
+import common.ActionOn;
 import common.Notifier;
 
 /**
@@ -32,8 +33,8 @@ public class MainNotifier implements Notifier {
     }
 
     @Override
-    public void notifyAction(long time, int port, Action action, String message) {
-        Main.notifyAction(time, port, action, message);
+    public void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
+        Main.notifyAction(time, port, action, actionOn, message);
     }
 
     @Override

@@ -17,6 +17,8 @@
 package main;
 
 import common.Action;
+import common.ActionOn;
+import expectations.Expectations;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
@@ -33,6 +35,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -54,6 +57,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private LogLine firstLog = null;
     private LogLine lastLog = firstLog;
+
+    @FXML
+    private ListView expectationsListView;
 
     @FXML
     private CheckBox checkBoxTime;
@@ -141,12 +147,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     public void clearMainLogAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, "Log has been cleared");
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
     }
 
     @FXML
     public void clearLogAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_LOGS, "Log has been cleared");
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_LOGS, null, "Log has been cleared");
     }
 
     @FXML
@@ -172,7 +178,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void checkBoxShowPortAction() {
         ServerManager.setShowPort(getSelectedPort(), checkBoxShowPort.isSelected());
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.LOG_REFRESH, "Log has been Updated");
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.LOG_REFRESH, null, "Log has been Updated");
     }
 
     @FXML
@@ -195,8 +201,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @Override
-    public boolean notifyAction(long time, int port, Action action, String message) {
+    public boolean notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
         switch (action) {
+            case LOAD_EXPECTATIONS:
+                refreshExpectationsTab((Expectations) actionOn);
+                break;
             case CLEAR_LOGS:
                 resetLog();
                 updateLog(time, port, LogCatagory.CLEAR, null);
@@ -233,6 +242,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
         }
         return true;
+    }
+
+    private void refreshExpectationsTab(Expectations expecttations) {
+        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(expecttations)));
     }
 
     private void updateMainLog(long time, int port, LogCatagory cat, String message) {

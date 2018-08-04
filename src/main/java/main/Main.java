@@ -17,6 +17,7 @@
 package main;
 
 import common.Action;
+import common.ActionOn;
 import common.Util;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -76,13 +77,13 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void notifyAction(long time, int port, Action action, String message) {
-       if (!headless) {
+    public static void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
+        if (!headless) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     for (ApplicationController ap : CONTROLLERS) {
-                        ap.notifyAction(time, port, action, message);
+                        ap.notifyAction(time, port, action, actionOn, message);
                     }
                 }
             });
@@ -110,7 +111,7 @@ public class Main extends Application {
                     config.setShowPort(selected);
                     break;
             }
-            notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, "");
+            notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, null, "");
         }
     }
 
@@ -156,7 +157,7 @@ public class Main extends Application {
                             StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException io) {
                     if (!force) {
-                        Main.notifyAction(System.currentTimeMillis(), -1, Action.CONFIG_SAVE_ERROR, io.toString());
+                        Main.notifyAction(System.currentTimeMillis(), -1, Action.CONFIG_SAVE_ERROR, null, io.toString());
                         return;
                     }
                 }
@@ -172,21 +173,21 @@ public class Main extends Application {
 
     public static void log(long time, int port, String message) {
         if (message != null) {
-            notifyAction(time, port, Action.LOG, message);
+            notifyAction(time, port, Action.LOG, null, message);
             logFinal(time, port, message);
         }
     }
 
     public static void log(long time, int port, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(time, port, Action.LOG, "ERROR:" + throwable.getMessage());
+            notifyAction(time, port, Action.LOG, null, "ERROR:" + throwable.getMessage());
             logFinal(time, port, "ERROR:" + throwable.getMessage());
         }
     }
 
     public static void log(long time, int port, String message, Throwable throwable) {
         if (throwable != null) {
-            notifyAction(time, port, Action.LOG, "ERROR:" + message + ": " + throwable.getMessage());
+            notifyAction(time, port, Action.LOG, null, "ERROR:" + message + ": " + throwable.getMessage());
             logFinal(time, port, "ERROR:" + message + ": " + throwable.getMessage());
         }
     }

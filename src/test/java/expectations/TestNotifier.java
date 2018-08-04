@@ -17,6 +17,7 @@
 package expectations;
 
 import common.Action;
+import common.ActionOn;
 import common.Notifier;
 import org.joda.time.DateTime;
 
@@ -27,7 +28,7 @@ import org.joda.time.DateTime;
 public class TestNotifier implements Notifier {
 
     @Override
-    public void notifyAction(long time, int port, Action action, String message) {
+    public void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
         if (action.equals(Action.SERVER_STATE)) {
             return;
         }

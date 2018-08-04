@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLDocumentController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLDocumentController">
     <top>
         <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
@@ -24,14 +23,14 @@
                 <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#connectAction" text="Connect" />
                 <Label text="Port:" />
                 <ChoiceBox fx:id="textFieldPortNumber" prefHeight="25.0" prefWidth="86.0" />
-            <Separator disable="true" orientation="VERTICAL" prefHeight="0.0" prefWidth="2.0" visible="false" />
-            <CheckBox fx:id="checkBoxAutoStart" mnemonicParsing="false" onAction="#checkBoxAutoStartAction" text="Auto-Start" />
-            <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="9.0" visible="false" />
-            <CheckBox fx:id="checkBoxShowPort" mnemonicParsing="false" onAction="#checkBoxShowPortAction" text="Show" />
+                <Separator disable="true" orientation="VERTICAL" prefHeight="0.0" prefWidth="2.0" visible="false" />
+                <CheckBox fx:id="checkBoxAutoStart" mnemonicParsing="false" onAction="#checkBoxAutoStartAction" text="Auto-Start" />
+                <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="9.0" visible="false" />
+                <CheckBox fx:id="checkBoxShowPort" mnemonicParsing="false" onAction="#checkBoxShowPortAction" text="Show" />
                 <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="19.0" />
                 <CheckBox fx:id="checkBoxTime" mnemonicParsing="false" onAction="#checkBoxTimeAction" text="Time" />
-            <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="0.0" />
-            <CheckBox fx:id="checkBoxPort" mnemonicParsing="false" onAction="#checkBoxPortAction" text="Port" />
+                <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="0.0" />
+                <CheckBox fx:id="checkBoxPort" mnemonicParsing="false" onAction="#checkBoxPortAction" text="Port" />
             </items>
         </ToolBar>
     </top>
@@ -47,47 +46,55 @@
         <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Requests">
-               <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <center>
-                        <TextArea fx:id="textAreaLogging" editable="false" prefHeight="329.0" prefWidth="627.0" BorderPane.alignment="CENTER">
-                            <font>
-                                <Font name="Courier New" size="12.0" />
-                            </font>
-                        </TextArea>
-                     </center>
-                     <top>
-                        <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                          <items>
-                                  <Button mnemonicParsing="false" onAction="#clearMainLogAction" text="Clear" />
-                                  <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="20.0" />
-                                  <CheckBox fx:id="checkBoxHeaders" mnemonicParsing="false" onAction="#checkBoxHeadersAction" text="Headers" />
-                                  <CheckBox fx:id="checkBoxBody" mnemonicParsing="false" onAction="#checkBoxBodyAction" text="Body" />
-                                  <CheckBox fx:id="checkBoxEmpty" mnemonicParsing="false" onAction="#checkBoxEmptyAction" text="Empty" />
-                          </items>
-                        </ToolBar>
-                     </top>
-                  </BorderPane>
-               </content>
+                    <content>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                            <center>
+                                <TextArea fx:id="textAreaLogging" editable="false" prefHeight="329.0" prefWidth="627.0" BorderPane.alignment="CENTER">
+                                    <font>
+                                        <Font name="Courier New" size="12.0" />
+                                    </font>
+                                </TextArea>
+                            </center>
+                            <top>
+                                <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                    <items>
+                                        <Button mnemonicParsing="false" onAction="#clearMainLogAction" text="Clear" />
+                                        <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="20.0" />
+                                        <CheckBox fx:id="checkBoxHeaders" mnemonicParsing="false" onAction="#checkBoxHeadersAction" text="Headers" />
+                                        <CheckBox fx:id="checkBoxBody" mnemonicParsing="false" onAction="#checkBoxBodyAction" text="Body" />
+                                        <CheckBox fx:id="checkBoxEmpty" mnemonicParsing="false" onAction="#checkBoxEmptyAction" text="Empty" />
+                                    </items>
+                                </ToolBar>
+                            </top>
+                        </BorderPane>
+                    </content>
                 </Tab>
                 <Tab text="Logs">
                     <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <center>
-                        <TextArea fx:id="textAreaLog" editable="false" prefHeight="329.0" prefWidth="627.0" BorderPane.alignment="CENTER">
-                            <font>
-                                <Font name="Courier New" size="12.0" />
-                            </font>
-                        </TextArea>
-                     </center>
-                     <top>
-                        <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                          <items>
-                            <Button mnemonicParsing="false" onAction="#clearLogAction" text="Clear" />
-                          </items>
-                        </ToolBar>
-                     </top>
-                  </BorderPane>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                            <center>
+                                <TextArea fx:id="textAreaLog" editable="false" prefHeight="329.0" prefWidth="627.0" BorderPane.alignment="CENTER">
+                                    <font>
+                                        <Font name="Courier New" size="12.0" />
+                                    </font>
+                                </TextArea>
+                            </center>
+                            <top>
+                                <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                    <items>
+                                        <Button mnemonicParsing="false" onAction="#clearLogAction" text="Clear" />
+                                    </items>
+                                </ToolBar>
+                            </top>
+                        </BorderPane>
+                    </content>
+                </Tab>
+                <Tab text="Expectations">
+                    <content>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <left>
+                        <ListView fx:id="expectationsListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     </left></BorderPane>
                     </content>
                 </Tab>
             </tabs>

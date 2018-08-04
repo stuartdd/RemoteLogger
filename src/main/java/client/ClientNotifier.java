@@ -17,6 +17,7 @@
 package client;
 
 import common.Action;
+import common.ActionOn;
 import common.Notifier;
 import org.joda.time.DateTime;
 
@@ -33,7 +34,7 @@ public class ClientNotifier implements Notifier {
     }
 
     @Override
-    public void notifyAction(long time, int port, Action action, String message) {
+    public void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
         if (verbose && (message != null) && (action != null)) {
             System.out.println(getTimeStamp(time) + (port <= 0?"":" ["+port+"] ") + action.name() + " " + message);
         }

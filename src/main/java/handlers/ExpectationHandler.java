@@ -59,7 +59,7 @@ public class ExpectationHandler implements HttpHandler {
         if (body != null) {
             String bodyTrim = body.trim();
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(time, port, Action.LOG_BODY, bodyTrim);
+                serverNotifier.notifyAction(time, port, Action.LOG_BODY, null, bodyTrim);
             }
             map.put("BODY", bodyTrim);
             map.put("BODY-TYPE", Util.detirmineBodyType(bodyTrim));
@@ -67,13 +67,13 @@ public class ExpectationHandler implements HttpHandler {
             map.put("BODY-TYPE", BodyType.EMPTY);
         }
         if (serverNotifier != null) {
-            serverNotifier.notifyAction(time, port, Action.LOG_HEADER, "METHOD:" + he.getRequestMethod());
+            serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "METHOD:" + he.getRequestMethod());
         }
         map.put("METHOD", he.getRequestMethod());
         String path = Util.trimmedNull(he.getRequestURI().getPath());
         if (path != null) {
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, "PATH:" + he.getRequestURI().getPath());
+                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "PATH:" + he.getRequestURI().getPath());
             }
             map.put("PATH", he.getRequestURI().getPath());
             splitIntoMap(map, null, "PATH", '/');
@@ -81,7 +81,7 @@ public class ExpectationHandler implements HttpHandler {
         String query = Util.trimmedNull(he.getRequestURI().getQuery());
         if (query != null) {
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, "QUERY:" + he.getRequestURI().getQuery());
+                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "QUERY:" + he.getRequestURI().getQuery());
             }
             map.put("QUERY", he.getRequestURI().getQuery());
             splitIntoMap(map, queries, "QUERY", '&');
@@ -92,7 +92,7 @@ public class ExpectationHandler implements HttpHandler {
             map.put("HEAD." + head, value);
             headers.put(head, value);
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, "HEADER: " + head + "=" + value);
+                serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "HEADER: " + head + "=" + value);
             }
         }
         map.put("INFO.BodyMapped", "false");

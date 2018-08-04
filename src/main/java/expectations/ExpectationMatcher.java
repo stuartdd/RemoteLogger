@@ -18,6 +18,7 @@ package expectations;
 
 import common.BodyType;
 import com.sun.net.httpserver.HttpExchange;
+import common.Action;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +53,7 @@ public class ExpectationMatcher {
         this.serverNotifier = serverNotifier;
         this.expectations = expectations;
         testExpectations(expectations);
-     }
+    }
 
     public ExpectationMatcher(String fileName, Notifier serverNotifier) {
         this.serverNotifier = serverNotifier;
@@ -120,7 +121,7 @@ public class ExpectationMatcher {
         }
         return new MockResponse(response, statusCode, responseHeaders);
     }
-    
+
     public boolean hasNoExpectations() {
         return ((expectations == null) || (expectations.getExpectations().isEmpty()));
     }
@@ -328,18 +329,21 @@ public class ExpectationMatcher {
             expectationsLoadTime = 0;
         }
         testExpectations(expectations);
+        if (serverNotifier != null) {
+            serverNotifier.notifyAction(System.currentTimeMillis(), -1, Action.LOAD_EXPECTATIONS, expectations, "Expectations loaded OK");
+        }
     }
 
     private void reloadExpectations(long time, int port) {
         if (expectationsFile != null) {
             if (expectationsFile.lastModified() != expectationsLoadTime) {
-
                 Expectations temp = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
                 try {
                     testExpectations(temp);
                     expectations = temp;
                     expectationsLoadTime = expectationsFile.lastModified();
                     if (serverNotifier != null) {
+                        serverNotifier.notifyAction(System.currentTimeMillis(), -1, Action.LOAD_EXPECTATIONS, expectations, "Expectations loaded OK");
                         serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
                     }
                 } catch (ExpectationException ex) {
@@ -370,4 +374,4 @@ public class ExpectationMatcher {
         }
     }
 
- }
+}

@@ -17,11 +17,12 @@
 package main;
 
 import common.Action;
+import common.ActionOn;
 
 /**
  *
  * @author stuart
  */
 public interface ApplicationController {
-    boolean notifyAction(long time, int port, Action s, String message);
+    boolean notifyAction(long time, int port, Action s, ActionOn actionOn, String message);
 }

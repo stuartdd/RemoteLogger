@@ -16,6 +16,7 @@
  */
 package expectations;
 
+import common.ActionOn;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;
@@ -24,7 +25,7 @@ import json.JsonUtils;
  *
  * @author 802996013
  */
-public class Expectations {
+public class Expectations implements ActionOn {
 
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;

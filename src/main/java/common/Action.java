@@ -29,5 +29,6 @@ public enum Action {
     CLEAR_MAIN_LOGS,
     CLEAR_LOGS,
     SCROLL_TO_END,
-    SERVER_STATE
+    SERVER_STATE,
+    LOAD_EXPECTATIONS
 }

@@ -72,5 +72,4 @@ public class StandAloneWithConfigAndCallbackReloaded2Test {
         assertEquals("PATH[0]=test PATH[1]=get PATH[2]=parts [PATH[3]] QUERY.q1=ONE QUERY.q2=TWO [QUERY.q3]", r.getBody());
         assertEquals(200, r.getStatus());
     }
-
 }
