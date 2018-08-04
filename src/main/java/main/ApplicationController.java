@@ -25,4 +25,5 @@ import common.ActionOn;
  */
 public interface ApplicationController {
     boolean notifyAction(long time, int port, Action s, ActionOn actionOn, String message);
+    void updateConfig(ConfigData configData);
 }

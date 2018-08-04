@@ -138,6 +138,10 @@ public class Util {
     }
 
     public static String cleanString(String in) {
+        return cleanString(in, Integer.MAX_VALUE);
+    }
+    
+    public static String cleanString(String in, int max) {
         if (in == null) {
             return null;
         }
@@ -146,6 +150,9 @@ public class Util {
             if ((c >= ' ') && (c < 127)) {
                 sb.append(c);
             }
+        }
+        if (sb.length()>max) {
+            sb.setLength(max);
         }
         return sb.toString();
     }

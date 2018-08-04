@@ -46,6 +46,7 @@ public class ConfigData extends Config {
     private double y;
     private double width;
     private double height;
+    private double[] expDividerPos;
 
     private static String writeFileName;
     private static String readFileName;
@@ -135,6 +136,14 @@ public class ConfigData extends Config {
 
     public void setHeight(double height) {
         this.height = height;
+    }
+
+    public double[] getExpDividerPos() {
+        return expDividerPos;
+    }
+
+    public void setExpDividerPos(double[] expDividerPos) {
+        this.expDividerPos = expDividerPos;
     }
 
     public boolean isIncludeHeaders() {

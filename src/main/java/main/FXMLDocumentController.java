@@ -18,6 +18,8 @@ package main;
 
 import common.Action;
 import common.ActionOn;
+import common.Util;
+import expectations.Expectation;
 import expectations.Expectations;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -36,12 +38,15 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import json.JsonUtils;
 import server.ServerManager;
 
 /**
@@ -59,7 +64,16 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private LogLine lastLog = firstLog;
 
     @FXML
+    private TextArea expectationTextAreaErrors;
+
+    @FXML
     private ListView expectationsListView;
+
+    @FXML
+    private SplitPane expectationsSplitPane;
+
+    @FXML
+    private TextArea expectationTextArea;
 
     @FXML
     private CheckBox checkBoxTime;
@@ -109,6 +123,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
             }
         });
+        expectationsListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if (oldValue != newValue) {
+                    expectationsListViewChanged();
+                }
+            }
+        });
         if (!ServerManager.isShowPort(Main.getConfig().getDefaultPort())) {
             ServerManager.setShowPort(Main.getConfig().getDefaultPort(), true);
         }
@@ -123,10 +145,23 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        Main.addApplicationController(this);
+        Main.setApplicationController(this);
         resetMainLog();
         ServerManager.autoStartServers();
         updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
+        /*
+        Do some stuff later in a separate thread!
+         */
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
+                    expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
+                }
+                expectationsListView.getSelectionModel().select(0);
+                expectationTextAreaKeyTyped();
+            }
+        });
     }
 
     @FXML
@@ -135,14 +170,29 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @FXML
-    public void portNumberChanged() {
+    public void expectationTextAreaKeyTyped() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                updatePortStatus();
-
+                String json = expectationTextArea.getText();
+                try {
+                    JsonUtils.beanFromJson(Expectation.class, json);
+                    setExpectationTextAreaInfo(true, "OK");
+                } catch (Exception ex) {
+                    setExpectationTextAreaInfo(false, ex.getCause().getMessage());
+                }
+                Util.sleep(80);
             }
         });
+    }
+
+    private void setExpectationTextAreaInfo(boolean ok, String message) {
+        Color colour = (ok ? Color.LIGHTGREEN : Color.PINK);
+        Region region1 = (Region) expectationTextArea.lookup(".content");
+        Region region2 = (Region) expectationTextAreaErrors.lookup(".content");
+        region1.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
+        region2.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
+        expectationTextAreaErrors.setText(message);
     }
 
     @FXML
@@ -204,7 +254,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public boolean notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
         switch (action) {
             case LOAD_EXPECTATIONS:
-                refreshExpectationsTab((Expectations) actionOn);
+                expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap((Expectations) actionOn)));
                 break;
             case CLEAR_LOGS:
                 resetLog();
@@ -244,8 +294,15 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
-    private void refreshExpectationsTab(Expectations expecttations) {
-        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(expecttations)));
+    public void updateConfig(ConfigData configData) {
+        if (expectationsSplitPane != null) {
+            int count = expectationsSplitPane.getDividers().size();
+            double[] pos = new double[count];
+            for (int i = 0; i < count; i++) {
+                pos[i] = expectationsSplitPane.getDividers().get(i).getPosition();
+            }
+            configData.setExpDividerPos(pos);
+        }
     }
 
     private void updateMainLog(long time, int port, LogCatagory cat, String message) {
@@ -345,6 +402,33 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             line = line.getNext();
         }
         return sb.toString().trim();
+    }
+
+    private void portNumberChanged() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updatePortStatus();
+
+            }
+        });
+    }
+
+    private void expectationsListViewChanged() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                updateExpectationsListSelection();
+            }
+        });
+    }
+
+    private void updateExpectationsListSelection() {
+        expectationTextArea.setText(JsonUtils.toJsonFormatted(getSelectedExpectation()));
+    }
+
+    private Expectation getSelectedExpectation() {
+        return ((ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem()).getExpectation();
     }
 
     private int getSelectedPort() {

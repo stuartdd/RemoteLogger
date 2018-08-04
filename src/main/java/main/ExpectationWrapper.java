@@ -37,6 +37,10 @@ public class ExpectationWrapper {
     public String toString() {
         return expectation.getName();
     }
+
+    public Expectation getExpectation() {
+        return expectation;
+    }
     
     public static List<ExpectationWrapper> wrap(Expectations expectations) {
         List<ExpectationWrapper> list = new ArrayList<>();

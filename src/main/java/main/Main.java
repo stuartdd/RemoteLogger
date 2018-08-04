@@ -45,7 +45,7 @@ public class Main extends Application {
     private static final int PORT_NUMBER = 1088;
     private static final Charset CHARSET = Charset.forName("UTF-8");
     private static boolean headless = false;
-    private static final List<ApplicationController> CONTROLLERS = new ArrayList<>();
+    private static ApplicationController applicationController;
     private static Stage mainStage;
     private static ConfigData config;
     private static String configName;
@@ -82,9 +82,7 @@ public class Main extends Application {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    for (ApplicationController ap : CONTROLLERS) {
-                        ap.notifyAction(time, port, action, actionOn, message);
-                    }
+                    applicationController.notifyAction(time, port, action, actionOn, message);
                 }
             });
         } else {
@@ -115,8 +113,8 @@ public class Main extends Application {
         }
     }
 
-    public static void addApplicationController(ApplicationController applicationController) {
-        CONTROLLERS.add(applicationController);
+    public static void setApplicationController(ApplicationController theApplicationController) {
+        applicationController = theApplicationController;
     }
 
     public static void startServer(int port) {
@@ -149,6 +147,7 @@ public class Main extends Application {
                 config.setY(mainStage.getY());
                 config.setWidth(mainStage.getWidth());
                 config.setHeight(mainStage.getHeight());
+                applicationController.updateConfig(config);
                 try {
                     Files.write(
                             FileSystems.getDefault().getPath(ConfigData.writeFileName()),
