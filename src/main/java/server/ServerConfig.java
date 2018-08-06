@@ -26,7 +26,7 @@ public class ServerConfig {
     private boolean showPort = false;
     private int timeToClose = 1;
     private boolean verbose = true;
-    private boolean logProperties = true;
+    private boolean logProperties;
 
     @JsonIgnore
     private Expectations expectations;
@@ -101,5 +101,7 @@ public class ServerConfig {
     public void setLogProperties(boolean logProperties) {
         this.logProperties = logProperties;
     }
+    
+    
     
 }

@@ -14,34 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package handlers;
+package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import expectations.ExpectationMatcher;
 import java.io.IOException;
 import java.io.OutputStream;
 import common.Action;
-import server.ServerManager;
 import common.Notifier;
 
 public class ControlHandler implements HttpHandler {
 
     private final int port;
-    private final ExpectationMatcher expectationMatcher;
+    private final Server server;
     private final Notifier serverNotifier;
 
-    public ControlHandler(int port, ExpectationMatcher expectationMatcher, Notifier serverNotifier) {
-        this.port = port;
-        this.expectationMatcher = expectationMatcher;
-        this.serverNotifier = serverNotifier;
+    public ControlHandler(Server server) {
+        this.server = server;
+        this.port = server.getPort();
+        this.serverNotifier = server.getServerNotifier();
     }
 
     @Override
     public void handle(HttpExchange he) throws IOException {
         if (he.getRequestURI().toString().contains("/stop")) {
             if (serverNotifier != null) {
-                serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, null, "Server on port " + port + " is shutting down");
+                serverNotifier.notifyAction(System.currentTimeMillis(), port, Action.SERVER_STATE, server, "Server on port " + port + " is shutting down");
             }
             ServerManager.stopServer(port);
 

@@ -31,15 +31,15 @@ public class MockServer {
     private Server server;
 
     public MockServer(int port, ResponseHandler responseHandler, String expectationFile, boolean verbose) {
-        server = new Server(port, new ServerConfig(expectationFile, 0, verbose, false), responseHandler, new MockServerNotifier());
+        server = new Server(port, new ServerConfig(expectationFile, 0, verbose, true), responseHandler, new MockServerNotifier());
     }
     
     public MockServer(int port, ResponseHandler responseHandler, Expectations expectations, boolean verbose) {
-        server = new Server(port, new ServerConfig(expectations, 0, verbose, false), responseHandler, new MockServerNotifier());
+        server = new Server(port, new ServerConfig(expectations, 0, verbose, true), responseHandler, new MockServerNotifier());
     }
     
     public MockServer(int port, ResponseHandler responseHandler, boolean verbose) {
-        server = new Server(port, new ServerConfig(new Expectations(), 0, verbose, false), responseHandler, new MockServerNotifier());
+        server = new Server(port, new ServerConfig(new Expectations(), 0, verbose, true), responseHandler, new MockServerNotifier());
     }
 
     public void setCallBackClass(ResponseHandler responseHandler) {

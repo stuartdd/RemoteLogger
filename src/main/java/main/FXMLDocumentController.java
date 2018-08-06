@@ -46,6 +46,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import json.JsonUtils;
+import server.Server;
 import server.ServerManager;
 
 /**
@@ -96,6 +97,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private LogLine firstLog = null;
     private LogLine lastLog = firstLog;
 
+    private Server selectedServer;
+
     @FXML
     private TextArea expectationTextAreaErrors;
 
@@ -110,7 +113,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private CheckBox checkBoxTime;
-            
+
     @FXML
     private CheckBox checkBoxLogProperties;
 
@@ -143,25 +146,26 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Button buttonConnect;
-    
+
     @FXML
     private Button buttonSaveExpectations;
-    
+
     @FXML
     private Label labelSaveExpectations;
 
     @FXML
-    private ChoiceBox textFieldPortNumber;
+    private ChoiceBox choiceBoxPortNumber;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        textFieldPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
-        textFieldPortNumber.getSelectionModel().select("" + Main.getConfig().getDefaultPort());
-        textFieldPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
+        choiceBoxPortNumber.getSelectionModel().select("" + Main.getConfig().getDefaultPort());
+        choiceBoxPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (oldValue != newValue) {
-                    portNumberChanged();
+                    getSelectedPort();
+                    Main.notifyAction(System.currentTimeMillis(), -1, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
                 }
             }
         });
@@ -176,7 +180,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (!ServerManager.isShowPort(Main.getConfig().getDefaultPort())) {
             ServerManager.setShowPort(Main.getConfig().getDefaultPort(), true);
         }
-        updatePortStatus();
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
         checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
@@ -184,7 +187,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         checkBoxPort.setSelected(Main.getConfig().isShowPort());
         checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
         checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
-        checkBoxLogProperties.setSelected(Main.getConfig().isLogProperties());
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -192,6 +194,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         resetMainLog();
         ServerManager.autoStartServers();
         updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
+        updateServerStatus(ServerManager.getServer(Main.getConfig().getDefaultPort()));
         /*
         Do some stuff later in a separate thread!
          */
@@ -221,7 +224,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
     }
-    
+
     @FXML
     public void buttonSaveExpectationsAction() {
         Main.notifyAction(System.currentTimeMillis(), -1, Action.SAVE_EXPECTATIONS, null, "Save updated expectations");
@@ -234,43 +237,43 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     public void checkBoxTimeAction() {
-        Main.notifyOption(Option.TIME, -1, checkBoxTime.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.TIME, -1, checkBoxTime.isSelected(), "");
     }
-    
+
     @FXML
     public void checkBoxLogPropertiesAction() {
-        Main.notifyOption(Option.LOG_PROPERTIES, -1, checkBoxLogProperties.isSelected(), "");
-    }
-
-    @FXML
-    public void checkBoxPortAction() {
-        Main.notifyOption(Option.PORT, -1, checkBoxPort.isSelected(), "");
-    }
-
-    @FXML
-    public void checkBoxHeadersAction() {
-        Main.notifyOption(Option.FILTER_HEADERS, -1, checkBoxHeaders.isSelected(), "");
+        selectedServer.setLogProperties(checkBoxLogProperties.isSelected());
     }
 
     @FXML
     public void checkBoxAutoStartAction() {
-        ServerManager.setAutoStart(getSelectedPort(), checkBoxAutoStart.isSelected());
+        selectedServer.setAutoStart(checkBoxAutoStart.isSelected());
+    }
+
+    @FXML
+    public void checkBoxPortAction() {
+        Main.notifyConfigChangeOption(Option.PORT, -1, checkBoxPort.isSelected(), "");
+    }
+
+    @FXML
+    public void checkBoxHeadersAction() {
+        Main.notifyConfigChangeOption(Option.FILTER_HEADERS, -1, checkBoxHeaders.isSelected(), "");
     }
 
     @FXML
     public void checkBoxShowPortAction() {
-        ServerManager.setShowPort(getSelectedPort(), checkBoxShowPort.isSelected());
+        selectedServer.setShowPort(checkBoxShowPort.isSelected());
         Main.notifyAction(System.currentTimeMillis(), -1, Action.LOG_REFRESH, null, "Log has been Updated");
     }
 
     @FXML
     public void checkBoxBodyAction() {
-        Main.notifyOption(Option.FILTER_BODY, -1, checkBoxBody.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.FILTER_BODY, -1, checkBoxBody.isSelected(), "");
     }
 
     @FXML
     public void checkBoxEmptyAction() {
-        Main.notifyOption(Option.FILTER_EMPTY, -1, checkBoxEmpty.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.FILTER_EMPTY, -1, checkBoxEmpty.isSelected(), "");
     }
 
     @FXML
@@ -302,6 +305,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 buttonSaveExpectations.setVisible(expectations.loadedFromAFile());
                 labelSaveExpectations.setVisible(!expectations.loadedFromAFile());
                 break;
+            case SERVER_SELECTED:
+                changeSelectedServer((Server) actionOn);
+                break;
+            case SERVER_STATE:
+                updateServerStatus((Server) actionOn);
+                break;
             case CLEAR_LOGS:
                 resetLog();
                 updateLog(time, port, LogCatagory.CLEAR, null);
@@ -324,9 +333,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             case LOG:
                 updateLog(time, port, LogCatagory.LOG, message);
                 labelStatus.setText("Log display refreshed");
-                break;
-            case SERVER_STATE:
-                updatePortStatus();
                 break;
             case CONFIG_SAVE_ERROR:
                 Alert alert = new Alert(AlertType.CONFIRMATION, message + "\n\nConfiguration data was not updated. \n\nPress OK to exit");
@@ -461,16 +467,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return sb.toString().trim();
     }
 
-    private void portNumberChanged() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                updatePortStatus();
-
-            }
-        });
-    }
-
     private void expectationsListViewChanged() {
         Platform.runLater(new Runnable() {
             @Override
@@ -489,37 +485,43 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private int getSelectedPort() {
-        return Integer.parseInt(textFieldPortNumber.getSelectionModel().getSelectedItem().toString());
+        return Integer.parseInt(choiceBoxPortNumber.getSelectionModel().getSelectedItem().toString());
     }
 
-    private void updatePortStatus() {
-        checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
-        checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
-        switch (ServerManager.state(getSelectedPort())) {
+    private void changeSelectedServer(Server server) {
+        selectedServer = server;
+        checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
+        checkBoxShowPort.setSelected(selectedServer.isShowPort());
+        checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
+        updateServerStatus(server);
+    }
+
+    private void updateServerStatus(Server server) {
+        switch (selectedServer.getServerState()) {
             case SERVER_STARTING:
             case SERVER_STOPPING:
                 buttonConnect.setDisable(true);
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
+                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_STOPPED:
                 buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_RUNNING:
                 buttonConnect.setDisable(false);
                 buttonConnect.setText("Stop");
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_FAIL:
                 buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
             case SERVER_PENDING:
                 buttonConnect.setDisable(false);
                 buttonConnect.setText("Start");
-                textFieldPortNumber.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
         }
     }

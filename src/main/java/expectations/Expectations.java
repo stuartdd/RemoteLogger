@@ -73,20 +73,20 @@ public class Expectations implements ActionOn {
     public Expectations addExpectation(String json) {
         Expectation ex = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
         expectations.add(ex);
-        ExpectationMatcher.testExpectations(this);
+        ExpectationManager.testExpectations(this);
         return this;
     }
     
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
         expectations.addExpectation(json);
-        ExpectationMatcher.testExpectations(expectations);
+        ExpectationManager.testExpectations(expectations);
         return expectations;
     }
     
     public static Expectations fromString(String json) {
         Expectations ex = (Expectations) JsonUtils.beanFromJson(Expectations.class, json);
-        ExpectationMatcher.testExpectations(ex);
+        ExpectationManager.testExpectations(ex);
         if (ex.getExpectations().isEmpty()) {
             throw new ExpectationException("Expectations are empty.", 500);
         }

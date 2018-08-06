@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package handlers;
+package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import common.Action;
 import common.Util;
-import expectations.ExpectationMatcher;
+import expectations.ExpectationManager;
 import common.Notifier;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
@@ -38,15 +38,17 @@ import server.ResponseHandler;
 public class ExpectationHandler implements HttpHandler {
 
     private final int port;
-    private final ExpectationMatcher expectationMatcher;
+    private final Server server;
+    private final ExpectationManager expectationManager;
     private ResponseHandler responseHandler;
     private final Notifier serverNotifier;
 
-    public ExpectationHandler(int port, ExpectationMatcher expectationMatcher, ResponseHandler responseHandler, Notifier serverNotifier) {
-        this.port = port;
-        this.expectationMatcher = expectationMatcher;
-        this.responseHandler = responseHandler;
-        this.serverNotifier = serverNotifier;
+    public ExpectationHandler(Server server) {
+        this.server = server;
+        this.port = server.getPort();
+        this.expectationManager = server.getExpectationManager();
+        this.responseHandler = server.getResponseHandler();
+        this.serverNotifier = server.getServerNotifier();
     }
 
     @Override
@@ -98,7 +100,7 @@ public class ExpectationHandler implements HttpHandler {
         map.put("INFO.BodyMapped", "false");
 
         if (responseHandler != null) {
-            MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationMatcher);
+            MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationManager);
             MockResponse mockResponse = responseHandler.handle(mockRequest, map);
             if (mockResponse != null) {
                 mockResponse.respond(he, map);
@@ -106,10 +108,10 @@ public class ExpectationHandler implements HttpHandler {
             }
         }
 
-        if (expectationMatcher.hasNoExpectations()) {
+        if (expectationManager.hasNoExpectations()) {
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
-            expectationMatcher.getResponse(time, port, he, map, headers, queries);
+            expectationManager.getResponse(time, port, he, map, headers, queries);
         }
 
     }

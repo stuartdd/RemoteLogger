@@ -1,6 +1,6 @@
 {
   "servers" : {
-    "1998" : {
+    "1999" : {
       "expectationsFile" : "expectations.json",
       "autoStart" : true,
       "showPort" : true,
@@ -8,7 +8,7 @@
       "verbose" : true,
       "logProperties" : true
     },
-    "1999" : {
+    "1998" : {
       "expectationsFile" : "expectations.json",
       "autoStart" : true,
       "showPort" : true,
@@ -25,10 +25,9 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "logProperties" : true,
-  "x" : 264.0,
-  "y" : 30.0,
+  "x" : 392.0,
+  "y" : 1258.0,
   "width" : 1471.0,
   "height" : 817.0,
-  "expDividerPos" : [ 0.13626978664831382, 0.6703372333103923 ]
+  "expDividerPos" : [ 0.13614703880190607, 0.6705241660993874 ]
 }

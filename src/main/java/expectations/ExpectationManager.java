@@ -40,7 +40,7 @@ import mockServer.MockResponse;
  *
  * @author 802996013
  */
-public class ExpectationMatcher {
+public class ExpectationManager {
 
     private static final String NL = System.getProperty("line.separator");
     private static final String LS = "-----------------------------------------------------------" + NL;
@@ -49,22 +49,25 @@ public class ExpectationMatcher {
     private File expectationsFile;
     private long expectationsLoadTime;
     private boolean logProperties;
+    private boolean loadedFromAFile;
 
 
-    public ExpectationMatcher(Expectations expectations, Notifier serverNotifier, boolean logProperties) {
+    public ExpectationManager(Expectations expectations, Notifier serverNotifier, boolean logProperties) {
         this.serverNotifier = serverNotifier;
         this.expectations = expectations;
         this.logProperties = logProperties;
+        loadedFromAFile = false;
         testExpectations(expectations);
     }
 
-    public ExpectationMatcher(String fileName, Notifier serverNotifier, boolean logProperties) {
+    public ExpectationManager(String fileName, Notifier serverNotifier, boolean logProperties) {
         this.serverNotifier = serverNotifier;
         if ((fileName == null) || (fileName.trim().length() == 0)) {
             expectations = null;
             expectationsFile = null;
             return;
         }
+        loadedFromAFile = false;
         loadExpectations(fileName);
     }
 
@@ -126,6 +129,10 @@ public class ExpectationMatcher {
 
     public boolean hasNoExpectations() {
         return ((expectations == null) || (expectations.getExpectations().isEmpty()));
+    }
+
+    public boolean isLoadedFromAFile() {
+        return loadedFromAFile;
     }
 
     private Expectation findMatchingExpectation(long time, int port, Map<String, Object> map) {
@@ -291,9 +298,9 @@ public class ExpectationMatcher {
     }
 
     private String readResource(int port, String file, String list) throws IOException {
-        InputStream is = ExpectationMatcher.class.getResourceAsStream(file);
+        InputStream is = ExpectationManager.class.getResourceAsStream(file);
         if (is == null) {
-            is = ExpectationMatcher.class.getResourceAsStream("/" + file);
+            is = ExpectationManager.class.getResourceAsStream("/" + file);
         }
         if (is == null) {
             if (serverNotifier != null) {
@@ -313,7 +320,6 @@ public class ExpectationMatcher {
     }
 
     private void loadExpectations(String expectationsFileName) {
-        boolean loadedFromAFile = false;
         File file = new File(expectationsFileName);
         if (file.exists()) {
             expectationsFile = file;
@@ -322,9 +328,9 @@ public class ExpectationMatcher {
             expectationsLoadTime = file.lastModified();
             loadedFromAFile = true;
         } else {
-            InputStream is = ExpectationMatcher.class.getResourceAsStream(expectationsFileName);
+            InputStream is = ExpectationManager.class.getResourceAsStream(expectationsFileName);
             if (is == null) {
-                is = ExpectationMatcher.class.getResourceAsStream("/" + expectationsFileName);
+                is = ExpectationManager.class.getResourceAsStream("/" + expectationsFileName);
                 if (is == null) {
                     throw new ExpectationException("Expectations file: " + expectationsFileName + " not found (File or classpath)", 500);
                 }

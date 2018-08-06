@@ -88,7 +88,7 @@ public class Main extends Application {
         }
     }
 
-    public static void notifyOption(Option option, int port, boolean selected, String message) {
+    public static void notifyConfigChangeOption(Option option, int port, boolean selected, String message) {
         if (!headless) {
             switch (option) {
                 case FILTER_HEADERS:
@@ -102,9 +102,6 @@ public class Main extends Application {
                     break;
                 case TIME:
                     config.setShowTime(selected);
-                    break;
-                case LOG_PROPERTIES:
-                    config.setLogProperties(selected);
                     break;
                 case PORT:
                     config.setShowPort(selected);
@@ -250,7 +247,7 @@ public class Main extends Application {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
         if ((config.getServers() == null) || (config.getServers().isEmpty())) {
-            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, config.isLogProperties()));
+            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
             config.setDefaultPort(PORT_NUMBER);
         }
         for (String portStr : config.getServers().keySet()) {

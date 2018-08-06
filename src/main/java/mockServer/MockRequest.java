@@ -17,7 +17,7 @@
 package mockServer;
 
 import com.sun.net.httpserver.HttpExchange;
-import expectations.ExpectationMatcher;
+import expectations.ExpectationManager;
 import java.util.Map;
 
 /**
@@ -33,9 +33,9 @@ public class MockRequest {
     private final String body;
     private final String path;
     private final String method;
-    private final ExpectationMatcher expectationMatcher;
+    private final ExpectationManager expectationMatcher;
 
-    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationMatcher expectationMatcher) {
+    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationManager expectationMatcher) {
         this.port = port;
         this.map = map;
         this.headers = headers;

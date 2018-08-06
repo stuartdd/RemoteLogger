@@ -16,6 +16,7 @@
  */
 package server;
 
+import common.ActionOn;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import common.Notifier;
@@ -42,7 +43,7 @@ public class ServerManager {
         servers.put(port, new Server(port, config, null, serverNotifier));
     }
 
-    public static boolean isPortRunning(int port) {
+    public static boolean isServerRunning(int port) {
         Server server = servers.get(port);
         if (server != null) {
             return server.isRunning();
@@ -50,10 +51,10 @@ public class ServerManager {
         return false;
     }
 
-    public static ServerState state(int port) {
+    public static ServerState getServerState(int port) {
         Server server = servers.get(port);
         if (server != null) {
-            return server.state();
+            return server.getServerState();
         }
         return ServerState.SERVER_STOPPED;
     }
@@ -140,13 +141,30 @@ public class ServerManager {
         return in;
     }
 
+    
+    public static int[] portListSorted() {
+        int[] pl = new int[servers.size()];
+        int pos = 0;
+        for (Integer key:servers.keySet()) {
+            pl[pos] = key;
+            pos++;
+        }
+        Arrays.sort(pl);
+        return pl;
+    }
+    
     public static List<String> portList() {
         List<String> l = new ArrayList<>();
-        for (int p : ports()) {
+        for (int p : portListSorted()) {
             l.add("" + p);
         }
         return l;
     }
+
+    public static Server getServer(int port) {
+        return servers.get(port);
+    }
+    
 
 
 }

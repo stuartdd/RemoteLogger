@@ -27,7 +27,7 @@
                 <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="1.0" />
                 <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#connectAction" text="Connect" />
                 <Label text="Port:" />
-                <ChoiceBox fx:id="textFieldPortNumber" prefHeight="25.0" prefWidth="86.0" />
+                <ChoiceBox fx:id="choiceBoxPortNumber" prefHeight="25.0" prefWidth="86.0" />
                 <Separator disable="true" orientation="VERTICAL" prefHeight="0.0" prefWidth="2.0" visible="false" />
                 <CheckBox fx:id="checkBoxAutoStart" mnemonicParsing="false" onAction="#checkBoxAutoStartAction" text="Auto-Start" />
                 <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="9.0" visible="false" />
