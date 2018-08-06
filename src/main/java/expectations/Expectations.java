@@ -16,6 +16,7 @@
  */
 package expectations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import common.ActionOn;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,10 @@ public class Expectations implements ActionOn {
 
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;
-    private boolean listMap;
+    private boolean logProperies;
+    
+    @JsonIgnore
+    private boolean loadedFromAFile = false;
 
     public List<Expectation> getExpectations() {
         return expectations;
@@ -47,16 +51,17 @@ public class Expectations implements ActionOn {
         this.paths = paths;
     }
 
-    public boolean isListMap() {
-        return listMap;
+    public boolean isLogProperies() {
+        return logProperies;
     }
 
-    public void setListMap(boolean listMap) {
-        this.listMap = listMap;
+    public void setLogProperies(boolean logProperies) {
+        this.logProperies = logProperies;
     }
 
-    public Expectations withListMap(boolean listMap) {
-        this.setListMap(listMap);
+
+    public Expectations withLogProperies(boolean listMap) {
+        this.setLogProperies(listMap);
         return this;
     }
     
@@ -87,4 +92,14 @@ public class Expectations implements ActionOn {
         }
         return ex;
     }
+
+    public boolean loadedFromAFile() {
+        return loadedFromAFile;
+    }
+    
+    public boolean wasLoadedFromAFile() {
+        return loadedFromAFile = true;
+    }
+    
+    
 }

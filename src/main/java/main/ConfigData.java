@@ -42,6 +42,7 @@ public class ConfigData extends Config {
     private boolean includeEmpty = false;
     private boolean showTime = true;
     private boolean showPort = true;
+    private boolean logProperties = true;
     private double x;
     private double y;
     private double width;
@@ -168,6 +169,14 @@ public class ConfigData extends Config {
 
     public void setIncludeEmpty(boolean includeEmpty) {
         this.includeEmpty = includeEmpty;
+    }
+
+    public boolean isLogProperties() {
+        return logProperties;
+    }
+
+    public void setLogProperties(boolean logProperties) {
+        this.logProperties = logProperties;
     }
 
     public String getTimeFormat() {

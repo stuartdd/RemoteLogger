@@ -48,9 +48,9 @@ public class ServerThread extends Thread {
         this.canRun = true;
         newState(ServerState.SERVER_PENDING, "");
         if (config.expectations() == null) {
-            expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier);
+            expectationMatcher = new ExpectationMatcher(config.getExpectationsFile(), serverNotifier, config.isLogProperties());
         } else {
-            expectationMatcher = new ExpectationMatcher(config.expectations(), serverNotifier);
+            expectationMatcher = new ExpectationMatcher(config.expectations(), serverNotifier, config.isLogProperties());
         }
         if (expectationMatcher.hasNoExpectations()) {
             if (serverNotifier != null) {

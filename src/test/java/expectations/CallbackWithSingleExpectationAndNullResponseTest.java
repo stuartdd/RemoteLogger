@@ -64,7 +64,7 @@ public class CallbackWithSingleExpectationAndNullResponseTest {
                 */
                 return  null;
             }
-        }, expectations.withListMap(true), true)).start();
+        }, expectations.withLogProperies(true), true)).start();
     }
 
     @AfterClass

@@ -18,7 +18,6 @@ package main;
 
 import common.Action;
 import common.ActionOn;
-import common.Util;
 import expectations.Expectation;
 import expectations.Expectations;
 import java.net.URL;
@@ -55,6 +54,40 @@ import server.ServerManager;
  */
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
 
+    private static final String EXAMPLE_JSON = "{\n"
+            + "  \"name\" : \"Unique Name for Expectation\",\n"
+            + "  \"method\" : \"[4] Method Equals: GET, POST, PUT, DELETE etc.\",\n"
+            + "  \"path\" : \"[1] Matching Path: E.g. /test/post/xml\",\n"
+            + "  \"bodyType\" : \"[4] Body Type Equals: From: XML, JSON, HTML, TXT, EMPTY\",\n"
+            + "  \"asserts\" : {\n"
+            + "    \"Name of property 1\" : \"[1] Value of property 1 must match\",\n"
+            + "    \"Name of property 2\" : \"[1] Value of property 2 must match\"\n"
+            + "  },\n"
+            + "  \"response\" : {\n"
+            + "    \"body\" : \"[3] Response body text\",\n"
+            + "    \"status\" : 200,\n"
+            + "    \"template\" : \"[2] [3] File or Resource to read response body from\",\n"
+            + "    \"headers\" : { "
+            + "         \"Accept\": \"%{HEAD.Accept}\",\n"
+            + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    private static final Expectation EXAMPLE = (Expectation) JsonUtils.beanFromJson(Expectation.class, EXAMPLE_JSON);
+    private static final String EXAMPLE_HEAD = "Example Expectation (annotated):";
+    private static final String EXAMPLE_NOTES = "Notes:\n"
+            + "All fields are optional excep name.\n"
+            + "[1] Matching or match examples:\n"
+            + "  'BBC' Exact match\n"
+            + "  '\\\\*BBC' Exact match '*BBC'\n"
+            + "  '*BBC*' Contains\n"
+            + "  'BBC*AAA' Starts with BBC and ends With AAA\n"
+            + "  'BBC*' Starts with\n"
+            + "  '*BBC' Ends With\n"
+            + "[2] Template is loaded only if body is null\n"
+            + "[3] Substitutions from properties (See the logs for values). E.g:\n"
+            + "    Method %{METHOD} URL:'%{PATH}' HOST:%{HEAD.Host}\n"
+            + "[4] Must be one from the list:";
     private static final String NL = System.getProperty("line.separator");
 
     private LogLine firstMainLog = null;
@@ -77,6 +110,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private CheckBox checkBoxTime;
+            
+    @FXML
+    private CheckBox checkBoxLogProperties;
 
     @FXML
     private CheckBox checkBoxPort;
@@ -107,6 +143,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Button buttonConnect;
+    
+    @FXML
+    private Button buttonSaveExpectations;
+    
+    @FXML
+    private Label labelSaveExpectations;
 
     @FXML
     private ChoiceBox textFieldPortNumber;
@@ -142,6 +184,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         checkBoxPort.setSelected(Main.getConfig().isShowPort());
         checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
         checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
+        checkBoxLogProperties.setSelected(Main.getConfig().isLogProperties());
         labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -171,33 +214,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     public void expectationTextAreaKeyTyped() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                String json = expectationTextArea.getText();
-                try {
-                    JsonUtils.beanFromJson(Expectation.class, json);
-                    setExpectationTextAreaInfo(true, "OK");
-                } catch (Exception ex) {
-                    setExpectationTextAreaInfo(false, ex.getCause().getMessage());
-                }
-                Util.sleep(80);
-            }
-        });
-    }
-
-    private void setExpectationTextAreaInfo(boolean ok, String message) {
-        Color colour = (ok ? Color.LIGHTGREEN : Color.PINK);
-        Region region1 = (Region) expectationTextArea.lookup(".content");
-        Region region2 = (Region) expectationTextAreaErrors.lookup(".content");
-        region1.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
-        region2.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
-        expectationTextAreaErrors.setText(message);
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.VALIDATE_EXP, null, "Validate Expectation JSON");
     }
 
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
+    }
+    
+    @FXML
+    public void buttonSaveExpectationsAction() {
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.SAVE_EXPECTATIONS, null, "Save updated expectations");
     }
 
     @FXML
@@ -208,6 +235,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void checkBoxTimeAction() {
         Main.notifyOption(Option.TIME, -1, checkBoxTime.isSelected(), "");
+    }
+    
+    @FXML
+    public void checkBoxLogPropertiesAction() {
+        Main.notifyOption(Option.LOG_PROPERTIES, -1, checkBoxLogProperties.isSelected(), "");
     }
 
     @FXML
@@ -253,8 +285,22 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @Override
     public boolean notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
         switch (action) {
+            case VALIDATE_EXP:
+                String json = expectationTextArea.getText();
+                try {
+                    JsonUtils.beanFromJson(Expectation.class, json);
+                    setExpectationTextAreaInfo(true, EXAMPLE_HEAD + NL + JsonUtils.toJsonFormatted(EXAMPLE) + NL + EXAMPLE_NOTES);
+                } catch (Exception ex) {
+                    setExpectationTextAreaInfo(false, ex.getCause().getMessage());
+                }
+                break;
+            case SAVE_EXPECTATIONS:
+                break;
             case LOAD_EXPECTATIONS:
-                expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap((Expectations) actionOn)));
+                Expectations expectations = (Expectations) actionOn;
+                expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(expectations)));
+                buttonSaveExpectations.setVisible(expectations.loadedFromAFile());
+                labelSaveExpectations.setVisible(!expectations.loadedFromAFile());
                 break;
             case CLEAR_LOGS:
                 resetLog();
@@ -294,6 +340,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
+    private void setExpectationTextAreaInfo(boolean ok, String message) {
+        buttonSaveExpectations.setDisable(!ok);
+        Color colour = (ok ? Color.LIGHTGREEN : Color.PINK);
+        Region region1 = (Region) expectationTextArea.lookup(".content");
+        Region region2 = (Region) expectationTextAreaErrors.lookup(".content");
+        region1.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
+        region2.setBackground(new Background(new BackgroundFill(colour, CornerRadii.EMPTY, Insets.EMPTY)));
+        expectationTextAreaErrors.setText(message);
+    }
+
+    @Override
     public void updateConfig(ConfigData configData) {
         if (expectationsSplitPane != null) {
             int count = expectationsSplitPane.getDividers().size();

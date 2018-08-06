@@ -52,7 +52,7 @@ public class StandAloneWithSingleExpectationFromStringTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null, expectations.withListMap(true), true)).start();
+        mockServer = (new MockServer(PORT, null, expectations.withLogProperies(true), true)).start();
     }
 
     @AfterClass

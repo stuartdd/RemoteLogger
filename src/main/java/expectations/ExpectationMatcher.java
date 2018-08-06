@@ -48,14 +48,17 @@ public class ExpectationMatcher {
     private final Notifier serverNotifier;
     private File expectationsFile;
     private long expectationsLoadTime;
+    private boolean logProperties;
 
-    public ExpectationMatcher(Expectations expectations, Notifier serverNotifier) {
+
+    public ExpectationMatcher(Expectations expectations, Notifier serverNotifier, boolean logProperties) {
         this.serverNotifier = serverNotifier;
         this.expectations = expectations;
+        this.logProperties = logProperties;
         testExpectations(expectations);
     }
 
-    public ExpectationMatcher(String fileName, Notifier serverNotifier) {
+    public ExpectationMatcher(String fileName, Notifier serverNotifier, boolean logProperties) {
         this.serverNotifier = serverNotifier;
         if ((fileName == null) || (fileName.trim().length() == 0)) {
             expectations = null;
@@ -74,10 +77,9 @@ public class ExpectationMatcher {
         int statusCode = 404;
         Map<String, String> responseHeaders = new HashMap<>();
         loadPropertiesFromBody(map, (String) map.get("BODY"));
-        if (expectations.isListMap() && (serverNotifier != null)) {
+        if ((expectations.isLogProperies() || logProperties) && (serverNotifier != null)) {
             logMap(System.currentTimeMillis(), port, map, "REQUEST PROPERTIES");
         }
-
         Expectation foundExpectation = findMatchingExpectation(System.currentTimeMillis(), port, map);
         if (foundExpectation != null) {
             try {
@@ -311,11 +313,14 @@ public class ExpectationMatcher {
     }
 
     private void loadExpectations(String expectationsFileName) {
+        boolean loadedFromAFile = false;
         File file = new File(expectationsFileName);
         if (file.exists()) {
             expectationsFile = file;
             expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
+            expectations.wasLoadedFromAFile();
             expectationsLoadTime = file.lastModified();
+            loadedFromAFile = true;
         } else {
             InputStream is = ExpectationMatcher.class.getResourceAsStream(expectationsFileName);
             if (is == null) {
@@ -335,7 +340,7 @@ public class ExpectationMatcher {
     }
 
     private void reloadExpectations(long time, int port) {
-        if (expectationsFile != null) {
+        if (expectations.loadedFromAFile()) {
             if (expectationsFile.lastModified() != expectationsLoadTime) {
                 Expectations temp = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
                 try {

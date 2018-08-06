@@ -47,5 +47,5 @@
         }
     ],
     "paths": [".", "/appl", "/bea"],
-    "listMap": true
+    "logProperies": true
 }

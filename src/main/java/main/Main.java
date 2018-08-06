@@ -24,8 +24,6 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -104,6 +102,9 @@ public class Main extends Application {
                     break;
                 case TIME:
                     config.setShowTime(selected);
+                    break;
+                case LOG_PROPERTIES:
+                    config.setLogProperties(selected);
                     break;
                 case PORT:
                     config.setShowPort(selected);
@@ -249,7 +250,7 @@ public class Main extends Application {
             config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
         if ((config.getServers() == null) || (config.getServers().isEmpty())) {
-            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true));
+            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, config.isLogProperties()));
             config.setDefaultPort(PORT_NUMBER);
         }
         for (String portStr : config.getServers().keySet()) {
