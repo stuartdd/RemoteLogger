@@ -194,6 +194,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         resetMainLog();
         ServerManager.autoStartServers();
         updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
+        changeSelectedServer(ServerManager.getServer(Main.getConfig().getDefaultPort()));
         updateServerStatus(ServerManager.getServer(Main.getConfig().getDefaultPort()));
         /*
         Do some stuff later in a separate thread!

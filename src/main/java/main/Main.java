@@ -80,7 +80,11 @@ public class Main extends Application {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    applicationController.notifyAction(time, port, action, actionOn, message);
+                    if (applicationController != null) {
+                        applicationController.notifyAction(time, port, action, actionOn, message);
+                    } else {
+                        System.out.println("Action:"+action+" on:"+actionOn.getClass());
+                    }
                 }
             });
         } else {
