@@ -1,7 +1,7 @@
 {
     "expectations": [
         {
-            "name": "TestPost XML body",
+            "name": "TestPost XML body (File)",
             "method": "post",
             "path": "/test/post/xml",
             "asserts": {

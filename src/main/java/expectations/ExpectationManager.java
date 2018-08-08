@@ -71,6 +71,10 @@ public class ExpectationManager {
         loadExpectations(fileName);
     }
 
+    public Expectations getExpectations() {
+        return expectations;
+    }
+
     public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries) {
         getResponseData(port, map).respond(he, map);
     }

@@ -125,7 +125,7 @@ public class Server implements ActionOn {
     }
 
     public boolean isLogProperties() {
-        return serverConfig.isShowPort();
+        return serverConfig.isLogProperties();
     }
 
     public void setCallBackClass(ResponseHandler responseHandler) {

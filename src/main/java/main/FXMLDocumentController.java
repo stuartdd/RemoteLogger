@@ -156,15 +156,25 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     private ChoiceBox choiceBoxPortNumber;
 
+    private void changeSelectedServer(Server server) {
+        selectedServer = server;
+        if (!selectedServer.isShowPort()) {
+            selectedServer.setShowPort(true);
+        }
+        checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
+        checkBoxShowPort.setSelected(selectedServer.isShowPort());
+        checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
+        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedServer.getExpectationManager().getExpectations())));
+        expectationsListView.getSelectionModel().select(0);
+        updateServerStatus(server);
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
-        choiceBoxPortNumber.getSelectionModel().select("" + Main.getConfig().getDefaultPort());
         choiceBoxPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (oldValue != newValue) {
-                    getSelectedPort();
                     Main.notifyAction(System.currentTimeMillis(), -1, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
                 }
             }
@@ -177,25 +187,21 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
             }
         });
-        if (!ServerManager.isShowPort(Main.getConfig().getDefaultPort())) {
-            ServerManager.setShowPort(Main.getConfig().getDefaultPort(), true);
-        }
+        changeSelectedServer(Main.getDefaultServer());
+        choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
+        choiceBoxPortNumber.getSelectionModel().select("" + selectedServer.getPort());
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
         checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
         checkBoxTime.setSelected(Main.getConfig().isShowTime());
         checkBoxPort.setSelected(Main.getConfig().isShowPort());
-        checkBoxAutoStart.setSelected(ServerManager.isAutoStart(getSelectedPort()));
-        checkBoxShowPort.setSelected(ServerManager.isShowPort(getSelectedPort()));
-        labelStatus.setText("Ready to start the server");
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.setApplicationController(this);
         resetMainLog();
         ServerManager.autoStartServers();
         updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
-        changeSelectedServer(ServerManager.getServer(Main.getConfig().getDefaultPort()));
-        updateServerStatus(ServerManager.getServer(Main.getConfig().getDefaultPort()));
+        updateServerStatus(selectedServer);
         /*
         Do some stuff later in a separate thread!
          */
@@ -489,41 +495,36 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return Integer.parseInt(choiceBoxPortNumber.getSelectionModel().getSelectedItem().toString());
     }
 
-    private void changeSelectedServer(Server server) {
-        selectedServer = server;
-        checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
-        checkBoxShowPort.setSelected(selectedServer.isShowPort());
-        checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
-        updateServerStatus(server);
-    }
-
     private void updateServerStatus(Server server) {
-        switch (selectedServer.getServerState()) {
-            case SERVER_STARTING:
-            case SERVER_STOPPING:
-                buttonConnect.setDisable(true);
-                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
-                break;
-            case SERVER_STOPPED:
-                buttonConnect.setDisable(false);
-                buttonConnect.setText("Start");
-                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-                break;
-            case SERVER_RUNNING:
-                buttonConnect.setDisable(false);
-                buttonConnect.setText("Stop");
-                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-                break;
-            case SERVER_FAIL:
-                buttonConnect.setDisable(false);
-                buttonConnect.setText("Start");
-                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
-                break;
-            case SERVER_PENDING:
-                buttonConnect.setDisable(false);
-                buttonConnect.setText("Start");
-                choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-                break;
+        if (server.getPort() == selectedServer.getPort()) {
+            Main.setTitle(server.getServerState().getInfo() + " Port[" + server.getPort() + "]");
+            switch (server.getServerState()) {
+                case SERVER_STARTING:
+                case SERVER_STOPPING:
+                    buttonConnect.setDisable(true);
+                    choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
+                    break;
+                case SERVER_STOPPED:
+                    buttonConnect.setDisable(false);
+                    buttonConnect.setText("Start");
+                    choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                    break;
+                case SERVER_RUNNING:
+                    buttonConnect.setDisable(false);
+                    buttonConnect.setText("Stop");
+                    choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                    break;
+                case SERVER_FAIL:
+                    buttonConnect.setDisable(false);
+                    buttonConnect.setText("Start");
+                    choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+                    break;
+                case SERVER_PENDING:
+                    buttonConnect.setDisable(false);
+                    buttonConnect.setText("Start");
+                    choiceBoxPortNumber.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+                    break;
+            }
         }
     }
 }

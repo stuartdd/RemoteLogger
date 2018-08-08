@@ -2,14 +2,14 @@
   "servers" : {
     "1999" : {
       "expectationsFile" : "expectations.json",
-      "autoStart" : true,
+      "autoStart" : false,
       "showPort" : true,
       "timeToClose" : 1,
       "verbose" : true,
-      "logProperties" : true
+      "logProperties" : false
     },
     "1998" : {
-      "expectationsFile" : "expectations.json",
+      "expectationsFile" : "exp.json",
       "autoStart" : true,
       "showPort" : true,
       "timeToClose" : 1,
@@ -19,7 +19,7 @@
   },
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
-  "defaultPort" : 1999,
+  "defaultPort" : 1998,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,

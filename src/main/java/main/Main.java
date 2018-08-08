@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
 import org.joda.time.DateTime;
+import server.Server;
 import server.ServerManager;
 import server.ServerConfig;
 
@@ -71,7 +72,7 @@ public class Main extends Application {
                 });
             }
         });
-        stage.setTitle("Log Server:" + (configName == null ? "<Undefined>" : configName));
+        setTitle("LOADED");
         stage.show();
     }
 
@@ -83,13 +84,17 @@ public class Main extends Application {
                     if (applicationController != null) {
                         applicationController.notifyAction(time, port, action, actionOn, message);
                     } else {
-                        System.out.println("Action:"+action+" on:"+actionOn.getClass());
+                        System.out.println("Action:" + action + " on:" + actionOn.getClass());
                     }
                 }
             });
         } else {
             Main.logFinal(time, port, action.name() + ":" + message);
         }
+    }
+
+    public static void setTitle(String title) {
+        mainStage.setTitle("Log Server:" + (configName == null ? "<Undefined>" : configName) + " - " + title);
     }
 
     public static void notifyConfigChangeOption(Option option, int port, boolean selected, String message) {
@@ -125,6 +130,10 @@ public class Main extends Application {
 
     public static void stopServer(int port) {
         ServerManager.stopServer(port);
+    }
+
+    public static Server getDefaultServer() {
+        return ServerManager.getServer(config.getDefaultPort());
     }
 
     public static void controlStopEventAction() {
