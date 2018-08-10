@@ -18,7 +18,6 @@ package expectations;
 
 import common.BodyType;
 import com.sun.net.httpserver.HttpExchange;
-import common.Action;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,13 +49,14 @@ public class ExpectationManager {
     private long expectationsLoadTime;
     private boolean logProperties;
     private boolean loadedFromAFile;
-
+    private boolean requiresSaving;
 
     public ExpectationManager(Expectations expectations, Notifier serverNotifier, boolean logProperties) {
         this.serverNotifier = serverNotifier;
         this.expectations = expectations;
         this.logProperties = logProperties;
         loadedFromAFile = false;
+        requiresSaving = false;
         testExpectations(expectations);
     }
 
@@ -68,11 +68,20 @@ public class ExpectationManager {
             return;
         }
         loadedFromAFile = false;
+        requiresSaving = false;
         loadExpectations(fileName);
     }
 
     public Expectations getExpectations() {
         return expectations;
+    }
+
+    public boolean isRequiresSaving() {
+        return requiresSaving;
+    }
+
+    public void setRequiresSaving(boolean requiresSaving) {
+        this.requiresSaving = requiresSaving;
     }
 
     public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries) {
@@ -331,6 +340,7 @@ public class ExpectationManager {
             expectations.wasLoadedFromAFile();
             expectationsLoadTime = file.lastModified();
             loadedFromAFile = true;
+            requiresSaving = false;
         } else {
             InputStream is = ExpectationManager.class.getResourceAsStream(expectationsFileName);
             if (is == null) {
@@ -344,9 +354,6 @@ public class ExpectationManager {
             expectationsLoadTime = 0;
         }
         testExpectations(expectations);
-        if (serverNotifier != null) {
-            serverNotifier.notifyAction(System.currentTimeMillis(), -1, Action.LOAD_EXPECTATIONS, expectations, "Expectations loaded OK");
-        }
     }
 
     private void reloadExpectations(long time, int port) {
@@ -357,10 +364,7 @@ public class ExpectationManager {
                     testExpectations(temp);
                     expectations = temp;
                     expectationsLoadTime = expectationsFile.lastModified();
-                    if (serverNotifier != null) {
-                        serverNotifier.notifyAction(System.currentTimeMillis(), -1, Action.LOAD_EXPECTATIONS, expectations, "Expectations loaded OK");
-                        serverNotifier.log(time, port, "* NOTE Expectatations file Reloaded:" + expectationsFile.getAbsolutePath());
-                    }
+                    requiresSaving = false;
                 } catch (ExpectationException ex) {
                     if (serverNotifier != null) {
                         serverNotifier.log(System.currentTimeMillis(), port, "Reload of expectation failed " + expectationsFile.getAbsolutePath(), ex);
@@ -385,7 +389,18 @@ public class ExpectationManager {
             if (map.containsKey(e.getName())) {
                 throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);
             }
+            if (e.getAsserts() == null) {
+                e.setAsserts(new HashMap<>());
+            }
             map.put(e.getName(), e.getName());
+        }
+    }
+
+    public void updateExpectiation(Expectation newExpectation) {
+        for (Expectation exp:expectations.getExpectations()) {
+            if (exp.getName().equals(exp)) {
+                expectations
+            }
         }
     }
 

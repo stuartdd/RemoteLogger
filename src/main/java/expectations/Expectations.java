@@ -76,6 +76,18 @@ public class Expectations implements ActionOn {
         ExpectationManager.testExpectations(this);
         return this;
     }
+
+    public Expectation replaceOrAddExpectation(Expectation newExpectation) {
+        for (Expectation exp:expectations) {
+            if (exp.getName().equals(exp)) {
+                expectations.remove(exp);
+                expectations.add(newExpectation);
+                return newExpectation;
+            }
+        }
+        expectations.add(newExpectation);
+        return newExpectation;
+    }
     
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
