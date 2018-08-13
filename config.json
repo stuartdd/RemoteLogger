@@ -19,7 +19,7 @@
   },
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
-  "defaultPort" : 1998,
+  "defaultPort" : 1999,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,

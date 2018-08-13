@@ -1,51 +1,61 @@
 {
-    "expectations": [
-        {
-            "name": "TestPost XML body (File)",
-            "method": "post",
-            "path": "/test/post/xml",
-            "asserts": {
-                "BorderPane.center.TabPane.tabs.Tab[1].{text}": "Loggs"
-            },
-            "response": {
-                "status": 200,
-                "template": "post-%{Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username}.xml"
-            }
-        },
-        {
-            "name": "Get Country Name",
-            "method": "get",
-            "path": "/services.groupkt.com/country/get/iso2code/IN",
-            "response": {
-                "status": 200,
-                "body": "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n"
-            }
-        },
-        {
-            "name": "Test Post Response Empty",
-            "method": "post",
-            "path": "/pre"
-        },
-        {
-            "name": "Test Get Response Empty",
-            "method": "get",
-            "path": "/gre"
-        },
-        {
-            "name": "Test Get Response Body",
-            "method": "get",
-            "path": "/grb",
-            "response": {
-                "status": 200,
-                "body": "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
-                "headers": {
-                    "Accept": "%{Accept}",
-                    "Connection": "%{Connection}",
-                    "zzz": "%{zzz}"
-                }
-            }
-        }
-    ],
-    "paths": [".", "/appl", "/bea"],
-    "logProperies": true
+  "expectations" : [ {
+    "name" : "TestPost XML body (File)",
+    "method" : "pist",
+    "path" : "/test/post/xml",
+    "bodyType" : "FRED!",
+    "asserts" : {
+      "BorderPane.center.TabPane.tabs.Tab[1].{text}" : "Loggs"
+    },
+    "response" : {
+      "body" : null,
+      "status" : 200,
+      "template" : "post-%{Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username}.xml",
+      "headers" : { }
+    }
+  }, {
+    "name" : "Get Country Name",
+    "method" : "get",
+    "path" : "/services.groupkt.com/country/get/iso2code/IN",
+    "bodyType" : null,
+    "asserts" : { },
+    "response" : {
+      "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n",
+      "status" : 200,
+      "template" : null,
+      "headers" : { }
+    }
+  }, {
+    "name" : "Test Post Response Empty",
+    "method" : "post",
+    "path" : "/pre",
+    "bodyType" : null,
+    "asserts" : { },
+    "response" : null
+  }, {
+    "name" : "Test Get Response Empty",
+    "method" : "get",
+    "path" : "/gre",
+    "bodyType" : null,
+    "asserts" : { },
+    "response" : null
+  }, {
+    "name" : "Test Get Response Body",
+    "method" : "get",
+    "path" : "/grb",
+    "bodyType" : null,
+    "asserts" : { },
+    "response" : {
+      "body" : "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
+      "status" : 200,
+      "template" : null,
+      "headers" : {
+        "Accept" : "%{Accept}",
+        "Connection" : "%{Connection}",
+        "zzz" : "%{zzz}"
+      }
+    }
+  } ],
+  "paths" : [ ".", "/appl", "/bea" ],
+  "logProperies" : true
 }

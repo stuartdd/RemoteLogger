@@ -31,7 +31,7 @@ public class Expectations implements ActionOn {
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;
     private boolean logProperies;
-    
+
     @JsonIgnore
     private boolean loadedFromAFile = false;
 
@@ -47,6 +47,13 @@ public class Expectations implements ActionOn {
         return paths;
     }
 
+    public int size() {
+        if (expectations == null) {
+            expectations = new ArrayList<>();
+        }
+        return expectations.size();
+    }
+
     public void setPaths(String[] paths) {
         this.paths = paths;
     }
@@ -59,36 +66,45 @@ public class Expectations implements ActionOn {
         this.logProperies = logProperies;
     }
 
-
     public Expectations withLogProperies(boolean listMap) {
         this.setLogProperies(listMap);
         return this;
     }
-    
+
     public Expectations withPaths(String[] paths) {
         this.setPaths(paths);
         return this;
     }
 
     public Expectations addExpectation(String json) {
-        Expectation ex = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
-        expectations.add(ex);
+        return addExpectation((Expectation) JsonUtils.beanFromJson(Expectation.class, json));
+    }
+
+    public Expectations addExpectation(Expectation expectation) {
+        expectations.add(expectation);
         ExpectationManager.testExpectations(this);
         return this;
     }
 
-    public void replaceOrAddExpectation(int index, Expectation newExpectation) {
-        expectations.set(index, newExpectation);
-        System.out.println("REPLACED:"+index+" "+newExpectation.getName());
+    public void replaceExpectation(Expectation oldExpectation, Expectation newExpectation) {
+        if (oldExpectation != null) {
+            for (int i = 0; i < expectations.size(); i++) {
+                if (expectations.get(i) == oldExpectation) {
+                    expectations.set(i, newExpectation);
+                }
+            }
+        } else {
+            expectations.add(newExpectation);
+        }
     }
-    
+
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
         expectations.addExpectation(json);
         ExpectationManager.testExpectations(expectations);
         return expectations;
     }
-    
+
     public static Expectations fromString(String json) {
         Expectations ex = (Expectations) JsonUtils.beanFromJson(Expectations.class, json);
         ExpectationManager.testExpectations(ex);
@@ -101,10 +117,9 @@ public class Expectations implements ActionOn {
     public boolean loadedFromAFile() {
         return loadedFromAFile;
     }
-    
+
     public boolean wasLoadedFromAFile() {
         return loadedFromAFile = true;
     }
-    
-    
+
 }

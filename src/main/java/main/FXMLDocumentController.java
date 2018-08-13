@@ -56,26 +56,7 @@ import server.ServerManager;
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
 
     private static final String NL = System.getProperty("line.separator");
-    private static final String EXAMPLE_JSON = "{\n"
-            + "  \"name\" : \"Unique Name for Expectation\",\n"
-            + "  \"method\" : \"[4] Method Equals: GET, POST, PUT, DELETE etc.\",\n"
-            + "  \"path\" : \"[1] Matching Path: E.g. /test/post/xml\",\n"
-            + "  \"bodyType\" : \"[4] Body Type Equals: From: XML, JSON, HTML, TXT, EMPTY\",\n"
-            + "  \"asserts\" : {\n"
-            + "    \"Name of property 1\" : \"[1] Value of property 1 must match\",\n"
-            + "    \"Name of property 2\" : \"[1] Value of property 2 must match\"\n"
-            + "  },\n"
-            + "  \"response\" : {\n"
-            + "    \"body\" : \"[3] Response body text\",\n"
-            + "    \"status\" : 200,\n"
-            + "    \"template\" : \"[2] [3] File or Resource to read response body from\",\n"
-            + "    \"headers\" : { "
-            + "         \"Accept\": \"%{HEAD.Accept}\",\n"
-            + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
-            + "    }\n"
-            + "  }\n"
-            + "}";
-    private static final Expectation EXAMPLE = (Expectation) JsonUtils.beanFromJson(Expectation.class, EXAMPLE_JSON);
+    private static final Expectation EXAMPLE = ExpectationManager.getExampleExpectation();
     private static final String EXAMPLE_HEAD = "Example Expectation (annotated):";
     private static final String EXAMPLE_HEAD_RO = "Expectations are READ-ONLY:\nThey were not read from the file system.";
     private static final String UL = NL + "--------------------------------------------------------------------" + NL;
@@ -101,8 +82,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private Server selectedServer;
     private ExpectationManager selectedExpectationManager;
-    private Expectation updatedExpectation;
-    private int selectedExpectationIndex;
+    private Expectation validClonedExpectation;
+    private Expectation selectedExpectation;
 
     @FXML
     private TextArea expectationTextAreaErrors;
@@ -150,6 +131,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private Label labelStatus;
 
     @FXML
+    private Button buttonReLoadExpectations;
+
+    @FXML
     private Button buttonConnect;
 
     @FXML
@@ -162,6 +146,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private ChoiceBox choiceBoxPortNumber;
 
     private void changeSelectedServer(Server server) {
+        saveUpdatedExpectation();
         selectedServer = server;
         if (!selectedServer.isShowPort()) {
             selectedServer.setShowPort(true);
@@ -174,14 +159,39 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void changeSelectedExpectationManager(Server server) {
-        saveSelectedExpectation();
+        saveUpdatedExpectation();
         selectedExpectationManager = server.getExpectationManager();
         expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
         expectationsListView.getSelectionModel().select(0);
-        selectedExpectationIndex = -1;
+        selectedExpectation = getTheSelectedExpectation();
         configureExpectationSaveOptions(false);
     }
 
+    private void changeSelectedExpectation(Expectation expectation) {
+        saveUpdatedExpectation();
+        selectedExpectation = expectation;
+        if (expectation != null) {
+            expectationTextArea.setText(JsonUtils.toJsonFormatted(expectation));
+            setExpectationTextColourAndInfo(false, null);
+        } 
+        validClonedExpectation = null;
+        configureExpectationSaveOptions(false);
+    }
+
+    private void saveUpdatedExpectation() {
+        if ((selectedExpectationManager != null) && (selectedExpectation != null) && (validClonedExpectation != null) && selectedExpectationManager.isLoadedFromAFile()) {
+            selectedExpectationManager.replaceExpectation(selectedExpectation, validClonedExpectation);
+            selectedExpectationManager.setRequiresSaving(false);
+            refreshSelectedExpectation();
+        }
+        validClonedExpectation = null;
+    }
+
+    private void refreshSelectedExpectation() {
+            expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
+            selectThisExpectation(selectedExpectation);
+    }
+    
     private void configureExpectationSaveOptions(boolean isInErrorState) {
         if (selectedExpectationManager.isLoadedFromAFile()) {
             if (isInErrorState) {
@@ -194,30 +204,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             buttonSaveExpectations.setDisable(true);
             labelSaveExpectations.setVisible(true);
         }
-    }
-
-    private void saveSelectedExpectation() {
-        if ((selectedExpectationManager != null) && (updatedExpectation != null)) {
-            if (selectedExpectationIndex >= 0) {
-                if (selectedExpectationManager.isLoadedFromAFile()) {
-                    selectedExpectationManager.replaceOrAddExpectation(selectedExpectationIndex, updatedExpectation);
-                }
-                selectedExpectationIndex = -1;
-            }
-        }
-    }
-
-    private void changeSelectedExpectation(Expectation expectation) {
-        saveSelectedExpectation();
-        if (expectation != null) {
-            selectedExpectationIndex = getSelectedExpectationIndex();
-            expectationTextArea.setText(JsonUtils.toJsonFormatted(expectation));
-            configureExpectationSaveOptions(false);
-            setExpectationTextColourAndInfo(false, null);
-        } else {
-            selectedExpectationIndex = -1;
-        }
-        updatedExpectation = null;
     }
 
     @Override
@@ -234,7 +220,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (oldValue != newValue) {
-                    Main.notifyAction(System.currentTimeMillis(), -1, Action.EXPECTATION_SELECTED, getSelectedExpectation(), "Expectation Selected [" + newValue + "]");
+                    Main.notifyAction(System.currentTimeMillis(), -1, Action.EXPECTATION_SELECTED, getTheSelectedExpectation(), "Expectation Selected [" + newValue + "]");
                 }
             }
         });
@@ -282,6 +268,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
+    }
+
+    @FXML
+    public void buttonReLoadExpectationsAction() {
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.RELOAD_EXPECTATIONS, null, "Expectations reloaded");
     }
 
     @FXML
@@ -351,11 +342,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 if (selectedExpectationManager.isLoadedFromAFile()) {
                     String json = expectationTextArea.getText();
                     try {
-                        updatedExpectation = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
+                        validClonedExpectation = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
                         configureExpectationSaveOptions(false);
                         setExpectationTextColourAndInfo(false, null);
+                        selectedExpectationManager.setRequiresSaving(true);
                     } catch (Exception ex) {
-                        updatedExpectation = null;
+                        validClonedExpectation = null;
                         configureExpectationSaveOptions(true);
                         setExpectationTextColourAndInfo(true, ex.getCause().getMessage());
                     }
@@ -364,6 +356,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
                 break;
             case SAVE_EXPECTATIONS:
+                selectedExpectationManager.save();
+                configureExpectationSaveOptions(false);
+                break;
+            case RELOAD_EXPECTATIONS:
+                selectedExpectationManager.reloadExpectations(selectedServer.getPort(), true);
+                refreshSelectedExpectation();
                 break;
             case EXPECTATION_SELECTED:
                 changeSelectedExpectation((Expectation) actionOn);
@@ -542,7 +540,16 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return sb.toString().trim();
     }
 
-    private Expectation getSelectedExpectation() {
+    private Expectation selectThisExpectation(Expectation expectation) {
+        if (expectation != null) {
+            expectationsListView.getSelectionModel().select(expectation);
+        } else {
+            expectationsListView.getSelectionModel().selectFirst();
+        }
+        return getTheSelectedExpectation();
+    }
+    
+    private Expectation getTheSelectedExpectation() {
         Object o = expectationsListView.getSelectionModel().getSelectedItem();
         if (o == null) {
             return null;
@@ -550,10 +557,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return ((ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem()).getExpectation();
     }
 
-    private int getSelectedExpectationIndex() {
-        return expectationsListView.getSelectionModel().getSelectedIndex();
-    }
-
+    
     private int getSelectedPort() {
         return Integer.parseInt(choiceBoxPortNumber.getSelectionModel().getSelectedItem().toString());
     }

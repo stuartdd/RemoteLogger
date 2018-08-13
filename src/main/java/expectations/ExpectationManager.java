@@ -33,6 +33,10 @@ import common.Util;
 import template.Template;
 import xml.MappedXml;
 import common.Notifier;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mockServer.MockResponse;
 
 /**
@@ -40,6 +44,43 @@ import mockServer.MockResponse;
  * @author 802996013
  */
 public class ExpectationManager {
+
+    private static final String EXAMPLE_JSON = "{\n"
+            + "  \"name\" : \"Unique Name for Expectation\",\n"
+            + "  \"method\" : \"[4] Method Equals: GET, POST, PUT, DELETE etc.\",\n"
+            + "  \"path\" : \"[1] Matching Path: E.g. /test/post/xml\",\n"
+            + "  \"bodyType\" : \"[4] Body Type Equals: From: XML, JSON, HTML, TXT, EMPTY\",\n"
+            + "  \"asserts\" : {\n"
+            + "    \"Name of property 1\" : \"[1] Value of property 1 must match\",\n"
+            + "    \"Name of property 2\" : \"[1] Value of property 2 must match\"\n"
+            + "  },\n"
+            + "  \"response\" : {\n"
+            + "    \"body\" : \"[3] Response body text\",\n"
+            + "    \"status\" : 200,\n"
+            + "    \"template\" : \"[2] [3] File or Resource to read response body from\",\n"
+            + "    \"headers\" : { "
+            + "         \"Accept\": \"%{HEAD.Accept}\",\n"
+            + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
+    private static final String BASIC_JSON = "{\n"
+            + "  \"name\" : \"Unique Expectation Name\",\n"
+            + "  \"method\" : \"GET\",\n"
+            + "  \"path\" : \"/test\",\n"
+            + "  \"bodyType\" : \"JSON\",\n"
+            + "  \"asserts\" : {\n"
+            + "    \"P1\" : \"V1\",\n"
+            + "  },\n"
+            + "  \"response\" : {\n"
+            + "    \"body\" : \"{\"message\":\"Message\",\n"
+            + "    \"status\" : 200,\n"
+            + "    \"template\" : null,\n"
+            + "    \"headers\" : { "
+            + "         \"Accept\": \"%{HEAD.Accept}\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}";
 
     private static final String NL = System.getProperty("line.separator");
     private static final String LS = "-----------------------------------------------------------" + NL;
@@ -78,6 +119,14 @@ public class ExpectationManager {
 
     public boolean isRequiresSaving() {
         return requiresSaving;
+    }
+
+    public static Expectation getExampleExpectation() {
+        return (Expectation) JsonUtils.beanFromJson(Expectation.class, EXAMPLE_JSON);
+    }
+
+    public static Expectation getBasicExpectation() {
+        return (Expectation) JsonUtils.beanFromJson(Expectation.class, BASIC_JSON);
     }
 
     public void setRequiresSaving(boolean requiresSaving) {
@@ -148,6 +197,10 @@ public class ExpectationManager {
         return loadedFromAFile;
     }
 
+    public void replaceExpectation(Expectation oldExpectation, Expectation newExpectation) {
+        expectations.replaceExpectation(oldExpectation, newExpectation);
+    }
+
     private Expectation findMatchingExpectation(long time, int port, Map<String, Object> map) {
         if (expectations == null) {
             if (serverNotifier != null) {
@@ -155,7 +208,7 @@ public class ExpectationManager {
             }
             return null;
         }
-        reloadExpectations(time, port);
+        reloadExpectations(port, false);
         Expectation found;
         for (Expectation exp : expectations.getExpectations()) {
             found = testExpectationMatches(time, port, exp, map);
@@ -332,6 +385,30 @@ public class ExpectationManager {
         return sb.toString();
     }
 
+    public void save() {
+        if (expectationsFile != null) {
+            String exString = JsonUtils.toJsonFormatted(expectations);
+            System.out.println(expectationsFile.getAbsolutePath());
+
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(expectationsFile);
+                fos.write(exString.getBytes(Charset.forName("UTF-8")));
+            } catch (IOException ex) {
+                Logger.getLogger(ExpectationManager.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(ExpectationManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+            setRequiresSaving(false);
+        }
+    }
+
     private void loadExpectations(String expectationsFileName) {
         File file = new File(expectationsFileName);
         if (file.exists()) {
@@ -356,9 +433,9 @@ public class ExpectationManager {
         testExpectations(expectations);
     }
 
-    private void reloadExpectations(long time, int port) {
+    public void reloadExpectations(int port, boolean force) {
         if (expectations.loadedFromAFile()) {
-            if (expectationsFile.lastModified() != expectationsLoadTime) {
+            if (force || (expectationsFile.lastModified() != expectationsLoadTime)) {
                 Expectations temp = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
                 try {
                     testExpectations(temp);
@@ -385,6 +462,9 @@ public class ExpectationManager {
             throw new ExpectationException("Expectations are empty.", 500);
         }
         Map<String, String> map = new HashMap<>();
+        if (expectations.size() == 0) {
+            expectations.addExpectation(getBasicExpectation());
+        }
         for (Expectation e : expectations.getExpectations()) {
             if (map.containsKey(e.getName())) {
                 throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);
@@ -394,10 +474,6 @@ public class ExpectationManager {
             }
             map.put(e.getName(), e.getName());
         }
-    }
-
-    public void replaceOrAddExpectation(int index, Expectation newExpectation) {
-        expectations.replaceOrAddExpectation(index, newExpectation);
     }
 
 }
