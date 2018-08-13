@@ -396,12 +396,8 @@ public class ExpectationManager {
         }
     }
 
-    public void updateExpectiation(Expectation newExpectation) {
-        for (Expectation exp:expectations.getExpectations()) {
-            if (exp.getName().equals(exp)) {
-                expectations
-            }
-        }
+    public void replaceOrAddExpectation(int index, Expectation newExpectation) {
+        expectations.replaceOrAddExpectation(index, newExpectation);
     }
 
 }

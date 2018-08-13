@@ -77,16 +77,9 @@ public class Expectations implements ActionOn {
         return this;
     }
 
-    public Expectation replaceOrAddExpectation(Expectation newExpectation) {
-        for (Expectation exp:expectations) {
-            if (exp.getName().equals(exp)) {
-                expectations.remove(exp);
-                expectations.add(newExpectation);
-                return newExpectation;
-            }
-        }
-        expectations.add(newExpectation);
-        return newExpectation;
+    public void replaceOrAddExpectation(int index, Expectation newExpectation) {
+        expectations.set(index, newExpectation);
+        System.out.println("REPLACED:"+index+" "+newExpectation.getName());
     }
     
     public static Expectations newExpectation(String json) {
