@@ -17,7 +17,6 @@
 package expectations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import common.ActionOn;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;
@@ -26,7 +25,7 @@ import json.JsonUtils;
  *
  * @author 802996013
  */
-public class Expectations implements ActionOn {
+public class Expectations  {
 
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;

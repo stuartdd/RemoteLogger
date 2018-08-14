@@ -16,7 +16,6 @@
  */
 package server;
 
-import common.ActionOn;
 import common.Notifier;
 import expectations.ExpectationManager;
 
@@ -24,13 +23,14 @@ import expectations.ExpectationManager;
  *
  * @author stuart
  */
-public class Server implements ActionOn {
+public class Server {
 
     private final int port;
     private final Notifier serverNotifier;
     private final ServerConfig serverConfig;
     private final ResponseHandler responseHandler;
     private final ExpectationManager expectationManager;
+    private final ServerStatistics serverStatistics;
 
     private ServerThread serverThread;
 
@@ -52,6 +52,7 @@ public class Server implements ActionOn {
         this.serverConfig = serverConfig;
         this.responseHandler = responseHandler;
         this.serverThread = null;
+        this.serverStatistics = new ServerStatistics();
     }
 
     public int getPort() {
@@ -76,6 +77,10 @@ public class Server implements ActionOn {
 
     public ExpectationManager getExpectationManager() {
         return expectationManager;
+    }
+
+    public ServerStatistics getServerStatistics() {
+        return serverStatistics;
     }
 
     public void start() {

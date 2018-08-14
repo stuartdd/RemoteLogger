@@ -21,6 +21,7 @@ import expectations.Expectations;
 import server.ResponseHandler;
 import server.Server;
 import server.ServerConfig;
+import server.ServerStatistics;
 
 /**
  *
@@ -33,11 +34,11 @@ public class MockServer {
     public MockServer(int port, ResponseHandler responseHandler, String expectationFile, boolean verbose) {
         server = new Server(port, new ServerConfig(expectationFile, 0, verbose, true), responseHandler, new MockServerNotifier());
     }
-    
+
     public MockServer(int port, ResponseHandler responseHandler, Expectations expectations, boolean verbose) {
         server = new Server(port, new ServerConfig(expectations, 0, verbose, true), responseHandler, new MockServerNotifier());
     }
-    
+
     public MockServer(int port, ResponseHandler responseHandler, boolean verbose) {
         server = new Server(port, new ServerConfig(new Expectations(), 0, verbose, true), responseHandler, new MockServerNotifier());
     }
@@ -45,8 +46,9 @@ public class MockServer {
     public void setCallBackClass(ResponseHandler responseHandler) {
         if (server != null) {
             server.setCallBackClass(responseHandler);
-        }        
+        }
     }
+
     public boolean isRunning() {
         if (server != null) {
             return server.isRunning();
@@ -77,4 +79,7 @@ public class MockServer {
         }
     }
 
+    public ServerStatistics getServerStatistics() {
+        return server.getServerStatistics();
+    }
 }

@@ -78,4 +78,8 @@ public class MockResponse {
         }
     }
 
+    public int getStatus() {
+        return status;
+    }
+
 }

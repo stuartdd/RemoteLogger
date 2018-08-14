@@ -17,7 +17,6 @@
 package expectations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import common.ActionOn;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ import java.util.Map;
  *
  * @author 802996013
  */
-public class Expectation implements ActionOn {
+public class Expectation {
 
     private String name;
     private String method;

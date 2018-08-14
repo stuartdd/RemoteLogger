@@ -17,7 +17,6 @@
 package mockServer;
 
 import common.Action;
-import common.ActionOn;
 import common.Notifier;
 import org.joda.time.DateTime;
 
@@ -28,7 +27,7 @@ import org.joda.time.DateTime;
 public class MockServerNotifier implements Notifier {
 
     @Override
-    public void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
+    public void notifyAction(long time, int port, Action action, Object actionOn, String message) {
         if (!action.equals(Action.SERVER_STATE)) {
           System.out.println(getTimeStamp(time) + "Port:" + port + " <MOCK> " + action.name() + " " + message);
         }

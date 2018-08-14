@@ -133,7 +133,6 @@ public class Util {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ex) {
-            System.out.print("");
         }
     }
 

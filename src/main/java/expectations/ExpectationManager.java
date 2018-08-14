@@ -38,6 +38,7 @@ import java.io.FileOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mockServer.MockResponse;
+import server.ServerStatistics;
 
 /**
  *
@@ -70,14 +71,13 @@ public class ExpectationManager {
             + "  \"path\" : \"/test\",\n"
             + "  \"bodyType\" : \"JSON\",\n"
             + "  \"asserts\" : {\n"
-            + "    \"P1\" : \"V1\",\n"
+            + "    \"P1\" : \"V1\"\n"
             + "  },\n"
             + "  \"response\" : {\n"
-            + "    \"body\" : \"{\"message\":\"Message\",\n"
+            + "    \"body\" : \"{\\\"message\\\":\\\"Message\\\"}\",\n"
             + "    \"status\" : 200,\n"
             + "    \"template\" : null,\n"
-            + "    \"headers\" : { "
-            + "         \"Accept\": \"%{HEAD.Accept}\"\n"
+            + "    \"headers\" : {\"Accept\": \"%{HEAD.Accept}\"\n"
             + "    }\n"
             + "  }\n"
             + "}";
@@ -133,11 +133,11 @@ public class ExpectationManager {
         this.requiresSaving = requiresSaving;
     }
 
-    public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries) {
-        getResponseData(port, map).respond(he, map);
+    public void getResponse(long time, int port, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ServerStatistics serverStatistics) {
+        getResponseData(port, map, serverStatistics).respond(he, map);
     }
 
-    public MockResponse getResponseData(int port, Map<String, Object> map) {
+    public MockResponse getResponseData(int port, Map<String, Object> map, ServerStatistics serverStatistics) {
         String response = "Not Found";
         int statusCode = 404;
         Map<String, String> responseHeaders = new HashMap<>();
@@ -148,6 +148,7 @@ public class ExpectationManager {
         Expectation foundExpectation = findMatchingExpectation(System.currentTimeMillis(), port, map);
         if (foundExpectation != null) {
             try {
+                serverStatistics.incMatchedCount();
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), port, "MATCHED " + foundExpectation);
                 }
@@ -182,9 +183,13 @@ public class ExpectationManager {
                 }
             }
         } else {
+            serverStatistics.incNotMatchedCount();
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), port, "Expectation not met");
             }
+        }
+        if (statusCode == 404) {
+            serverStatistics.incNotFoundCount();
         }
         return new MockResponse(response, statusCode, responseHeaders);
     }
@@ -388,7 +393,6 @@ public class ExpectationManager {
     public void save() {
         if (expectationsFile != null) {
             String exString = JsonUtils.toJsonFormatted(expectations);
-            System.out.println(expectationsFile.getAbsolutePath());
 
             FileOutputStream fos = null;
             try {
@@ -462,9 +466,6 @@ public class ExpectationManager {
             throw new ExpectationException("Expectations are empty.", 500);
         }
         Map<String, String> map = new HashMap<>();
-        if (expectations.size() == 0) {
-            expectations.addExpectation(getBasicExpectation());
-        }
         for (Expectation e : expectations.getExpectations()) {
             if (map.containsKey(e.getName())) {
                 throw new ExpectationException("Duplicate Expectation name found: " + e.getName(), 500);

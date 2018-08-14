@@ -41,6 +41,7 @@ public class CallbackWithNoExpectationAndSetResponseTest {
     private static MockServer mockServer;
 
     private static String response = "{\"response\":\"This is the response\"}";
+
     @BeforeClass
     public static void beforeClass() {
         mockServer = (new MockServer(PORT, null, true)).start();

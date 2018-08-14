@@ -17,7 +17,6 @@
 package main;
 
 import common.Action;
-import common.ActionOn;
 import expectations.Expectation;
 import expectations.ExpectationManager;
 import java.net.URL;
@@ -231,7 +230,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private void changeSelectedServer(Server server) {
         System.out.println("changeSelectedServer:" + server);
-        saveUpdatedExpectation();
         selectedServer = server;
         if (!selectedServer.isShowPort()) {
             selectedServer.setShowPort(true);
@@ -247,7 +245,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         System.out.println("changeSelectedExpectationManager:" + server);
         expectationSelectionChangedListener.setSupressActions(true);
         try {
-            saveUpdatedExpectation();
             selectedExpectationManager = server.getExpectationManager();
             expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
             expectationsListView.getSelectionModel().selectFirst();
@@ -271,7 +268,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private void changeSelectedExpectation(Expectation expectation) {
         System.out.println("changeSelectedExpectation:" + expectation);
-        saveUpdatedExpectation();
         selectedExpectation = reSelectThisExpectation(expectation);
         selectedExpectationJson = JsonUtils.toJsonFormatted(selectedExpectation);
         if (expectation != null) {
@@ -371,7 +367,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
             }
         });
-
     }
 
     @Override
@@ -401,13 +396,16 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 refreshExpectationListView();
                 break;
             case RELOAD_EXPECTATIONS:
+                saveUpdatedExpectation();
                 selectedExpectationManager.reloadExpectations(selectedServer.getPort(), true);
                 refreshExpectationListView();
                 break;
             case EXPECTATION_SELECTED:
+                saveUpdatedExpectation();
                 changeSelectedExpectation((Integer) actionOn);
                 break;
             case SERVER_SELECTED:
+                saveUpdatedExpectation();
                 changeSelectedServer((Server) actionOn);
                 break;
             case SERVER_STATE:

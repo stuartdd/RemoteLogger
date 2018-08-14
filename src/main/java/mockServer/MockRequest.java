@@ -19,6 +19,7 @@ package mockServer;
 import com.sun.net.httpserver.HttpExchange;
 import expectations.ExpectationManager;
 import java.util.Map;
+import server.ServerStatistics;
 
 /**
  *
@@ -34,8 +35,9 @@ public class MockRequest {
     private final String path;
     private final String method;
     private final ExpectationManager expectationMatcher;
+    private final ServerStatistics serverStatistics;
 
-    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationManager expectationMatcher) {
+    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationManager expectationMatcher, ServerStatistics serverStatistics) {
         this.port = port;
         this.map = map;
         this.headers = headers;
@@ -44,13 +46,14 @@ public class MockRequest {
         this.body = getMapObject("BODY");
         this.path = getMapObject("PATH");
         this.expectationMatcher = expectationMatcher;
+        this.serverStatistics = serverStatistics;
     }
 
     public MockResponse getResponseData(Map<String, Object> map) {
-        return expectationMatcher.getResponseData(port, map);
+        return expectationMatcher.getResponseData(port, map, serverStatistics);
     }
     public MockResponse getResponseData() {
-        return expectationMatcher.getResponseData(port, map);
+        return expectationMatcher.getResponseData(port, map, serverStatistics);
     }
 
     private String getMapObject(String key) {
