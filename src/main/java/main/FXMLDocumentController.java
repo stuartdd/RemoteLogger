@@ -82,8 +82,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private Server selectedServer;
     private ExpectationManager selectedExpectationManager;
+    private ExpectationSelectionChangedListener expectationSelectionChangedListener;
     private Expectation validClonedExpectation;
     private Expectation selectedExpectation;
+    private String selectedExpectationJson;
 
     @FXML
     private TextArea expectationTextAreaErrors;
@@ -144,114 +146,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private ChoiceBox choiceBoxPortNumber;
-
-    private void changeSelectedServer(Server server) {
-        saveUpdatedExpectation();
-        selectedServer = server;
-        if (!selectedServer.isShowPort()) {
-            selectedServer.setShowPort(true);
-        }
-        checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
-        checkBoxShowPort.setSelected(selectedServer.isShowPort());
-        checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
-        changeSelectedExpectationManager(server);
-        updateServerStatus(server);
-    }
-
-    private void changeSelectedExpectationManager(Server server) {
-        saveUpdatedExpectation();
-        selectedExpectationManager = server.getExpectationManager();
-        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
-        expectationsListView.getSelectionModel().select(0);
-        selectedExpectation = getTheSelectedExpectation();
-        configureExpectationSaveOptions(false);
-    }
-
-    private void changeSelectedExpectation(Expectation expectation) {
-        saveUpdatedExpectation();
-        selectedExpectation = expectation;
-        if (expectation != null) {
-            expectationTextArea.setText(JsonUtils.toJsonFormatted(expectation));
-            setExpectationTextColourAndInfo(false, null);
-        } 
-        validClonedExpectation = null;
-        configureExpectationSaveOptions(false);
-    }
-
-    private void saveUpdatedExpectation() {
-        if ((selectedExpectationManager != null) && (selectedExpectation != null) && (validClonedExpectation != null) && selectedExpectationManager.isLoadedFromAFile()) {
-            selectedExpectationManager.replaceExpectation(selectedExpectation, validClonedExpectation);
-            selectedExpectationManager.setRequiresSaving(false);
-            refreshSelectedExpectation();
-        }
-        validClonedExpectation = null;
-    }
-
-    private void refreshSelectedExpectation() {
-            expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
-            selectThisExpectation(selectedExpectation);
-    }
-    
-    private void configureExpectationSaveOptions(boolean isInErrorState) {
-        if (selectedExpectationManager.isLoadedFromAFile()) {
-            if (isInErrorState) {
-                buttonSaveExpectations.setDisable(true);
-            } else {
-                buttonSaveExpectations.setDisable(!selectedExpectationManager.isRequiresSaving());
-            }
-            labelSaveExpectations.setVisible(false);
-        } else {
-            buttonSaveExpectations.setDisable(true);
-            labelSaveExpectations.setVisible(true);
-        }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        choiceBoxPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (oldValue != newValue) {
-                    Main.notifyAction(System.currentTimeMillis(), -1, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
-                }
-            }
-        });
-        expectationsListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (oldValue != newValue) {
-                    Main.notifyAction(System.currentTimeMillis(), -1, Action.EXPECTATION_SELECTED, getTheSelectedExpectation(), "Expectation Selected [" + newValue + "]");
-                }
-            }
-        });
-
-        changeSelectedServer(Main.getDefaultServer());
-        choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
-        choiceBoxPortNumber.getSelectionModel().select("" + selectedServer.getPort());
-        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
-        checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
-        checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
-        checkBoxTime.setSelected(Main.getConfig().isShowTime());
-        checkBoxPort.setSelected(Main.getConfig().isShowPort());
-        textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        Main.setApplicationController(this);
-        resetMainLog();
-        ServerManager.autoStartServers();
-        updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
-        updateServerStatus(selectedServer);
-        /*
-        Do some stuff later in a separate thread!
-         */
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
-                    expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
-                }
-            }
-        });
-    }
 
     @FXML
     public void closeAction() {
@@ -335,8 +229,154 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
     }
 
+    private void changeSelectedServer(Server server) {
+        System.out.println("changeSelectedServer:" + server);
+        saveUpdatedExpectation();
+        selectedServer = server;
+        if (!selectedServer.isShowPort()) {
+            selectedServer.setShowPort(true);
+        }
+        checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
+        checkBoxShowPort.setSelected(selectedServer.isShowPort());
+        checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
+        updateServerStatus(server);
+        changeSelectedExpectationManager(server);
+    }
+
+    private void changeSelectedExpectationManager(Server server) {
+        System.out.println("changeSelectedExpectationManager:" + server);
+        expectationSelectionChangedListener.setSupressActions(true);
+        try {
+            saveUpdatedExpectation();
+            selectedExpectationManager = server.getExpectationManager();
+            expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
+            expectationsListView.getSelectionModel().selectFirst();
+            changeSelectedExpectation(getTheSelectedExpectation());
+        } finally {
+            expectationSelectionChangedListener.setSupressActions(false);
+        }
+    }
+
+    private void refreshExpectationListView() {
+        System.out.println("refreshExpectationListView");
+        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
+        changeSelectedExpectation(reSelectThisExpectation(selectedExpectation));
+    }
+
+    private void changeSelectedExpectation(Integer expectationIndex) {
+        if (expectationIndex >= 0) {
+            changeSelectedExpectation(((ExpectationWrapper) expectationsListView.getItems().get(expectationIndex)).getExpectation());
+        }
+    }
+
+    private void changeSelectedExpectation(Expectation expectation) {
+        System.out.println("changeSelectedExpectation:" + expectation);
+        saveUpdatedExpectation();
+        selectedExpectation = reSelectThisExpectation(expectation);
+        selectedExpectationJson = JsonUtils.toJsonFormatted(selectedExpectation);
+        if (expectation != null) {
+            expectationTextArea.setText(JsonUtils.toJsonFormatted(expectation));
+            setExpectationTextColourAndInfo(false, null);
+        }
+        validClonedExpectation = null;
+        configureExpectationSaveOptions(false);
+    }
+
+    private void saveUpdatedExpectation() {
+        System.out.println("saveUpdatedExpectation:" + validClonedExpectation);
+        if ((selectedExpectationManager != null) && (selectedExpectation != null) && (validClonedExpectation != null) && selectedExpectationManager.isLoadedFromAFile()) {
+            selectedExpectationManager.replaceExpectation(selectedExpectation, validClonedExpectation);
+        }
+        validClonedExpectation = null;
+    }
+
+    private Expectation reSelectThisExpectation(Expectation expectation) {
+        if (expectation != null) {
+            System.out.println("selectThisExpectation:" + expectation.toString());
+            for (int i = 0; i < expectationsListView.getItems().size(); i++) {
+                ExpectationWrapper wrapper = (ExpectationWrapper) expectationsListView.getItems().get(i);
+                if (wrapper.getExpectation().getName().equals(expectation.getName())) {
+                    expectationsListView.getSelectionModel().select(i);
+                    return wrapper.getExpectation();
+                }
+            }
+        }
+        System.out.println("selectThisExpectation:selectFirst()");
+        expectationsListView.getSelectionModel().selectFirst();
+        return ((ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem()).getExpectation();
+    }
+
+    private Expectation getTheSelectedExpectation() {
+        ExpectationWrapper o = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
+        if (o == null) {
+            return reSelectThisExpectation(null);
+        }
+        return o.getExpectation();
+    }
+
+    private void configureExpectationSaveOptions(boolean isInErrorState) {
+        System.out.println("configureExpectationSaveOptions:" + isInErrorState);
+        if (selectedExpectationManager.isLoadedFromAFile()) {
+            if (isInErrorState) {
+                buttonSaveExpectations.setDisable(true);
+            } else {
+                buttonSaveExpectations.setDisable(!selectedExpectationManager.isRequiresSaving());
+            }
+            labelSaveExpectations.setVisible(false);
+        } else {
+            buttonSaveExpectations.setDisable(true);
+            labelSaveExpectations.setVisible(true);
+        }
+    }
+
     @Override
-    public boolean notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
+    public void initialize(URL url, ResourceBundle rb) {
+        System.out.println("initialize:");
+        expectationSelectionChangedListener = new ExpectationSelectionChangedListener();
+
+        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
+        checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
+        checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
+        checkBoxTime.setSelected(Main.getConfig().isShowTime());
+        checkBoxPort.setSelected(Main.getConfig().isShowPort());
+        textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        Main.setApplicationController(this);
+        resetMainLog();
+        ServerManager.autoStartServers();
+        updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
+        changeSelectedServer(Main.getDefaultServer());
+        choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
+        choiceBoxPortNumber.getSelectionModel().select("" + selectedServer.getPort());
+        /*
+        Link up th echange notifiers. Must be done AFTER init!
+         */
+        choiceBoxPortNumber.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if (oldValue != newValue) {
+                    Main.notifyAction(System.currentTimeMillis(), -1, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
+                }
+            }
+        });
+        expectationsListView.getSelectionModel().selectedIndexProperty().addListener(expectationSelectionChangedListener);
+        /*
+        Do some stuff later in a separate thread!
+         */
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
+                    expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public boolean notifyAction(long time, int port, Action action, Object actionOn, String message) {
+        System.out.println("ACTION:" + action.name() + " On[" + actionOn + "]");
         switch (action) {
             case EXPECTATION_TEXT_CHANGED:
                 if (selectedExpectationManager.isLoadedFromAFile()) {
@@ -356,15 +396,16 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 }
                 break;
             case SAVE_EXPECTATIONS:
+                saveUpdatedExpectation();
                 selectedExpectationManager.save();
-                configureExpectationSaveOptions(false);
+                refreshExpectationListView();
                 break;
             case RELOAD_EXPECTATIONS:
                 selectedExpectationManager.reloadExpectations(selectedServer.getPort(), true);
-                refreshSelectedExpectation();
+                refreshExpectationListView();
                 break;
             case EXPECTATION_SELECTED:
-                changeSelectedExpectation((Expectation) actionOn);
+                changeSelectedExpectation((Integer) actionOn);
                 break;
             case SERVER_SELECTED:
                 changeSelectedServer((Server) actionOn);
@@ -423,10 +464,20 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 color = Color.LIGHTGREEN;
             }
         }
-        Region region1 = (Region) expectationTextArea.lookup(".content");
-        Region region2 = (Region) expectationTextAreaErrors.lookup(".content");
-        region1.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
-        region2.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Region region1 = (Region) expectationTextArea.lookup(".content");
+                Region region2 = (Region) expectationTextAreaErrors.lookup(".content");
+                if (region1 != null) {
+                    region1.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+                if (region2 != null) {
+                    region2.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+            }
+        });
+
     }
 
     @Override
@@ -540,24 +591,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return sb.toString().trim();
     }
 
-    private Expectation selectThisExpectation(Expectation expectation) {
-        if (expectation != null) {
-            expectationsListView.getSelectionModel().select(expectation);
-        } else {
-            expectationsListView.getSelectionModel().selectFirst();
-        }
-        return getTheSelectedExpectation();
-    }
-    
-    private Expectation getTheSelectedExpectation() {
-        Object o = expectationsListView.getSelectionModel().getSelectedItem();
-        if (o == null) {
-            return null;
-        }
-        return ((ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem()).getExpectation();
-    }
-
-    
     private int getSelectedPort() {
         return Integer.parseInt(choiceBoxPortNumber.getSelectionModel().getSelectedItem().toString());
     }

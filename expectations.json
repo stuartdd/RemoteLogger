@@ -1,7 +1,7 @@
 {
   "expectations" : [ {
-    "name" : "TestPost XML body (File)",
-    "method" : "pist",
+    "name" : "1: TestPost XML body (File)",
+    "method" : "pip",
     "path" : "/test/post/xml",
     "bodyType" : "FRED!",
     "asserts" : {
@@ -14,8 +14,8 @@
       "headers" : { }
     }
   }, {
-    "name" : "Get Country Name",
-    "method" : "get",
+    "name" : "2: Get Country Name",
+    "method" : "GET",
     "path" : "/services.groupkt.com/country/get/iso2code/IN",
     "bodyType" : null,
     "asserts" : { },
@@ -26,22 +26,22 @@
       "headers" : { }
     }
   }, {
-    "name" : "Test Post Response Empty",
+    "name" : "3: Test Post Response Empty",
     "method" : "post",
     "path" : "/pre",
     "bodyType" : null,
     "asserts" : { },
     "response" : null
   }, {
-    "name" : "Test Get Response Empty",
+    "name" : "4: Test Get Response Empty",
     "method" : "get",
     "path" : "/gre",
     "bodyType" : null,
     "asserts" : { },
     "response" : null
   }, {
-    "name" : "Test Get Response Body",
-    "method" : "get",
+    "name" : "5: Test Get Response Body",
+    "method" : "GET",
     "path" : "/grb",
     "bodyType" : null,
     "asserts" : { },

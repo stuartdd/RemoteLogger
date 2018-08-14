@@ -91,6 +91,7 @@ public class Expectations implements ActionOn {
             for (int i = 0; i < expectations.size(); i++) {
                 if (expectations.get(i) == oldExpectation) {
                     expectations.set(i, newExpectation);
+                    return;
                 }
             }
         } else {

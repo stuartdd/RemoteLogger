@@ -76,7 +76,7 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void notifyAction(long time, int port, Action action, ActionOn actionOn, String message) {
+    public static void notifyAction(long time, int port, Action action, Object actionOn, String message) {
         if (!headless) {
             Platform.runLater(new Runnable() {
                 @Override

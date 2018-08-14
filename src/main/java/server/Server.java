@@ -134,4 +134,9 @@ public class Server implements ActionOn {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Server{" + "port=" + port + '}';
+    }
+
 }
