@@ -65,6 +65,10 @@ public class MockServer {
             Util.sleep(2);
             count++;
         }
+        Util.sleep(2);
+        if (!server.isRunning()) {
+            throw new MockServerTimeoutException("Timeout waiting for server to start");
+        }
         return this;
     }
 
@@ -76,6 +80,10 @@ public class MockServer {
         while (server.isRunning() && (count < 10000)) {
             Util.sleep(2);
             count++;
+        }
+        Util.sleep(2);
+        if (server.isRunning()) {
+            throw new MockServerTimeoutException("Timeout waiting for server to stop");
         }
     }
 
