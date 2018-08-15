@@ -148,7 +148,7 @@ public class ExpectationManager {
         Expectation foundExpectation = findMatchingExpectation(System.currentTimeMillis(), port, map);
         if (foundExpectation != null) {
             try {
-                serverStatistics.incMatchedCount();
+                serverStatistics.inc(ServerStatistics.STAT.MATCH, true);
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), port, "MATCHED " + foundExpectation);
                 }
@@ -183,13 +183,10 @@ public class ExpectationManager {
                 }
             }
         } else {
-            serverStatistics.incNotMatchedCount();
+            serverStatistics.inc(ServerStatistics.STAT.MISSMATCH, true);
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), port, "Expectation not met");
             }
-        }
-        if (statusCode == 404) {
-            serverStatistics.incNotFoundCount();
         }
         return new MockResponse(response, statusCode, responseHeaders);
     }

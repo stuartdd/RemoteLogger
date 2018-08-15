@@ -91,7 +91,6 @@ public class Server {
     public void stop() {
         if (serverThread != null) {
             serverThread.stopServer();
-            serverThread = null;
         }
     }
 
