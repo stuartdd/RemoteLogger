@@ -15,11 +15,11 @@ import javafx.beans.value.ObservableValue;
  */
 public class ExpectationSelectionChangedListener implements ChangeListener {
 
-    private boolean supressActions = true;
+    private int supressActionCounts = 0;
 
     @Override
     public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        if (supressActions) {
+        if (supressActionCounts > 0) {
             return;
         }
         if (oldValue != newValue) {
@@ -27,8 +27,12 @@ public class ExpectationSelectionChangedListener implements ChangeListener {
         }
     }
 
-    public void setSupressActions(boolean supressActions) {
-        this.supressActions = supressActions;
+    public synchronized void supressActions(boolean supressActions) {
+        if (supressActions) {
+            supressActionCounts++;
+        } else {
+            supressActionCounts--;
+        }
     }
 
 }
