@@ -17,6 +17,9 @@
 package main;
 
 import expectations.Expectation;
+import expectations.Expectations;
+import java.util.ArrayList;
+import java.util.List;
 import json.JsonUtils;
 
 /**
@@ -35,7 +38,7 @@ public class ExpectationWrapper {
 
     @Override
     public String toString() {
-        return expectation.getName();
+        return getIndex()+":"+getName();
     }
 
     public String toJson() {
@@ -54,12 +57,26 @@ public class ExpectationWrapper {
         return expectation;
     }
 
-    public void setExpectation(Expectation expectation) {
-        this.expectation = expectation;
+    public String getName() {
+        return expectation.getName();
+    }
+
+    public String getJson() {
+        return JsonUtils.toJsonFormatted(expectation);
     }
 
     public int getIndex() {
         return index;
+    }
+
+    public static List<ExpectationWrapper> wrap(Expectations expectations) {
+        List<ExpectationWrapper> list = new ArrayList<>();
+        int index = 0;
+        for (Expectation exp : expectations.getExpectations()) {
+            list.add(new ExpectationWrapper(exp, index));
+            index++;
+        }
+        return list;
     }
 
 }

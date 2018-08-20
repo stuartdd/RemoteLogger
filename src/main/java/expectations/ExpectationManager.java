@@ -33,7 +33,6 @@ import common.Util;
 import template.Template;
 import xml.MappedXml;
 import common.Notifier;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -148,7 +147,7 @@ public class ExpectationManager {
         Expectation foundExpectation = findMatchingExpectation(System.currentTimeMillis(), port, map);
         if (foundExpectation != null) {
             try {
-                serverStatistics.incMatchedCount();
+                serverStatistics.inc(ServerStatistics.STAT.MATCH, true);
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), port, "MATCHED " + foundExpectation);
                 }
@@ -183,13 +182,10 @@ public class ExpectationManager {
                 }
             }
         } else {
-            serverStatistics.incNotMatchedCount();
+            serverStatistics.inc(ServerStatistics.STAT.MISSMATCH, true);
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), port, "Expectation not met");
             }
-        }
-        if (statusCode == 404) {
-            serverStatistics.incNotFoundCount();
         }
         return new MockResponse(response, statusCode, responseHeaders);
     }
@@ -470,6 +466,18 @@ public class ExpectationManager {
                 e.setAsserts(new HashMap<>());
             }
             map.put(e.getName(), e.getName());
+        }
+    }
+
+    public void ensureNotEmpty() {
+        if (expectations == null) {
+            expectations = new Expectations();
+        }
+        if (expectations.size() == 0) {
+            expectations.addExpectation(getBasicExpectation());
+        }
+        if (isLoadedFromAFile()) {
+            setRequiresSaving(true);
         }
     }
 

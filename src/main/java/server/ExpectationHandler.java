@@ -53,7 +53,7 @@ public class ExpectationHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         long time = System.currentTimeMillis();
-        this.server.getServerStatistics().incRequestCount();
+        this.server.getServerStatistics().inc(ServerStatistics.STAT.REQUEST, true);
         Map<String, Object> map = new HashMap<>();
         Map<String, String> headers = new HashMap<>();
         Map<String, String> queries = new HashMap<>();
@@ -103,22 +103,18 @@ public class ExpectationHandler implements HttpHandler {
             MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationManager, this.server.getServerStatistics());
             MockResponse mockResponse = responseHandler.handle(mockRequest, map);
             if (mockResponse != null) {
-                this.server.getServerStatistics().incResponseCount();
-                if (mockResponse.getStatus() == 404) {
-                    this.server.getServerStatistics().incNotFoundCount();
-                }
                 mockResponse.respond(he, map);
+                this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
                 return;
             }
         }
 
         if (expectationManager.hasNoExpectations()) {
-            this.server.getServerStatistics().incNotFoundCount();
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
-            this.server.getServerStatistics().incResponseCount();
             expectationManager.getResponse(time, port, he, map, headers, queries, this.server.getServerStatistics());
         }
+        this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
 
     }
 

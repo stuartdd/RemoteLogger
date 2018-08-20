@@ -133,9 +133,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private Label labelStatus;
 
     @FXML
-    private Button buttonReLoadExpectations;
-
-    @FXML
     private Button buttonConnect;
 
     @FXML
@@ -244,7 +241,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private void changeSelectedExpectationManager(Server server) {
         System.out.println("changeSelectedExpectationManager:" + server);
-        expectationSelectionChangedListener.setSupressActions(true);
+        expectationSelectionChangedListener.supressActions(true);
         try {
             selectedExpectationManager = server.getExpectationManager();
             expectationWrapperManager = new ExpectationWrapperManager(selectedExpectationManager.getExpectations());
@@ -253,7 +250,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             expectationWrapperManager.selectFirst();
             displaySelectedExpectation();
         } finally {
-            expectationSelectionChangedListener.setSupressActions(false);
+            expectationSelectionChangedListener.supressActions(false);
         }
     }
 
@@ -291,7 +288,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 && selectedExpectationManager.isLoadedFromAFile()) {
             expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
         }
-        validClonedExpectation = null;
     }
 
     private void configureExpectationSaveOptions(boolean isInErrorState) {
@@ -381,7 +377,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 displaySelectedExpectation();
                 break;
             case RELOAD_EXPECTATIONS:
-                saveUpdatedExpectation();
                 selectedExpectationManager.reloadExpectations(selectedServer.getPort(), true);
                 expectationWrapperManager.reload(selectedExpectationManager.getExpectations());
                 displaySelectedExpectation();

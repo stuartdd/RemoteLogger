@@ -11,55 +11,43 @@ package server;
  */
 public class ServerStatistics {
 
+    public enum STAT {
+        REQUEST, RESPONSE, MISSMATCH, MATCH
+    }
     int requestCount = 0;
     int responseCount = 0;
     int notMatchedCount = 0;
-    int notFoundCount = 0;
     int matchedCount = 0;
 
-    public void incRequestCount() {
-        requestCount++;
-    }
-
-    public int getRequestCount() {
-        return requestCount;
-    }
-
-    public void incResponseCount() {
-        responseCount++;
-    }
-
-    public int getResponseCount() {
-        return responseCount;
-    }
-
-    public void incNotMatchedCount() {
-        notMatchedCount++;
-    }
-
-    public int getNotMatchedCount() {
-        return notMatchedCount;
-    }
-    
-    public void incMatchedCount() {
-        matchedCount++;
-    }
-
-    public int getMatchedCount() {
-        return matchedCount;
-    }
-
-    public void incNotFoundCount() {
-        notFoundCount++;
-    }
-
-    public int getNotFoundCount() {
-        return notFoundCount;
+    public synchronized int inc(STAT statToInc, boolean inc) {
+        switch (statToInc) {
+            case REQUEST:
+                if (inc) {
+                    requestCount++;
+                }
+                return requestCount;
+            case RESPONSE:
+                if (inc) {
+                    responseCount++;
+                }
+                return responseCount;
+            case MISSMATCH:
+                if (inc) {
+                    notMatchedCount++;
+                }
+                return notMatchedCount;
+            case MATCH:
+                if (inc) {
+                    matchedCount++;
+                }
+                return matchedCount;
+        }
+        return requestCount+responseCount+matchedCount+notMatchedCount;
     }
 
     @Override
     public String toString() {
-        return "ServerStatistics{" + "requestCount=" + requestCount + ", responseCount=" + responseCount + ", notMatchedCount=" + notMatchedCount + ", notFoundCount=" + notFoundCount + ", matchedCount=" + matchedCount + '}';
+        return "ServerStatistics{" + "request=" + requestCount + ", response=" + responseCount + ", missmatch=" + notMatchedCount + ", match=" + matchedCount + '}';
     }
 
 }

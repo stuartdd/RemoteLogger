@@ -18,10 +18,9 @@ package server;
 
 import common.Action;
 import com.sun.net.httpserver.HttpServer;
+import common.Notifier;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import common.Util;
 
 public class ServerThread extends Thread {
@@ -29,42 +28,65 @@ public class ServerThread extends Thread {
     private ServerState serverState = ServerState.SERVER_STOPPED;
     private final Server server;
     private boolean running;
-    private boolean canRun;
+    private boolean serverCanRun;
     private final ExpectationHandler expectationHandler;
+    private final ControlHandler controlHandler;
 
     public ServerThread(Server server) {
         this.server = server;
         this.running = false;
-        this.canRun = true;
+        this.serverCanRun = true;
         this.expectationHandler = new ExpectationHandler(server);
+        this.controlHandler = new ControlHandler(server);
         newState(ServerState.SERVER_PENDING, "");
     }
 
     @Override
     public void run() {
         running = true;
-        canRun = true;
+        serverCanRun = true;
         HttpServer httpServer;
         try {
             newState(ServerState.SERVER_STARTING, "");
-            httpServer = HttpServer.create(new InetSocketAddress(server.getPort()), 0);
-            httpServer.createContext("/control", new ControlHandler(server));
+            httpServer = bind(server.getPort(), server.getServerNotifier());
+            httpServer.createContext("/control", controlHandler);
             httpServer.createContext("/", expectationHandler);
             httpServer.setExecutor(null); // creates a default executor
             httpServer.start();
-            newState(ServerState.SERVER_RUNNING, null);
         } catch (IOException ex) {
             newState(ServerState.SERVER_FAIL, ex.getMessage());
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
-        while (canRun) {
-            Util.sleep(10);
-        }
-        newState(ServerState.SERVER_STOPPING, "Time to close:" + server.getTimeToClose());
+        newState(ServerState.SERVER_RUNNING, null);
+        do {
+            Util.sleep(50);
+        } while (serverCanRun);
+        newState(ServerState.SERVER_STOPPING, "["+serverCanRun+"] Time to close:" + server.getTimeToClose());
         httpServer.stop(server.getTimeToClose());
         newState(ServerState.SERVER_STOPPED, null);
         running = false;
+    }
+
+    private HttpServer bind(int port, Notifier notifier) throws IOException {
+        int tries = 0;
+        HttpServer server = null;
+        IOException exception = null;
+        while ((tries < 20) && (server == null)) {
+            try {
+                server = HttpServer.create(new InetSocketAddress(port), 0);
+            } catch (IOException ex) {
+                exception = ex;
+            }
+            tries++;
+            if (notifier != null) {
+                notifier.log(System.currentTimeMillis(), port, "Server Port in use. Try " + tries);
+            }
+            Util.sleep(100);
+        }
+        if ((server == null) && (exception != null)) {
+            throw exception;
+        }
+        return server;
     }
 
     private synchronized void newState(ServerState state, String additional) {
@@ -84,18 +106,10 @@ public class ServerThread extends Thread {
     }
 
     public void stopServer() {
-        canRun = false;
         if (server.getServerNotifier() != null) {
-            server.getServerNotifier().log(System.currentTimeMillis(), server.getPort(), "STOP-SERVER");
+            server.getServerNotifier().log(System.currentTimeMillis(), server.getPort(), "STOP-SERVER Via stopServer()");
         }
-    }
-
-    private void sleeep(long ms) {
-        try {
-            sleep(ms);
-        } catch (InterruptedException ex) {
-
-        }
+        serverCanRun = false;
     }
 
     void setCallBackClass(ResponseHandler responseHandler) {
