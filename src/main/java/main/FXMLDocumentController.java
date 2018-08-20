@@ -256,7 +256,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private void displaySelectedExpectation() {
         System.out.println("displaySelectedExpectation:" + expectationWrapperManager.getSelectedExpectation());
-        expectationSelectionChangedListener.setSupressActions(true);
+        expectationSelectionChangedListener.supressActions(true);
         try {
             ExpectationWrapper expectationWrapper = expectationWrapperManager.getSelectedExpectationWrapper();
             ExpectationWrapper actual = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
@@ -275,7 +275,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             validClonedExpectation = null;
             configureExpectationSaveOptions(false);
         } finally {
-            expectationSelectionChangedListener.setSupressActions(false);
+            expectationSelectionChangedListener.supressActions(false);
         }
     }
 

@@ -57,10 +57,6 @@ public class ExpectationWrapper {
         return expectation;
     }
 
-    public String getName() {
-        return expectation.getName();
-    }
-
     public String getJson() {
         return JsonUtils.toJsonFormatted(expectation);
     }
@@ -69,14 +65,8 @@ public class ExpectationWrapper {
         return index;
     }
 
-    public static List<ExpectationWrapper> wrap(Expectations expectations) {
-        List<ExpectationWrapper> list = new ArrayList<>();
-        int index = 0;
-        for (Expectation exp : expectations.getExpectations()) {
-            list.add(new ExpectationWrapper(exp, index));
-            index++;
-        }
-        return list;
+    void setExpectation(Expectation newExpectation) {
+        this.expectation = newExpectation;
     }
 
-}
+ }
