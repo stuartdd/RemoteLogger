@@ -85,18 +85,6 @@ public class Expectations  {
         return this;
     }
 
-    public void replaceExpectation(Expectation oldExpectation, Expectation newExpectation) {
-        if (oldExpectation != null) {
-            for (int i = 0; i < expectations.size(); i++) {
-                if (expectations.get(i) == oldExpectation) {
-                    expectations.set(i, newExpectation);
-                    return;
-                }
-            }
-        } else {
-            expectations.add(newExpectation);
-        }
-    }
 
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
@@ -122,4 +110,15 @@ public class Expectations  {
         return loadedFromAFile = true;
     }
 
+    public Expectation get(int index) {
+        return expectations.get(index);
+    }
+
+    public void set(int i, Expectation newExpectation) {
+        expectations.set(i, newExpectation);
+    }
+
+    public void add(Expectation newExpectation) {
+        expectations.add(newExpectation);
+    }
 }

@@ -202,10 +202,6 @@ public class ExpectationManager {
         return loadedFromAFile;
     }
 
-    public void replaceExpectation(Expectation oldExpectation, Expectation newExpectation) {
-        expectations.replaceExpectation(oldExpectation, newExpectation);
-    }
-
     private Expectation findMatchingExpectation(long time, int port, Map<String, Object> map) {
         if (expectations == null) {
             if (serverNotifier != null) {

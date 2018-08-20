@@ -17,9 +17,7 @@
 package main;
 
 import expectations.Expectation;
-import expectations.Expectations;
-import java.util.ArrayList;
-import java.util.List;
+import json.JsonUtils;
 
 /**
  *
@@ -27,10 +25,12 @@ import java.util.List;
  */
 public class ExpectationWrapper {
 
-    private final Expectation expectation;
+    private Expectation expectation;
+    private int index;
 
-    public ExpectationWrapper(Expectation expectation) {
+    public ExpectationWrapper(Expectation expectation, int index) {
         this.expectation = expectation;
+        this.index = index;
     }
 
     @Override
@@ -38,16 +38,28 @@ public class ExpectationWrapper {
         return expectation.getName();
     }
 
+    public String toJson() {
+        return JsonUtils.toJsonFormatted(expectation);
+    }
+    
+    public boolean contains(Expectation expectation) {
+        return (this.expectation == expectation);
+    }
+
+    public String getName() {
+        return expectation.getName();
+    }
+
     public Expectation getExpectation() {
         return expectation;
     }
-    
-    public static List<ExpectationWrapper> wrap(Expectations expectations) {
-        List<ExpectationWrapper> list = new ArrayList<>();
-        for (Expectation exp: expectations.getExpectations()) {
-            list.add(new ExpectationWrapper(exp));
-        }
-        return list;
+
+    public void setExpectation(Expectation expectation) {
+        this.expectation = expectation;
     }
-    
+
+    public int getIndex() {
+        return index;
+    }
+
 }

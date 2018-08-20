@@ -83,7 +83,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private ExpectationManager selectedExpectationManager;
     private ExpectationSelectionChangedListener expectationSelectionChangedListener;
     private Expectation validClonedExpectation;
-    private Expectation selectedExpectation;
+
+    private ExpectationWrapperManager expectationWrapperManager;
     private String selectedExpectationJson;
 
     @FXML
@@ -246,68 +247,51 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         expectationSelectionChangedListener.setSupressActions(true);
         try {
             selectedExpectationManager = server.getExpectationManager();
-            expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
+            expectationWrapperManager = new ExpectationWrapperManager(selectedExpectationManager.getExpectations());
+            expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
             expectationsListView.getSelectionModel().selectFirst();
-            changeSelectedExpectation(getTheSelectedExpectation());
+            expectationWrapperManager.selectFirst();
+            displaySelectedExpectation();
         } finally {
             expectationSelectionChangedListener.setSupressActions(false);
         }
     }
 
-    private void refreshExpectationListView() {
-        System.out.println("refreshExpectationListView");
-        expectationsListView.setItems(FXCollections.observableArrayList(ExpectationWrapper.wrap(selectedExpectationManager.getExpectations())));
-        changeSelectedExpectation(reSelectThisExpectation(selectedExpectation));
-    }
-
-    private void changeSelectedExpectation(Integer expectationIndex) {
-        if (expectationIndex >= 0) {
-            changeSelectedExpectation(((ExpectationWrapper) expectationsListView.getItems().get(expectationIndex)).getExpectation());
+    private void displaySelectedExpectation() {
+        System.out.println("displaySelectedExpectation:" + expectationWrapperManager.getSelectedExpectation());
+        expectationSelectionChangedListener.setSupressActions(true);
+        try {
+            ExpectationWrapper expectationWrapper = expectationWrapperManager.getSelectedExpectationWrapper();
+            ExpectationWrapper actual = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
+            if (actual!=expectationWrapper) {
+                expectationsListView.getSelectionModel().select(expectationWrapper);
+            }
+            if (expectationWrapper != null) {
+                selectedExpectationJson = expectationWrapper.toJson();
+                expectationTextArea.setText(selectedExpectationJson);
+                setExpectationTextColourAndInfo(false, null);
+            } else {
+                selectedExpectationJson = "";
+                expectationTextArea.setText("");
+                setExpectationTextColourAndInfo(true, null);
+            }
+            validClonedExpectation = null;
+            configureExpectationSaveOptions(false);
+        } finally {
+            expectationSelectionChangedListener.setSupressActions(false);
         }
-    }
-
-    private void changeSelectedExpectation(Expectation expectation) {
-        System.out.println("changeSelectedExpectation:" + expectation);
-        selectedExpectation = reSelectThisExpectation(expectation);
-        selectedExpectationJson = JsonUtils.toJsonFormatted(selectedExpectation);
-        if (expectation != null) {
-            expectationTextArea.setText(JsonUtils.toJsonFormatted(expectation));
-            setExpectationTextColourAndInfo(false, null);
-        }
-        validClonedExpectation = null;
-        configureExpectationSaveOptions(false);
     }
 
     private void saveUpdatedExpectation() {
         System.out.println("saveUpdatedExpectation:" + validClonedExpectation);
-        if ((selectedExpectationManager != null) && (selectedExpectation != null) && (validClonedExpectation != null) && selectedExpectationManager.isLoadedFromAFile()) {
-            selectedExpectationManager.replaceExpectation(selectedExpectation, validClonedExpectation);
+        if ((selectedExpectationManager != null)
+                && (expectationWrapperManager != null)
+                && (expectationWrapperManager.isSelected())
+                && (validClonedExpectation != null)
+                && selectedExpectationManager.isLoadedFromAFile()) {
+            expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
         }
         validClonedExpectation = null;
-    }
-
-    private Expectation reSelectThisExpectation(Expectation expectation) {
-        if (expectation != null) {
-            System.out.println("selectThisExpectation:" + expectation.toString());
-            for (int i = 0; i < expectationsListView.getItems().size(); i++) {
-                ExpectationWrapper wrapper = (ExpectationWrapper) expectationsListView.getItems().get(i);
-                if (wrapper.getExpectation().getName().equals(expectation.getName())) {
-                    expectationsListView.getSelectionModel().select(i);
-                    return wrapper.getExpectation();
-                }
-            }
-        }
-        System.out.println("selectThisExpectation:selectFirst()");
-        expectationsListView.getSelectionModel().selectFirst();
-        return ((ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem()).getExpectation();
-    }
-
-    private Expectation getTheSelectedExpectation() {
-        ExpectationWrapper o = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
-        if (o == null) {
-            return reSelectThisExpectation(null);
-        }
-        return o.getExpectation();
     }
 
     private void configureExpectationSaveOptions(boolean isInErrorState) {
@@ -393,16 +377,19 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             case SAVE_EXPECTATIONS:
                 saveUpdatedExpectation();
                 selectedExpectationManager.save();
-                refreshExpectationListView();
+                expectationWrapperManager.reload(selectedExpectationManager.getExpectations());
+                displaySelectedExpectation();
                 break;
             case RELOAD_EXPECTATIONS:
                 saveUpdatedExpectation();
                 selectedExpectationManager.reloadExpectations(selectedServer.getPort(), true);
-                refreshExpectationListView();
+                expectationWrapperManager.reload(selectedExpectationManager.getExpectations());
+                displaySelectedExpectation();
                 break;
             case EXPECTATION_SELECTED:
                 saveUpdatedExpectation();
-                changeSelectedExpectation((Integer) actionOn);
+                expectationWrapperManager.setSelectedExpectationWrapper((Integer) actionOn);
+                displaySelectedExpectation();
                 break;
             case SERVER_SELECTED:
                 saveUpdatedExpectation();
