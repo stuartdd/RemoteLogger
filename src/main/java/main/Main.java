@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Optional;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -30,6 +31,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
@@ -63,12 +66,9 @@ public class Main extends Application {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        closeApplication(false);
-                    }
-                });
+                if (!closeApplication(false)) {
+                    event.consume();
+                }
             }
         });
         setTitle("LOADED");
@@ -149,7 +149,24 @@ public class Main extends Application {
         }).start();
     }
 
-    public static void closeApplication(boolean force) {
+    public static boolean alertOkCancel(String ti, String txt, String ht) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Alert:" + ti);
+        alert.setHeaderText(txt);
+        alert.setContentText(ht);
+        alert.setX(mainStage.getX() + 50);
+        alert.setY(mainStage.getY() + 50);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.get() == ButtonType.OK;
+    }
+
+    public static boolean closeApplication(boolean force) {
+        if (!applicationController.canAppClose() && !force) {
+            if (!Main.alertOkCancel("Unsaved Data", "Unsaved Expectation data. Please save before exiting", "Ok to quit anyway and discard the changes?")) {
+                return false;
+            }
+        }
+
         log(System.currentTimeMillis(), -1, "Shutting down");
         if (!headless) {
             if (ConfigData.writeFileName() != null) {
@@ -167,7 +184,7 @@ public class Main extends Application {
                 } catch (IOException io) {
                     if (!force) {
                         Main.notifyAction(System.currentTimeMillis(), -1, Action.CONFIG_SAVE_ERROR, null, io.toString());
-                        return;
+                        return true;
                     }
                 }
             }
@@ -178,6 +195,7 @@ public class Main extends Application {
         } else {
             System.exit(0);
         }
+        return true;
     }
 
     public static void log(long time, int port, String message) {

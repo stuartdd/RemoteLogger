@@ -112,7 +112,7 @@ public class ExpectationHandler implements HttpHandler {
         if (expectationManager.hasNoExpectations()) {
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
-            expectationManager.getResponse(time, port, he, map, headers, queries, this.server.getServerStatistics());
+            expectationManager.getResponse(time, he, map, headers, queries, this.server.getServerStatistics());
         }
         this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
 

@@ -23,6 +23,10 @@ import common.Action;
  * @author stuart
  */
 public interface ApplicationController {
+
     boolean notifyAction(long time, int port, Action s, Object actionOn, String message);
+
     void updateConfig(ConfigData configData);
+
+    boolean canAppClose();
 }

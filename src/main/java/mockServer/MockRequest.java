@@ -16,7 +16,6 @@
  */
 package mockServer;
 
-import com.sun.net.httpserver.HttpExchange;
 import expectations.ExpectationManager;
 import java.util.Map;
 import server.ServerStatistics;
@@ -50,10 +49,10 @@ public class MockRequest {
     }
 
     public MockResponse getResponseData(Map<String, Object> map) {
-        return expectationMatcher.getResponseData(port, map, serverStatistics);
+        return expectationMatcher.getResponseData(map, serverStatistics);
     }
     public MockResponse getResponseData() {
-        return expectationMatcher.getResponseData(port, map, serverStatistics);
+        return expectationMatcher.getResponseData(map, serverStatistics);
     }
 
     private String getMapObject(String key) {

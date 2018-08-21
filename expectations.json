@@ -1,7 +1,7 @@
 {
   "expectations" : [ {
     "name" : "1: TestPost XML body (File)",
-    "method" : "PUT",
+    "method" : "d",
     "path" : "/test/post/xml",
     "bodyType" : "FRED!",
     "asserts" : {

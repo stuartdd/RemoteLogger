@@ -6,9 +6,9 @@
 package main;
 
 import expectations.Expectation;
-import expectations.Expectations;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -16,75 +16,67 @@ import java.util.List;
  */
 public class ExpectationWrapperManager {
 
-    private List<ExpectationWrapper> wrappedExpectations;
-    private ExpectationWrapper selectedExpectationWrapper;
-    private Expectations expectations;
+    private final Map<Integer, ExpectationWrapperList> wrapperList = new HashMap<>();
+    private int selectedPort;
 
-    public ExpectationWrapperManager(Expectations expectations) {
-        reload(expectations);
+    public void add(int port, ExpectationWrapperList list) {
+        wrapperList.put(port, list);
     }
 
-    public void replaceSelectedExpectation(Expectation newExpectation) {
-        if ((selectedExpectationWrapper != null) && (newExpectation != null)) {
-            int index = selectedExpectationWrapper.getIndex();
-            expectations.set(index, newExpectation);
-            selectedExpectationWrapper.setExpectation(newExpectation);
-        }
+    public void setSelectedPort(int port) {
+        this.selectedPort = port;
+    }
+
+    public ExpectationWrapperList getSelectedExpectationWrapperList() {
+        return wrapperList.get(selectedPort);
+    }
+
+    public void selectFirst() {
+        getSelectedExpectationWrapperList().selectFirst();
     }
 
     public List<ExpectationWrapper> getWrappedExpectations() {
-        return wrappedExpectations;
+        return getSelectedExpectationWrapperList().getWrappedExpectations();
     }
 
-    public ExpectationWrapper getSelectedExpectationWrapper() {
-        return selectedExpectationWrapper;
+    boolean loadedFromFile() {
+        return getSelectedExpectationWrapperList().loadedFromFile();
     }
 
-    public void setSelectedExpectationWrapper(ExpectationWrapper selectedExpectationWrapper) {
-        this.selectedExpectationWrapper = selectedExpectationWrapper;
+    Expectation getSelectedExpectation() {
+        return getSelectedExpectationWrapperList().getSelectedExpectation();
     }
 
-    public void setSelectedExpectationWrapper(Integer index) {
-        if (index != null) {
-            this.selectedExpectationWrapper = wrappedExpectations.get(index);
-        }
+    ExpectationWrapper getSelectedExpectationWrapper() {
+        return getSelectedExpectationWrapperList().getSelectedExpectationWrapper();
     }
 
-    void selectFirst() {
-        this.selectedExpectationWrapper = wrappedExpectations.get(0);
+    boolean isSelected() {
+        return getSelectedExpectationWrapperList().isSelected();
     }
 
-    public Expectation getSelectedExpectation() {
-        if (selectedExpectationWrapper != null) {
-            return selectedExpectationWrapper.getExpectation();
-        }
-        return null;
+    boolean updated() {
+        return getSelectedExpectationWrapperList().updated();
     }
 
-    public boolean isSelected() {
-        return (selectedExpectationWrapper != null);
+    void replaceSelectedExpectation(Expectation validClonedExpectation) {
+        getSelectedExpectationWrapperList().replaceSelectedExpectation(validClonedExpectation);
     }
 
-    public ExpectationWrapper findByName(String name) {
-        for (ExpectationWrapper w : wrappedExpectations) {
-            if (w.getName().equals(name)) {
-                return w;
-            }
-        }
-        return null;
+    void save() {
+        getSelectedExpectationWrapperList().save();
     }
 
-    public final void reload(Expectations expectations) {
-        this.expectations = expectations;
-        wrappedExpectations = new ArrayList<>();
-        for (int index = 0; index < expectations.size(); index++) {
-            wrappedExpectations.add(new ExpectationWrapper(expectations.get(index), index));
-        }
-        if (selectedExpectationWrapper == null) {
-            selectFirst();
-        } else {
-            selectedExpectationWrapper = findByName(selectedExpectationWrapper.getName());
-        }
+    void refresh() {
+        getSelectedExpectationWrapperList().refresh();
+    }
+
+    void reloadExpectations() {
+        getSelectedExpectationWrapperList().reloadExpectations();
+    }
+
+    void setSelectedExpectationWrapper(Integer integer) {
+        getSelectedExpectationWrapperList().setSelectedExpectationWrapper(integer);
     }
 
 }

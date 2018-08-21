@@ -19,6 +19,7 @@ package server;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import common.Notifier;
+import expectations.ExpectationManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -164,6 +165,11 @@ public class ServerManager {
         return servers.get(port);
     }
     
-
-
+    public static ExpectationManager getExpectationManager(int port) {
+        Server server = getServer(port);
+        if (server == null) {
+            return null;
+        }
+        return server.getExpectationManager();
+    }
 }
