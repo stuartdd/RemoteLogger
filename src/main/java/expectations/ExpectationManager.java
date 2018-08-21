@@ -108,6 +108,7 @@ public class ExpectationManager {
             expectationsFile = null;
             return;
         }
+        this.logProperties = logProperties;
         loadedFromAFile = false;
         loadExpectations(fileName);
     }

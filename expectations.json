@@ -1,17 +1,18 @@
 {
   "expectations" : [ {
-    "name" : "1: TestPost XML body (File)",
-    "method" : "d",
-    "path" : "/test/post/xml",
-    "bodyType" : "FRED!",
-    "asserts" : {
-      "BorderPane.center.TabPane.tabs.Tab[1].{text}" : "Loggs"
-    },
+    "name" : "nowtv/accounts/service-status",
+    "method" : "GET",
+    "path" : "/bt-consumer/v1/*/accounts/service-status",
+    "bodyType" : "EMPTY",
+    "asserts" : { },
     "response" : {
-      "body" : null,
+      "body" : "{\"ntvServiceStatus\": \"healthy\",\"ntvServiceText\": \"The NTV service is Active\"}",
       "status" : 200,
-      "template" : "post-%{Envelope.Body.createUserProfile.hubServiceMessage.serviceBusinessMessage.serviceInputInfo.username}.xml",
-      "headers" : { }
+      "template" : null,
+      "headers" : {
+        "Content-Type" : "application/json",
+        "Fred" : "FRED"
+      }
     }
   }, {
     "name" : "2: Get Country Name",
@@ -57,5 +58,5 @@
     }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
-  "logProperies" : true
+  "logProperies" : false
 }

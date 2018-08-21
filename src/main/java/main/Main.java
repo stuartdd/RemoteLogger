@@ -286,10 +286,14 @@ public class Main extends Application {
         }
         if (headless) {
             ServerManager.autoStartServers();
-            while (ServerManager.countServersRunning() > 0) {
+            int count = 0;
+            do {
                 Util.sleep(1000);
-                logFinal(System.currentTimeMillis(), -1, "Servers running :" + ServerManager.countServersRunning());
-            }
+                if ((count % 10) == 0) {
+                    logFinal(System.currentTimeMillis(), -1, "Servers running :" + ServerManager.countServersRunning());
+                }
+                count++;
+            } while (ServerManager.countServersRunning() > 0);
             System.exit(0);
         } else {
             if (config.getDefaultPort() == 0) {

@@ -1,16 +1,16 @@
 {
   "servers" : {
-    "1999" : {
+    "5002" : {
       "expectationsFile" : "expectations.json",
-      "autoStart" : false,
+      "autoStart" : true,
       "showPort" : true,
       "timeToClose" : 1,
       "verbose" : true,
-      "logProperties" : false
+      "logProperties" : true
     },
     "1998" : {
       "expectationsFile" : "exp.json",
-      "autoStart" : true,
+      "autoStart" : false,
       "showPort" : true,
       "timeToClose" : 1,
       "verbose" : true,
@@ -19,14 +19,14 @@
   },
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
-  "defaultPort" : 1999,
+  "defaultPort" : 5002,
   "includeHeaders" : true,
   "includeBody" : true,
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 152.0,
-  "y" : 88.0,
+  "x" : 186.0,
+  "y" : 61.0,
   "width" : 1471.0,
   "height" : 817.0,
   "expDividerPos" : [ 0.13764624913971094, 0.5753613214039918 ]
