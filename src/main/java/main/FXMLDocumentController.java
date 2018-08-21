@@ -172,6 +172,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @FXML
+    public void buttonDeleteExpectationAction() {
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.DELETE_EXPECTATIONS, null, "Save updated expectations");
+    }
+
+    @FXML
     public void clearLogAction() {
         Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_LOGS, null, "Log has been cleared");
     }
@@ -184,6 +189,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void checkBoxLogPropertiesAction() {
         selectedServer.setLogProperties(checkBoxLogProperties.isSelected());
+        expectationWrapperManager.setLogProperties(checkBoxLogProperties.isSelected());
     }
 
     @FXML
@@ -278,7 +284,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private boolean canSaveUpdatedExpectation() {
         return (expectationWrapperManager != null)
                 && expectationWrapperManager.isSelected()
-                && expectationWrapperManager.updated()
+                && expectationWrapperManager.isUpdated()
                 && expectationWrapperManager.loadedFromFile();
     }
 
@@ -286,6 +292,20 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         buttonSaveExpectations.setDisable(!canSaveUpdatedExpectation());
         buttonReLoadExpectations.setDisable(buttonSaveExpectations.isDisabled());
         labelSaveExpectations.setVisible(!expectationWrapperManager.loadedFromFile());
+    }
+
+    private void reloadListView() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                expectationSelectionChangedListener.supressActions(true);
+                try {
+                    expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                } finally {
+                    expectationSelectionChangedListener.supressActions(false);
+                }
+            }
+        });
     }
 
     @Override
@@ -341,13 +361,20 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         switch (action) {
             case EXPECTATION_TEXT_CHANGED:
                 if (expectationWrapperManager.loadedFromFile()) {
+                    boolean nameChange = false;
                     String json = expectationTextArea.getText();
                     try {
                         Expectation validClonedExpectation = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
+                        if (!validClonedExpectation.getName().equals(expectationWrapperManager.getSelectedExpectation().getName())) {
+                            nameChange = true;
+                        }
                         expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
                         setExpectationTextColourAndInfo(false, null);
                     } catch (Exception ex) {
                         setExpectationTextColourAndInfo(true, ex.getCause().getMessage());
+                    }
+                    if (nameChange) {
+                        reloadListView();
                     }
                 } else {
                     setExpectationTextColourAndInfo(false, null);
@@ -356,12 +383,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case SAVE_EXPECTATIONS:
                 expectationWrapperManager.save();
-                expectationWrapperManager.refresh();
+                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                displaySelectedExpectation();
+                break;
+            case DELETE_EXPECTATIONS:
+                expectationWrapperManager.delete();
+                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
                 displaySelectedExpectation();
                 break;
             case RELOAD_EXPECTATIONS:
                 expectationWrapperManager.reloadExpectations();
-                expectationWrapperManager.refresh();
+                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
                 displaySelectedExpectation();
                 break;
             case EXPECTATION_SELECTED:
@@ -443,7 +475,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public boolean canAppClose() {
-        return !expectationWrapperManager.updated();
+        return !expectationWrapperManager.isUpdated();
     }
 
     @Override

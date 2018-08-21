@@ -31,9 +31,6 @@ public class Expectations  {
     private String[] paths;
     private boolean logProperies;
 
-    @JsonIgnore
-    private boolean loadedFromAFile = false;
-
     public List<Expectation> getExpectations() {
         return expectations;
     }
@@ -102,14 +99,6 @@ public class Expectations  {
         return ex;
     }
 
-    public boolean loadedFromAFile() {
-        return loadedFromAFile;
-    }
-
-    public boolean wasLoadedFromAFile() {
-        return loadedFromAFile = true;
-    }
-
     public Expectation get(int index) {
         return expectations.get(index);
     }
@@ -120,5 +109,9 @@ public class Expectations  {
 
     public void add(Expectation newExpectation) {
         expectations.add(newExpectation);
+    }
+
+    void remove(Expectation expectation) {
+        expectations.remove(expectation);
     }
 }

@@ -21,9 +21,11 @@ public class ExpectationWrapperList {
 
     private List<ExpectationWrapper> wrappedExpectations;
     private ExpectationWrapper selectedExpectationWrapper;
+    private boolean updated;
 
     public ExpectationWrapperList(ExpectationManager expectationManager) {
         this.expectationManager = expectationManager;
+        this.updated = false;
         refresh();
     }
 
@@ -35,10 +37,13 @@ public class ExpectationWrapperList {
         }
     }
 
-    public void save() {
+    public ExpectationWrapperList save() {
         expectationManager.save();
+        refresh();
+        this.updated = false;
+        return this;
     }
-    
+
     public List<ExpectationWrapper> getWrappedExpectations() {
         return wrappedExpectations;
     }
@@ -52,8 +57,10 @@ public class ExpectationWrapperList {
     }
 
     public void setSelectedExpectationWrapper(Integer index) {
-        if (index != null) {
+        if ((index != null) && (index >= 0)) {
             this.selectedExpectationWrapper = wrappedExpectations.get(index);
+        } else {
+            this.selectedExpectationWrapper = wrappedExpectations.get(0);
         }
     }
 
@@ -85,7 +92,10 @@ public class ExpectationWrapperList {
         return expectationManager.isLoadedFromAFile();
     }
 
-    public boolean updated() {
+    public boolean isUpdated() {
+        if (updated) {
+            return true;
+        }
         for (ExpectationWrapper w : wrappedExpectations) {
             if (w.isUpdated()) {
                 return true;
@@ -94,7 +104,7 @@ public class ExpectationWrapperList {
         return false;
     }
 
-    public final void refresh() {
+    private final void refresh() {
         Expectations expectations = expectationManager.getExpectations();
         wrappedExpectations = new ArrayList<>();
         for (int index = 0; index < expectations.size(); index++) {
@@ -107,8 +117,24 @@ public class ExpectationWrapperList {
         }
     }
 
-    void reloadExpectations() {
+    ExpectationWrapperList reloadExpectations() {
         expectationManager.reloadExpectations(true);
+        refresh();
+        selectFirst();
+        updated = false;
+        return this;
+    }
+
+    void setLogProperties(boolean logProperties) {
+        expectationManager.setLogProperties(logProperties);
+    }
+
+    ExpectationWrapperList deleteSelectedExpectation() {
+        expectationManager.remove(selectedExpectationWrapper.getExpectation());
+        refresh();
+        selectFirst();
+        updated = true;
+        return this;
     }
 
 }

@@ -32,9 +32,9 @@
                 <CheckBox fx:id="checkBoxAutoStart" mnemonicParsing="false" onAction="#checkBoxAutoStartAction" text="Auto-Start" />
                 <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="9.0" visible="false" />
                 <CheckBox fx:id="checkBoxShowPort" mnemonicParsing="false" onAction="#checkBoxShowPortAction" prefHeight="17.0" prefWidth="106.0" text="Show This Port" />
-            <CheckBox fx:id="checkBoxLogProperties" mnemonicParsing="false" onAction="#checkBoxLogPropertiesAction" text="Log Properties" />
+                <CheckBox fx:id="checkBoxLogProperties" mnemonicParsing="false" onAction="#checkBoxLogPropertiesAction" text="Log Properties" />
                 <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="19.0" />
-            <Label text="Display" />
+                <Label text="Display" />
                 <CheckBox fx:id="checkBoxTime" mnemonicParsing="false" onAction="#checkBoxTimeAction" text="Time" />
                 <CheckBox fx:id="checkBoxPort" mnemonicParsing="false" onAction="#checkBoxPortAction" text="Port Number" />
             </items>
@@ -95,7 +95,7 @@
                         </BorderPane>
                     </content>
                 </Tab>
-                <Tab text="Expectations2">
+                <Tab text="View Expectations">
                     <content>
                     </content>
                     <content>
@@ -103,7 +103,18 @@
                             <center>
                                 <SplitPane fx:id="expectationsSplitPane" dividerPositions="0.29797979797979796, 0.5" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                     <items>
-                                        <ListView fx:id="expectationsListView" prefHeight="200.0" prefWidth="200.0" />
+                                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                                            <center>
+                                                <ListView fx:id="expectationsListView" prefHeight="200.0" prefWidth="200.0" />
+                                            </center>
+                                            <top>
+                                                <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                                    <items>
+                                                        <Button mnemonicParsing="false" onAction="#buttonDeleteExpectationAction" text="Delete" />
+                                                    </items>
+                                                </ToolBar>
+                                            </top>
+                                        </BorderPane>
                                         <TextArea fx:id="expectationTextArea" onKeyTyped="#expectationTextAreaKeyTyped" prefHeight="296.0" prefWidth="398.0" />
                                         <TextArea fx:id="expectationTextAreaErrors" editable="false" prefHeight="296.0" prefWidth="314.0" wrapText="true" />
                                     </items>
@@ -113,8 +124,8 @@
                                 <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                     <items>
                                         <Button fx:id="buttonSaveExpectations" mnemonicParsing="false" onAction="#buttonSaveExpectationsAction" text="Save" />
-                              <Button fx:id="buttonReLoadExpectations" mnemonicParsing="false" onAction="#buttonReLoadExpectationsAction" text="Re-Load" />
-                              <Label fx:id="labelSaveExpectations" prefHeight="17.0" prefWidth="176.0" text="Expectations cannot be updated" />
+                                        <Button fx:id="buttonReLoadExpectations" mnemonicParsing="false" onAction="#buttonReLoadExpectationsAction" text="Re-Load" />
+                                        <Label fx:id="labelSaveExpectations" prefHeight="17.0" prefWidth="176.0" text="Expectations cannot be updated" />
                                     </items>
                                 </ToolBar>
                             </top>

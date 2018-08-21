@@ -39,44 +39,47 @@ public class ExpectationWrapperManager {
         return getSelectedExpectationWrapperList().getWrappedExpectations();
     }
 
-    boolean loadedFromFile() {
+    public boolean loadedFromFile() {
         return getSelectedExpectationWrapperList().loadedFromFile();
     }
 
-    Expectation getSelectedExpectation() {
+    public Expectation getSelectedExpectation() {
         return getSelectedExpectationWrapperList().getSelectedExpectation();
     }
 
-    ExpectationWrapper getSelectedExpectationWrapper() {
+    public ExpectationWrapper getSelectedExpectationWrapper() {
         return getSelectedExpectationWrapperList().getSelectedExpectationWrapper();
     }
 
-    boolean isSelected() {
+    public boolean isSelected() {
         return getSelectedExpectationWrapperList().isSelected();
     }
 
-    boolean updated() {
-        return getSelectedExpectationWrapperList().updated();
+    public boolean isUpdated() {
+        return getSelectedExpectationWrapperList().isUpdated();
     }
 
-    void replaceSelectedExpectation(Expectation validClonedExpectation) {
+    public void replaceSelectedExpectation(Expectation validClonedExpectation) {
         getSelectedExpectationWrapperList().replaceSelectedExpectation(validClonedExpectation);
     }
 
-    void save() {
-        getSelectedExpectationWrapperList().save();
+    public void save() {
+        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().save());
     }
 
-    void refresh() {
-        getSelectedExpectationWrapperList().refresh();
+    public void reloadExpectations() {
+        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().reloadExpectations());
     }
 
-    void reloadExpectations() {
-        getSelectedExpectationWrapperList().reloadExpectations();
-    }
-
-    void setSelectedExpectationWrapper(Integer integer) {
+    public void setSelectedExpectationWrapper(Integer integer) {
         getSelectedExpectationWrapperList().setSelectedExpectationWrapper(integer);
     }
 
+    public void setLogProperties(boolean logProperties) {
+        getSelectedExpectationWrapperList().setLogProperties(logProperties);
+    }
+
+    public void delete() {
+        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().deleteSelectedExpectation());
+    }
 }

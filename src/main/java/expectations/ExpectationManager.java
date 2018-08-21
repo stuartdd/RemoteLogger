@@ -96,7 +96,7 @@ public class ExpectationManager {
         this.serverNotifier = serverNotifier;
         this.expectations = expectations;
         this.logProperties = logProperties;
-        loadedFromAFile = false;
+        this.loadedFromAFile = false;
         testExpectations(expectations);
     }
 
@@ -109,7 +109,7 @@ public class ExpectationManager {
             return;
         }
         this.logProperties = logProperties;
-        loadedFromAFile = false;
+        this.loadedFromAFile = false;
         loadExpectations(fileName);
     }
 
@@ -119,6 +119,10 @@ public class ExpectationManager {
 
     public int getPort() {
         return port;
+    }
+
+    public void setLogProperties(boolean logProperties) {
+        this.logProperties = logProperties;
     }
     
     public void set(int i, Expectation newExpectation) {
@@ -410,7 +414,6 @@ public class ExpectationManager {
         if (file.exists()) {
             expectationsFile = file;
             expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, file);
-            expectations.wasLoadedFromAFile();
             expectationsLoadTime = file.lastModified();
             loadedFromAFile = true;
         } else {
@@ -424,12 +427,13 @@ public class ExpectationManager {
             expectationsFile = null;
             expectations = (Expectations) JsonUtils.beanFromJson(Expectations.class, is);
             expectationsLoadTime = 0;
+            loadedFromAFile = false;
         }
         testExpectations(expectations);
     }
 
     public void reloadExpectations(boolean force) {
-        if (expectations.loadedFromAFile()) {
+        if (loadedFromAFile) {
             if (force || (expectationsFile.lastModified() != expectationsLoadTime)) {
                 Expectations temp = (Expectations) JsonUtils.beanFromJson(Expectations.class, expectationsFile);
                 try {
@@ -474,6 +478,10 @@ public class ExpectationManager {
         if (expectations.size() == 0) {
             expectations.addExpectation(getBasicExpectation());
         }
+    }
+
+    public void remove(Expectation expectation) {
+        expectations.remove(expectation);
     }
 
 }

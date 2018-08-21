@@ -40,22 +40,6 @@
     "bodyType" : null,
     "asserts" : { },
     "response" : null
-  }, {
-    "name" : "5: Test Get Response Body",
-    "method" : "GET",
-    "path" : "/grb",
-    "bodyType" : null,
-    "asserts" : { },
-    "response" : {
-      "body" : "Method %{METHOD}.\nURL:'%{PATH}'.\nHOST:%{Host}.\nAccept:%{Accept}.\nxxx:%{xxx}",
-      "status" : 200,
-      "template" : null,
-      "headers" : {
-        "Accept" : "%{Accept}",
-        "Connection" : "%{Connection}",
-        "zzz" : "%{zzz}"
-      }
-    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "logProperies" : false
