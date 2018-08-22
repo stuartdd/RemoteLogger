@@ -18,10 +18,10 @@ import java.util.List;
 public class ExpectationWrapperList {
 
     private final ExpectationManager expectationManager;
-
     private List<ExpectationWrapper> wrappedExpectations;
-    private ExpectationWrapper selectedExpectationWrapper;
+    private int selectedIndex;
     private boolean updated;
+
 
     public ExpectationWrapperList(ExpectationManager expectationManager) {
         this.expectationManager = expectationManager;
@@ -29,18 +29,25 @@ public class ExpectationWrapperList {
         refresh();
     }
 
+    void setLogProperties(boolean logProperties) {
+        expectationManager.setLogProperties(logProperties);
+    }
+
     public void replaceSelectedExpectation(Expectation newExpectation) {
-        if ((selectedExpectationWrapper != null) && (newExpectation != null)) {
-            int index = selectedExpectationWrapper.getIndex();
-            expectationManager.set(index, newExpectation);
-            selectedExpectationWrapper.setExpectation(newExpectation);
+        if (isSelected() && (newExpectation != null)) {
+            expectationManager.set(selectedIndex, newExpectation);
+            refresh();
+            updated = true;
         }
     }
 
-    public ExpectationWrapperList save() {
-        expectationManager.save();
-        refresh();
-        this.updated = false;
+    ExpectationWrapperList deleteSelectedExpectation() {
+        if (isSelected()) {
+            expectationManager.remove(getSelectedExpectation());
+            refresh();
+            selectFirst();
+            updated = true;
+        }
         return this;
     }
 
@@ -48,44 +55,34 @@ public class ExpectationWrapperList {
         return wrappedExpectations;
     }
 
+    public Expectation getSelectedExpectation() {
+        if (isSelected()) {
+            return wrappedExpectations.get(selectedIndex).getExpectation();
+        }
+        return null;
+    }
+
     public ExpectationWrapper getSelectedExpectationWrapper() {
-        return selectedExpectationWrapper;
+        if (isSelected()) {
+            return wrappedExpectations.get(selectedIndex);
+        }
+        return null;
     }
 
     public void setSelectedExpectationWrapper(ExpectationWrapper selectedExpectationWrapper) {
-        this.selectedExpectationWrapper = selectedExpectationWrapper;
+        this.selectedIndex = indexOfWrappedExpectation(selectedExpectationWrapper);
     }
 
     public void setSelectedExpectationWrapper(Integer index) {
-        if ((index != null) && (index >= 0)) {
-            this.selectedExpectationWrapper = wrappedExpectations.get(index);
-        } else {
-            this.selectedExpectationWrapper = wrappedExpectations.get(0);
-        }
+        this.selectedIndex = index;
     }
 
     void selectFirst() {
-        this.selectedExpectationWrapper = wrappedExpectations.get(0);
-    }
-
-    public Expectation getSelectedExpectation() {
-        if (selectedExpectationWrapper != null) {
-            return selectedExpectationWrapper.getExpectation();
-        }
-        return null;
+        this.selectedIndex = 0;
     }
 
     public boolean isSelected() {
-        return (selectedExpectationWrapper != null);
-    }
-
-    public ExpectationWrapper findByName(String name) {
-        for (ExpectationWrapper w : wrappedExpectations) {
-            if (w.getName().equals(name)) {
-                return w;
-            }
-        }
-        return null;
+        return ((selectedIndex >= 0) && (selectedIndex < wrappedExpectations.size()));
     }
 
     public boolean loadedFromFile() {
@@ -104,17 +101,22 @@ public class ExpectationWrapperList {
         return false;
     }
 
-    private final void refresh() {
+    private final synchronized void refresh() {
         Expectations expectations = expectationManager.getExpectations();
-        wrappedExpectations = new ArrayList<>();
+        wrappedExpectations.clear();
         for (int index = 0; index < expectations.size(); index++) {
             wrappedExpectations.add(new ExpectationWrapper(expectations.get(index), index));
         }
-        if (selectedExpectationWrapper == null) {
+        if (!isSelected()) {
             selectFirst();
-        } else {
-            selectedExpectationWrapper = findByName(selectedExpectationWrapper.getName());
         }
+    }
+
+    public ExpectationWrapperList save() {
+        expectationManager.save();
+        refresh();
+        this.updated = false;
+        return this;
     }
 
     ExpectationWrapperList reloadExpectations() {
@@ -125,16 +127,17 @@ public class ExpectationWrapperList {
         return this;
     }
 
-    void setLogProperties(boolean logProperties) {
-        expectationManager.setLogProperties(logProperties);
+    private int indexOfWrappedExpectation(ExpectationWrapper expectationWrapper) {
+        return indexOfExpectation(expectationWrapper.getExpectation());
     }
 
-    ExpectationWrapperList deleteSelectedExpectation() {
-        expectationManager.remove(selectedExpectationWrapper.getExpectation());
-        refresh();
-        selectFirst();
-        updated = true;
-        return this;
+    private int indexOfExpectation(Expectation expectation) {
+        for (int i = 0; i < wrappedExpectations.size(); i++) {
+            if (expectation.getName().equals(wrappedExpectations.get(i).getName())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }

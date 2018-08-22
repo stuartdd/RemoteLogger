@@ -59,8 +59,8 @@ public class ExpectationWrapperManager {
         return getSelectedExpectationWrapperList().isUpdated();
     }
 
-    public void replaceSelectedExpectation(Expectation validClonedExpectation) {
-        getSelectedExpectationWrapperList().replaceSelectedExpectation(validClonedExpectation);
+    public void replaceSelectedExpectation(Expectation expectation) {
+        getSelectedExpectationWrapperList().replaceSelectedExpectation(expectation);
     }
 
     public void save() {

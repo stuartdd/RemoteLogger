@@ -250,7 +250,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         expectationSelectionChangedListener.supressActions(true);
         try {
             expectationWrapperManager.setSelectedPort(server.getPort());
-            expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+            reloadListView(true);
             expectationsListView.getSelectionModel().selectFirst();
             expectationWrapperManager.selectFirst();
             displaySelectedExpectation();
@@ -294,18 +294,27 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         labelSaveExpectations.setVisible(!expectationWrapperManager.loadedFromFile());
     }
 
-    private void reloadListView() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                expectationSelectionChangedListener.supressActions(true);
-                try {
-                    expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
-                } finally {
-                    expectationSelectionChangedListener.supressActions(false);
-                }
+    private synchronized void reloadListView(boolean now) {
+        if (now) {
+            expectationSelectionChangedListener.supressActions(true);
+            try {
+                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+            } finally {
+                expectationSelectionChangedListener.supressActions(false);
             }
-        });
+        } else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    expectationSelectionChangedListener.supressActions(true);
+                    try {
+                        expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                    } finally {
+                        expectationSelectionChangedListener.supressActions(false);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -365,16 +374,13 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                     String json = expectationTextArea.getText();
                     try {
                         Expectation validClonedExpectation = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
-                        if (!validClonedExpectation.getName().equals(expectationWrapperManager.getSelectedExpectation().getName())) {
-                            nameChange = true;
-                        }
                         expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
+                        if (!validClonedExpectation.getName().equals(expectationWrapperManager.getSelectedExpectation().getName())) {
+                            reloadListView(true);
+                        }
                         setExpectationTextColourAndInfo(false, null);
                     } catch (Exception ex) {
                         setExpectationTextColourAndInfo(true, ex.getCause().getMessage());
-                    }
-                    if (nameChange) {
-                        reloadListView();
                     }
                 } else {
                     setExpectationTextColourAndInfo(false, null);
@@ -383,17 +389,17 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case SAVE_EXPECTATIONS:
                 expectationWrapperManager.save();
-                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                reloadListView(true);
                 displaySelectedExpectation();
                 break;
             case DELETE_EXPECTATIONS:
                 expectationWrapperManager.delete();
-                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                reloadListView(true);
                 displaySelectedExpectation();
                 break;
             case RELOAD_EXPECTATIONS:
                 expectationWrapperManager.reloadExpectations();
-                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
+                reloadListView(true);
                 displaySelectedExpectation();
                 break;
             case EXPECTATION_SELECTED:
