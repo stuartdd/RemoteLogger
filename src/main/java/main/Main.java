@@ -32,7 +32,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import json.JsonUtils;
@@ -158,6 +160,34 @@ public class Main extends Application {
         alert.setY(mainStage.getY() + 50);
         Optional<ButtonType> result = alert.showAndWait();
         return result.get() == ButtonType.OK;
+    }
+
+    public static void errorDialog(String ti, String txt, String ht) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(ti);
+        alert.setHeaderText(txt);
+        alert.setContentText(ht);
+        alert.setX(mainStage.getX() + 50);
+        alert.setY(mainStage.getY() + 50);
+        alert.showAndWait();
+    }
+
+    public static String textInputDialog(String ti, String ht, String prompt, String txt) {
+        TextInputDialog textDialog = new TextInputDialog(txt);
+        textDialog.setTitle(ti);
+        textDialog.setHeaderText(ht);
+        textDialog.setContentText(prompt);
+        textDialog.setX(mainStage.getX() + 50);
+        textDialog.setY(mainStage.getY() + 50);
+        Optional<String> result = textDialog.showAndWait();
+        if (result.isPresent()) {
+            String res = result.get();
+            if (res.equals(txt)) {
+                return null;
+            }
+            return res;
+        }
+        return null;
     }
 
     public static boolean closeApplication(boolean force) {

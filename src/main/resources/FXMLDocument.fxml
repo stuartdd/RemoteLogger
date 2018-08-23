@@ -110,10 +110,15 @@
                                             <top>
                                                 <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                     <items>
-                                                        <Button mnemonicParsing="false" onAction="#buttonDeleteExpectationAction" text="Delete" />
+                                                        <Button fx:id="buttonDeleteExpectation" mnemonicParsing="false" onAction="#buttonDeleteExpectationAction" text="Delete" />
+                                          <Button fx:id="buttonRenameExpectation" mnemonicParsing="false" onAction="#buttonRenameExpectationAction" text="Rename" />
+                                          <Button fx:id="buttonNewExpectation" mnemonicParsing="false" onAction="#buttonNewExpectationAction" text="New" />
                                                     </items>
                                                 </ToolBar>
                                             </top>
+                                 <bottom>
+                                    <Label fx:id="labelExpectationList" text="Label" BorderPane.alignment="CENTER" />
+                                 </bottom>
                                         </BorderPane>
                                         <TextArea fx:id="expectationTextArea" onKeyTyped="#expectationTextAreaKeyTyped" prefHeight="296.0" prefWidth="398.0" />
                                         <TextArea fx:id="expectationTextAreaErrors" editable="false" prefHeight="296.0" prefWidth="314.0" wrapText="true" />

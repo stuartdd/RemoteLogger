@@ -124,17 +124,40 @@ public class ExpectationManager {
     public void setLogProperties(boolean logProperties) {
         this.logProperties = logProperties;
     }
+
+    public void remove(Expectation expectation) {
+        int index = findIndexByName(expectation.getName());
+        if (index >= 0) {
+            expectations.remove(expectations.get(index));
+        }
+    }
+
+    public Expectation replace(Expectation oldExpectation, Expectation newExpectation) {
+        int index = findIndexByName(oldExpectation.getName());
+        if (index >= 0) {
+            expectations.set(index, newExpectation);
+            return newExpectation;
+        }
+        return oldExpectation;
+    }
     
-    public void set(int i, Expectation newExpectation) {
-        expectations.set(i, newExpectation);
+    private int findIndexByName(String name) {
+        for (int i = 0; i < expectations.size(); i++) {
+            if (expectations.get(i).getName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public static Expectation getExampleExpectation() {
         return (Expectation) JsonUtils.beanFromJson(Expectation.class, EXAMPLE_JSON);
     }
 
-    public static Expectation getBasicExpectation() {
-        return (Expectation) JsonUtils.beanFromJson(Expectation.class, BASIC_JSON);
+    public static Expectation getBasicExpectationWithName(String name) {
+        Expectation exp = (Expectation) JsonUtils.beanFromJson(Expectation.class, BASIC_JSON);
+        exp.setName(name);
+        return exp;
     }
 
     public void getResponse(long time, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ServerStatistics serverStatistics) {
@@ -202,6 +225,7 @@ public class ExpectationManager {
     public boolean isLoadedFromAFile() {
         return loadedFromAFile;
     }
+
 
     private Expectation findMatchingExpectation(long time, Map<String, Object> map) {
         if (expectations == null) {
@@ -476,12 +500,11 @@ public class ExpectationManager {
             expectations = new Expectations();
         }
         if (expectations.size() == 0) {
-            expectations.addExpectation(getBasicExpectation());
+            expectations.addExpectation(getBasicExpectationWithName("Temp Name"));
         }
     }
 
-    public void remove(Expectation expectation) {
-        expectations.remove(expectation);
+    public void add(Expectation ex) {
+        expectations.addExpectation(ex);
     }
-
 }

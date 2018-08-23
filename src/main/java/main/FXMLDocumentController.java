@@ -82,7 +82,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private ExpectationSelectionChangedListener expectationSelectionChangedListener;
 
     private Server selectedServer;
+    private int selectedServerPort = -1;
     private ExpectationWrapperManager expectationWrapperManager;
+    private boolean updatedExpectationisValid = true;
 
     @FXML
     private TextArea expectationTextAreaErrors;
@@ -130,6 +132,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private Label labelStatus;
 
     @FXML
+    private Label labelExpectationList;
+
+    @FXML
     private Button buttonConnect;
 
     @FXML
@@ -137,6 +142,15 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Button buttonReLoadExpectations;
+
+    @FXML
+    private Button buttonRenameExpectation;
+    
+    @FXML
+    private Button buttonDeleteExpectation;
+
+    @FXML
+    private Button buttonNewExpectation;
 
     @FXML
     private Label labelSaveExpectations;
@@ -152,38 +166,64 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @FXML
     public void expectationTextAreaKeyTyped() {
         if (expectationWrapperManager.loadedFromFile()) {
-            Main.notifyAction(System.currentTimeMillis(), -1, Action.EXPECTATION_TEXT_CHANGED, null, "Validate Expectation JSON");
+            Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.EXPECTATION_TEXT_CHANGED, null, "Validate Expectation JSON");
         }
     }
 
     @FXML
     public void clearMainLogAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
     }
 
     @FXML
     public void buttonReLoadExpectationsAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.RELOAD_EXPECTATIONS, null, "Expectations reloaded");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RELOAD_EXPECTATIONS, null, "Expectations reloaded");
+    }
+
+    @FXML
+    public void buttonNewExpectationAction() {
+        String name = Main.textInputDialog("ADD EXPECTATION", "Add new expectation. Note that the name must be unique", "Name", "");
+        if (name != null) {
+            String cause = expectationWrapperManager.checkNewExpectationName(name);
+            if (cause != null) {
+                Main.errorDialog("ERROR", cause, "Please try again");
+            } else {
+                Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.ADD_EXPECTATION, name, "Expectation renamed");
+            }
+        }
     }
 
     @FXML
     public void buttonSaveExpectationsAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.SAVE_EXPECTATIONS, null, "Save updated expectations");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.SAVE_EXPECTATIONS, null, "Save expectations");
     }
 
     @FXML
     public void buttonDeleteExpectationAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.DELETE_EXPECTATIONS, null, "Save updated expectations");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.DELETE_EXPECTATION, null, "Delete expectation");
+    }
+
+    @FXML
+    public void buttonRenameExpectationAction() {
+        String name = Main.textInputDialog("RENAME EXPECTATION", "Rename the current expectation. Note that the name must be unique", "Name", expectationWrapperManager.getName());
+        if (name != null) {
+            String cause = expectationWrapperManager.checkNewExpectationName(name);
+            if (cause != null) {
+                Main.errorDialog("ERROR", cause, "Please try again");
+            } else {
+                Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RENAME_EXPECTATION, name, "Expectation renamed");
+            }
+        }
     }
 
     @FXML
     public void clearLogAction() {
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.CLEAR_LOGS, null, "Log has been cleared");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_LOGS, null, "Log has been cleared");
     }
 
     @FXML
     public void checkBoxTimeAction() {
-        Main.notifyConfigChangeOption(Option.TIME, -1, checkBoxTime.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.TIME, selectedServerPort, checkBoxTime.isSelected(), "");
     }
 
     @FXML
@@ -199,28 +239,28 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     public void checkBoxPortAction() {
-        Main.notifyConfigChangeOption(Option.PORT, -1, checkBoxPort.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.PORT, selectedServerPort, checkBoxPort.isSelected(), "");
     }
 
     @FXML
     public void checkBoxHeadersAction() {
-        Main.notifyConfigChangeOption(Option.FILTER_HEADERS, -1, checkBoxHeaders.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.FILTER_HEADERS, selectedServerPort, checkBoxHeaders.isSelected(), "");
     }
 
     @FXML
     public void checkBoxShowPortAction() {
         selectedServer.setShowPort(checkBoxShowPort.isSelected());
-        Main.notifyAction(System.currentTimeMillis(), -1, Action.LOG_REFRESH, null, "Log has been Updated");
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.LOG_REFRESH, null, "Log has been Updated");
     }
 
     @FXML
     public void checkBoxBodyAction() {
-        Main.notifyConfigChangeOption(Option.FILTER_BODY, -1, checkBoxBody.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.FILTER_BODY, selectedServerPort, checkBoxBody.isSelected(), "");
     }
 
     @FXML
     public void checkBoxEmptyAction() {
-        Main.notifyConfigChangeOption(Option.FILTER_EMPTY, -1, checkBoxEmpty.isSelected(), "");
+        Main.notifyConfigChangeOption(Option.FILTER_EMPTY, selectedServerPort, checkBoxEmpty.isSelected(), "");
     }
 
     @FXML
@@ -235,12 +275,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private void changeSelectedServer(Server server) {
         System.out.println("changeSelectedServer:" + server);
         selectedServer = server;
+        selectedServerPort = selectedServer.getPort();
         if (!selectedServer.isShowPort()) {
             selectedServer.setShowPort(true);
         }
         checkBoxAutoStart.setSelected(selectedServer.isAutoStart());
         checkBoxShowPort.setSelected(selectedServer.isShowPort());
         checkBoxLogProperties.setSelected(selectedServer.isLogProperties());
+        labelExpectationList.setText("Expectations for server on port:" + selectedServerPort);
         updateServerStatus(server);
         changeSelectedExpectationManager(server);
     }
@@ -250,13 +292,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         expectationSelectionChangedListener.supressActions(true);
         try {
             expectationWrapperManager.setSelectedPort(server.getPort());
-            reloadListView(true);
+            expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
             expectationsListView.getSelectionModel().selectFirst();
             expectationWrapperManager.selectFirst();
-            displaySelectedExpectation();
         } finally {
             expectationSelectionChangedListener.supressActions(false);
         }
+        displaySelectedExpectation();
+        expectationsListView.refresh();
     }
 
     private void displaySelectedExpectation() {
@@ -264,11 +307,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         expectationSelectionChangedListener.supressActions(true);
         try {
             ExpectationWrapper expectationWrapper = expectationWrapperManager.getSelectedExpectationWrapper();
-            ExpectationWrapper actual = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
-            if (actual != expectationWrapper) {
-                expectationsListView.getSelectionModel().select(expectationWrapper);
-            }
             if (expectationWrapper != null) {
+                /*
+                 Make sure we have the correct one selected
+                 */
+                ExpectationWrapper actual = (ExpectationWrapper) expectationsListView.getSelectionModel().getSelectedItem();
+                if (actual != expectationWrapper) {
+                    expectationsListView.getSelectionModel().select(expectationWrapper);
+                }
                 expectationTextArea.setText(expectationWrapper.toJson());
                 setExpectationTextColourAndInfo(false, null);
             } else {
@@ -283,37 +329,27 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private boolean canSaveUpdatedExpectation() {
         return (expectationWrapperManager != null)
+                && updatedExpectationisValid
                 && expectationWrapperManager.isSelected()
                 && expectationWrapperManager.isUpdated()
                 && expectationWrapperManager.loadedFromFile();
     }
 
     private void configureExpectationSaveOptions() {
-        buttonSaveExpectations.setDisable(!canSaveUpdatedExpectation());
-        buttonReLoadExpectations.setDisable(buttonSaveExpectations.isDisabled());
-        labelSaveExpectations.setVisible(!expectationWrapperManager.loadedFromFile());
-    }
-
-    private synchronized void reloadListView(boolean now) {
-        if (now) {
-            expectationSelectionChangedListener.supressActions(true);
-            try {
-                expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
-            } finally {
-                expectationSelectionChangedListener.supressActions(false);
-            }
+        if (expectationWrapperManager.loadedFromFile()) {
+            buttonSaveExpectations.setDisable(!canSaveUpdatedExpectation());
+            buttonReLoadExpectations.setDisable(buttonSaveExpectations.isDisabled());
+            buttonRenameExpectation.setDisable(!updatedExpectationisValid);
+            buttonNewExpectation.setDisable(false);
+            buttonDeleteExpectation.setDisable(expectationWrapperManager.size()<2);
+            labelSaveExpectations.setVisible(false);
         } else {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    expectationSelectionChangedListener.supressActions(true);
-                    try {
-                        expectationsListView.setItems(FXCollections.observableArrayList(expectationWrapperManager.getWrappedExpectations()));
-                    } finally {
-                        expectationSelectionChangedListener.supressActions(false);
-                    }
-                }
-            });
+            labelSaveExpectations.setVisible(true);
+            buttonSaveExpectations.setDisable(true);
+            buttonReLoadExpectations.setDisable(true);
+            buttonRenameExpectation.setDisable(true);
+            buttonNewExpectation.setDisable(true);
+            buttonDeleteExpectation.setDisable(true);
         }
     }
 
@@ -335,10 +371,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         for (int p : ServerManager.portListSorted()) {
             expectationWrapperManager.add(p, new ExpectationWrapperList(ServerManager.getExpectationManager(p)));
         }
-        updateMainLog(System.currentTimeMillis(), -1, LogCatagory.EMPTY, null);
+        updateMainLog(System.currentTimeMillis(), selectedServerPort, LogCatagory.EMPTY, null);
         changeSelectedServer(Main.getDefaultServer());
         choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));
-        choiceBoxPortNumber.getSelectionModel().select("" + selectedServer.getPort());
+        choiceBoxPortNumber.getSelectionModel().select("" + selectedServerPort);
         /*
         Link up th echange notifiers. Must be done AFTER init!
          */
@@ -346,7 +382,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (oldValue != newValue) {
-                    Main.notifyAction(System.currentTimeMillis(), -1, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
+                    Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.SERVER_SELECTED, ServerManager.getServer(ServerManager.portListSorted()[newValue.intValue()]), "Server Selected [" + newValue + "]");
                 }
             }
         });
@@ -370,15 +406,15 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         switch (action) {
             case EXPECTATION_TEXT_CHANGED:
                 if (expectationWrapperManager.loadedFromFile()) {
-                    boolean nameChange = false;
                     String json = expectationTextArea.getText();
                     try {
                         Expectation validClonedExpectation = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
-                        expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
-                        if (!validClonedExpectation.getName().equals(expectationWrapperManager.getSelectedExpectation().getName())) {
-                            reloadListView(true);
+                        if (validClonedExpectation.getName().equals(expectationWrapperManager.getSelectedExpectation().getName())) {
+                            expectationWrapperManager.replaceSelectedExpectation(validClonedExpectation);
+                            setExpectationTextColourAndInfo(false, null);
+                        } else {
+                            setExpectationTextColourAndInfo(true, "Cannot rename an Expectation from the Editor.\n\nPlease use the Rename button.\nPress Ctrl+Z to correct and continue");
                         }
-                        setExpectationTextColourAndInfo(false, null);
                     } catch (Exception ex) {
                         setExpectationTextColourAndInfo(true, ex.getCause().getMessage());
                     }
@@ -389,18 +425,23 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case SAVE_EXPECTATIONS:
                 expectationWrapperManager.save();
-                reloadListView(true);
-                displaySelectedExpectation();
+                changeSelectedExpectationManager(selectedServer);
                 break;
-            case DELETE_EXPECTATIONS:
+            case DELETE_EXPECTATION:
                 expectationWrapperManager.delete();
-                reloadListView(true);
-                displaySelectedExpectation();
+                changeSelectedExpectationManager(selectedServer);
                 break;
             case RELOAD_EXPECTATIONS:
                 expectationWrapperManager.reloadExpectations();
-                reloadListView(true);
-                displaySelectedExpectation();
+                changeSelectedExpectationManager(selectedServer);
+                break;
+            case ADD_EXPECTATION:
+                expectationWrapperManager.addExpectationWithName((String) actionOn);
+                changeSelectedExpectationManager(selectedServer);
+                break;
+            case RENAME_EXPECTATION:
+                expectationWrapperManager.rename((String) actionOn);
+                changeSelectedExpectationManager(selectedServer);
                 break;
             case EXPECTATION_SELECTED:
                 expectationWrapperManager.setSelectedExpectationWrapper((Integer) actionOn);
@@ -449,6 +490,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     private void setExpectationTextColourAndInfo(boolean isError, String message) {
         Color color;
+        updatedExpectationisValid = !isError;
         if (!expectationWrapperManager.loadedFromFile()) {
             color = Color.LIGHTCYAN;
             expectationTextArea.setEditable(false);

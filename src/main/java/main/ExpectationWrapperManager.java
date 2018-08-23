@@ -50,6 +50,9 @@ public class ExpectationWrapperManager {
     public ExpectationWrapper getSelectedExpectationWrapper() {
         return getSelectedExpectationWrapperList().getSelectedExpectationWrapper();
     }
+    int size() {
+        return getSelectedExpectationWrapperList().size();
+    }
 
     public boolean isSelected() {
         return getSelectedExpectationWrapperList().isSelected();
@@ -64,11 +67,11 @@ public class ExpectationWrapperManager {
     }
 
     public void save() {
-        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().save());
+        getSelectedExpectationWrapperList().save();
     }
 
     public void reloadExpectations() {
-        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().reloadExpectations());
+        getSelectedExpectationWrapperList().reloadExpectations();
     }
 
     public void setSelectedExpectationWrapper(Integer integer) {
@@ -80,6 +83,33 @@ public class ExpectationWrapperManager {
     }
 
     public void delete() {
-        wrapperList.put(selectedPort, getSelectedExpectationWrapperList().deleteSelectedExpectation());
+        getSelectedExpectationWrapperList().deleteSelectedExpectation();
     }
+
+    String getJson() {
+        return getSelectedExpectationWrapperList().getJson();
+    }
+
+    String getName() {
+        return getSelectedExpectationWrapperList().getName();
+    }
+
+    String checkNewExpectationName(String name) {
+        if ((name == null) || (name.trim().length()==0)) {
+            return "Name cannot be empty";
+        }
+        if (getSelectedExpectationWrapperList().checkNewExpectationName(name)) {
+            return null;
+        }
+        return "Duplicate Expectation names are not allowed";
+    }
+
+    void rename(String name) {
+        getSelectedExpectationWrapperList().renameSelectedExpectation(name);
+    }
+
+    void addExpectationWithName(String name) {
+        getSelectedExpectationWrapperList().addExpectationWithName(name);
+    }
+
 }

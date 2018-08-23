@@ -1,7 +1,7 @@
 {
   "expectations" : [ {
     "name" : "nowtv/accounts/service-status",
-    "method" : "GET",
+    "method" : " ",
     "path" : "/bt-consumer/v1/*/accounts/service-status",
     "bodyType" : "EMPTY",
     "asserts" : { },
