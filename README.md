@@ -1,4 +1,4 @@
-# Remote Logger
+# Mock Server with Remote Logger and UI
 
 A GUI that Echos/Logs http requests sent to it.
 
@@ -20,23 +20,42 @@ java -jar RemoteLogger.jar configfile.json
 Example config file (annotated):
 ```
 {
-  "port" : 1999,                  Listens on this port
-  "logDateFormat" : "",           The date format for logging
-  "autoConnect" : true,           Connect on load. This will be remembered for each session
-  "timeFormat" : "HH:mm:ss.SSS",  Format for On Screen log time
-  "expectationsFile" : "expectations.json", Rules for generating response files
-  "verbose" : true,               Lots more logging
-  "includeHeaders" : true,        Flag to include headers on screen
-  "includeBody" : true,           Flag to include the bodu text on screen
-  "includeEmpty" : false,         Flag to include empty lines on screen
-  "showTime" : true,              Flag to show timeFormat on screen
-  "x" : 338.0,                    The UI position on screen
-  "y" : 93.0,     
-  "width" : 1548.0,
-  "height" : 845.0
+  "servers" : {
+    "5002" : {
+      "expectationsFile" : "expectations.json",
+      "autoStart" : true,
+      "showPort" : true,
+      "timeToClose" : 1,
+      "verbose" : true,
+      "logProperties" : true
+    },
+    "1998" : {
+      "expectationsFile" : "exp.json",
+      "autoStart" : false,
+      "showPort" : true,
+      "timeToClose" : 1,
+      "verbose" : true,
+      "logProperties" : true
+    }
+  },
+  "logDateFormat" : "",
+  "timeFormat" : "HH:mm:ss.SSS",
+  "defaultPort" : 5002,
+  "includeHeaders" : true,
+  "includeBody" : true,
+  "includeEmpty" : false,
+  "showTime" : true,
+  "showPort" : true,
+  "x" : 0.0,
+  "y" : 0.0,
+  "width" : 1471.0,
+  "height" : 817.0,
+  "expDividerPos" : [ 0.1686166551961459, 0.5898141775636614 ]
 }
 ```
-This config file is updated each time the UI exits normally.
+This config file is updated each time the UI exits normally with the changes selected.
+
+If the UI was on another screen and cannot now be seen. Set x and y to 0 and reload.
 
 The expectation file is yet to be documented.
 
