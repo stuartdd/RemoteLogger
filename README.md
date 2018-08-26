@@ -53,7 +53,9 @@ Example config file (annotated):
   "expDividerPos" : [ 0.1686166551961459, 0.5898141775636614 ]
 }
 ```
-This config file is updated each time the UI exits normally.
+This config file is updated each time the UI exits normally with the changes selected.
+
+If the UI was on another screen and cannot now be seen. Set x and y to 0 and reload.
 
 The expectation file is yet to be documented.
 
