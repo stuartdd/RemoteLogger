@@ -1,4 +1,4 @@
-# Remote Logger
+# Mock Server with Remote Logger and UI
 
 A GUI that Echos/Logs http requests sent to it.
 
