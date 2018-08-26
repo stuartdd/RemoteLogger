@@ -8,9 +8,9 @@
       "verbose" : true,
       "logProperties" : true
     },
-    "1998" : {
+    "5003" : {
       "expectationsFile" : "exp.json",
-      "autoStart" : false,
+      "autoStart" : true,
       "showPort" : true,
       "timeToClose" : 1,
       "verbose" : true,
