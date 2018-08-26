@@ -77,8 +77,9 @@ public class Client {
             obj = new URL(fullHost);
             con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod(method.toString());
-            con.setRequestProperty("User-Agent", config.getUserAgent());
-            con.setRequestProperty("Accept-Language", config.getAcceptLang());
+            for (Map.Entry<String, String> s:config.getHeaders().entrySet()) {
+                con.setRequestProperty(s.getKey(),s.getValue());
+            }
             if ((body == null) || (body.trim().length() == 0)) {
                 con.setDoOutput(false);
             } else {

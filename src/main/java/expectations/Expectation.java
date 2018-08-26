@@ -36,6 +36,7 @@ public class Expectation {
     private Map<String, StringMatcher> stringMatchers;
 
     private ResponseContent response;
+    private ForwardContent forward;
 
     @JsonIgnore
     private MultiStringMatch multiPathMatcher;
@@ -92,6 +93,14 @@ public class Expectation {
 
     public void setResponse(ResponseContent response) {
         this.response = response;
+    }
+
+    public ForwardContent getForward() {
+        return forward;
+    }
+
+    public void setForward(ForwardContent forward) {
+        this.forward = forward;
     }
 
     public String getBodyType() {

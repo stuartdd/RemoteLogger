@@ -13,7 +13,7 @@
         "Content-Type" : "application/json",
         "Fred" : "FRED"
       }
-    }
+    }, "forward":null
   }, {
     "name" : "2: Get Country Name",
     "method" : "GET",

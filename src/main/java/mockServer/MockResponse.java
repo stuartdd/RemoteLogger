@@ -35,9 +35,9 @@ public class MockResponse {
     private final Map<String, String> headers;
 
     public MockResponse(String responseBody, int status, Map<String, String> headers) {
-        this.responseBody = (responseBody==null?"":responseBody);
+        this.responseBody = (responseBody == null ? "" : responseBody);
         this.status = status;
-        this.headers = (headers==null?new HashMap<>():headers);
+        this.headers = (headers == null ? new HashMap<>() : headers);
     }
 
     public void respond(HttpExchange he, Map<String, Object> map) {
@@ -82,4 +82,23 @@ public class MockResponse {
         return status;
     }
 
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public static MockResponse notFound() {
+        return new MockResponse("Not Found", 404, new HashMap<>());
+    }
+
+    public static MockResponse undefined(String method) {
+        if (method.equalsIgnoreCase("GET")) {
+            return new MockResponse("Response is undefined", 200, new HashMap<>());
+        } else {
+            return new MockResponse("Response is undefined", 201, new HashMap<>());
+        }
+    }
 }

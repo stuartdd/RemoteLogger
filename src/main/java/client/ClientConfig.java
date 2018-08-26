@@ -16,11 +16,15 @@
  */
 package client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author 802996013
  */
 public class ClientConfig {
+
     private static final String USER_AGENT = "Mozilla/5.0";
     private static final String HOST = "http://localhost";
     private static final String ACCEPT_LANGUAGE = "en-US,en;q=0.5";
@@ -29,15 +33,35 @@ public class ClientConfig {
     private String userAgent = USER_AGENT;
     private String acceptLang = ACCEPT_LANGUAGE;
     private Integer port = null;
+    private Map<String, String> headers;
 
     public ClientConfig(int port) {
         this.port = port;
     }
-    
+
     public ClientConfig(String host) {
         this.host = host;
+        this.headers = null;
+    }
+
+    public ClientConfig(String host, Integer port) {
+        this.host = host;
+        this.port = port;
+        this.headers = null;
+    }
+
+    public ClientConfig(String host, Integer port, Map<String, String> headers) {
+        this.host = host;
+        this.port = port;
+        this.headers = headers;
     }
     
+    public ClientConfig(String host, Map<String, String> headers) {
+        this.host = host;
+        this.port = null;
+        this.headers = headers;
+    }
+
     public String getHost() {
         return host;
     }
@@ -69,6 +93,14 @@ public class ClientConfig {
     public void setAcceptLang(String acceptLang) {
         this.acceptLang = acceptLang;
     }
-    
-    
+
+    public Map<String, String> getHeaders() {
+        if (headers == null) {
+            Map<String, String> tempHeaders = new HashMap<>();
+            tempHeaders.put("User-Agent", getUserAgent());
+            tempHeaders.put("Accept-Language", getAcceptLang());
+            return tempHeaders;
+        }
+        return headers;
+    }
 }

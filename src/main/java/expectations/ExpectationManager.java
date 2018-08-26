@@ -16,6 +16,10 @@
  */
 package expectations;
 
+import client.Client;
+import client.Client.Method;
+import client.ClientConfig;
+import client.ClientResponse;
 import common.BodyType;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.File;
@@ -62,7 +66,7 @@ public class ExpectationManager {
             + "         \"Accept\": \"%{HEAD.Accept}\",\n"
             + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
             + "    }\n"
-            + "  }\n"
+            + "  }, \"forward\": null"
             + "}";
     private static final String BASIC_JSON = "{\n"
             + "  \"name\" : \"Unique Expectation Name\",\n"
@@ -140,7 +144,7 @@ public class ExpectationManager {
         }
         return oldExpectation;
     }
-    
+
     private int findIndexByName(String name) {
         for (int i = 0; i < expectations.size(); i++) {
             if (expectations.get(i).getName().equals(name)) {
@@ -165,9 +169,8 @@ public class ExpectationManager {
     }
 
     public MockResponse getResponseData(Map<String, Object> map, ServerStatistics serverStatistics) {
-        String response = "Not Found";
-        int statusCode = 404;
-        Map<String, String> responseHeaders = new HashMap<>();
+        MockResponse mockResponse = MockResponse.notFound();
+
         loadPropertiesFromBody(map, (String) map.get("BODY"));
         if ((expectations.isLogProperies() || logProperties) && (serverNotifier != null)) {
             logMap(System.currentTimeMillis(), map, "REQUEST PROPERTIES");
@@ -179,32 +182,10 @@ public class ExpectationManager {
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), getPort(), "MATCHED " + foundExpectation);
                 }
-                if (foundExpectation.getResponse() != null) {
-                    ResponseContent responseContent = foundExpectation.getResponse();
-                    if (Util.isEmpty(responseContent.getBodyTemplate())) {
-                        if (Util.isEmpty(responseContent.getBody())) {
-                            response = "Body is undefined";
-                        } else {
-                            response = Template.parse(responseContent.getBody(), map, true);
-                        }
-                    } else {
-                        String templateName = Template.parse(responseContent.getBodyTemplate(), map, true);
-                        response = locateResponseFile(templateName);
-                    }
-                    statusCode = responseContent.getStatus();
-                    responseHeaders = responseContent.getHeaders();
-                } else {
-                    if (foundExpectation.getMethod().equalsIgnoreCase("GET")) {
-                        statusCode = 200;
-                    } else {
-                        statusCode = 201;
-                    }
-                    response = "Response is undefined";
-                }
-                map.put("STATUS", "" + statusCode);
-                logResponse(System.currentTimeMillis(), response, statusCode, "RESP");
+                mockResponse = createMockResponse(foundExpectation, map);
+                mockResponse = createMockResponseViaForward(mockResponse, foundExpectation, map);
             } catch (ExpectationException ee) {
-                statusCode = ee.getStatus();
+                mockResponse = MockResponse.notFound();
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), getPort(), new IOException("Read file failed for expectation: " + foundExpectation.getName() + ". " + ee.getMessage(), ee));
                 }
@@ -215,7 +196,9 @@ public class ExpectationManager {
                 serverNotifier.log(System.currentTimeMillis(), getPort(), "Expectation not met");
             }
         }
-        return new MockResponse(response, statusCode, responseHeaders);
+        map.put("STATUS", "" + mockResponse.getStatus());
+        logResponse(System.currentTimeMillis(), mockResponse.getResponseBody(), mockResponse.getStatus(), "RESP");
+        return mockResponse;
     }
 
     public boolean hasNoExpectations() {
@@ -226,6 +209,57 @@ public class ExpectationManager {
         return loadedFromAFile;
     }
 
+    private MockResponse createMockResponseViaForward(MockResponse mockResponse, Expectation foundExpectation, Map<String, Object> map) {
+        if (foundExpectation.getForward() != null) {
+            ForwardContent forward = foundExpectation.getForward();
+            String body = "";
+            if (Util.isEmpty(forward.getBodyTemplate())) {
+                if (Util.isEmpty(forward.getBody())) {
+                    body = "";
+                } else {
+                    body = Template.parse(forward.getBody(), map, true);
+                }
+            } else {
+                String templateName = Template.parse(forward.getBodyTemplate(), map, true);
+                body = locateResponseFile(templateName);
+            }
+            Map<String, String> headers = new HashMap<>();
+            if (forward.getHeaders() != null) {
+                for (Map.Entry<String, String> s : forward.getHeaders().entrySet()) {
+                    headers.put(s.getKey(), Template.parse(s.getValue(), map, true));
+                }
+            }
+            ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true), headers);
+            Client client = new Client(clientConfig, serverNotifier);
+            ClientResponse resp = client.send(Template.parse(forward.getPath(), map, true), body, Method.valueOf(forward.getMethod()));
+            return new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders());
+        }
+        return mockResponse;
+    }
+
+    private MockResponse createMockResponse(Expectation expectation, Map<String, Object> map) {
+        String response = "Not Found";
+        int statusCode = 404;
+        Map<String, String> responseHeaders = new HashMap<>();
+        if (expectation.getResponse() != null) {
+            ResponseContent responseContent = expectation.getResponse();
+            if (Util.isEmpty(responseContent.getBodyTemplate())) {
+                if (Util.isEmpty(responseContent.getBody())) {
+                    response = "Body is undefined";
+                } else {
+                    response = Template.parse(responseContent.getBody(), map, true);
+                }
+            } else {
+                String templateName = Template.parse(responseContent.getBodyTemplate(), map, true);
+                response = locateResponseFile(templateName);
+            }
+            statusCode = responseContent.getStatus();
+            responseHeaders = responseContent.getHeaders();
+        } else {
+            return MockResponse.undefined(expectation.getMethod());
+        }
+        return new MockResponse(response, statusCode, responseHeaders);
+    }
 
     private Expectation findMatchingExpectation(long time, Map<String, Object> map) {
         if (expectations == null) {
@@ -507,4 +541,5 @@ public class ExpectationManager {
     public void add(Expectation ex) {
         expectations.addExpectation(ex);
     }
+
 }
