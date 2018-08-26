@@ -27,7 +27,7 @@ import common.Util;
 public class ResponseContent {
     private String body;
     private int status;
-    private String template;
+    private String bodyTemplate;
     private Map<String, String> headers = new HashMap<>();
 
     public String getBody() {
@@ -46,12 +46,12 @@ public class ResponseContent {
         this.status = status;
     }
 
-    public String getTemplate() {
-        return template;
+    public String getBodyTemplate() {
+        return bodyTemplate;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
+    public void setBodyTemplate(String bodyTemplate) {
+        this.bodyTemplate = bodyTemplate;
     }
 
     public Map<String, String> getHeaders() {
@@ -64,7 +64,7 @@ public class ResponseContent {
 
     @Override
     public String toString() {
-        return "{" + "status=" + status + ", body[20]='" + (Util.isEmpty(body)?"":Util.firstN(body, 20)) + "', template=" + (Util.isEmpty(template)?"Undefined":template) + ", headers=" + headers.size() + '}';
+        return "{" + "status=" + status + ", body[20]='" + (Util.isEmpty(body)?"":Util.firstN(body, 20)) + "', bodyTemplate=" + (Util.isEmpty(bodyTemplate)?"Undefined":bodyTemplate) + ", headers=" + headers.size() + '}';
     }
     
     

@@ -57,7 +57,7 @@ public class ExpectationManager {
             + "  \"response\" : {\n"
             + "    \"body\" : \"[3] Response body text\",\n"
             + "    \"status\" : 200,\n"
-            + "    \"template\" : \"[2] [3] File or Resource to read response body from\",\n"
+            + "    \"bodyTemplate\" : \"[2] [3] File or Resource to read response body from\",\n"
             + "    \"headers\" : { "
             + "         \"Accept\": \"%{HEAD.Accept}\",\n"
             + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
@@ -75,7 +75,7 @@ public class ExpectationManager {
             + "  \"response\" : {\n"
             + "    \"body\" : \"{\\\"message\\\":\\\"Message\\\"}\",\n"
             + "    \"status\" : 200,\n"
-            + "    \"template\" : null,\n"
+            + "    \"bodyTemplate\" : null,\n"
             + "    \"headers\" : {\"Accept\": \"%{HEAD.Accept}\"\n"
             + "    }\n"
             + "  }\n"
@@ -181,14 +181,14 @@ public class ExpectationManager {
                 }
                 if (foundExpectation.getResponse() != null) {
                     ResponseContent responseContent = foundExpectation.getResponse();
-                    if (Util.isEmpty(responseContent.getTemplate())) {
+                    if (Util.isEmpty(responseContent.getBodyTemplate())) {
                         if (Util.isEmpty(responseContent.getBody())) {
                             response = "Body is undefined";
                         } else {
                             response = Template.parse(responseContent.getBody(), map, true);
                         }
                     } else {
-                        String templateName = Template.parse(responseContent.getTemplate(), map, true);
+                        String templateName = Template.parse(responseContent.getBodyTemplate(), map, true);
                         response = locateResponseFile(templateName);
                     }
                     statusCode = responseContent.getStatus();

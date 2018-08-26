@@ -8,7 +8,7 @@
     "response" : {
       "body" : "{\"ntvServiceStatus\": \"healthy\",\"ntvServiceText\": \"The NTV service is Active\"}",
       "status" : 200,
-      "template" : null,
+      "bodyTemplate" : null,
       "headers" : {
         "Content-Type" : "application/json",
         "Fred" : "FRED"
@@ -23,7 +23,7 @@
     "response" : {
       "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n",
       "status" : 200,
-      "template" : null,
+      "bodyTemplate" : null,
       "headers" : { }
     }
   }, {
@@ -40,6 +40,22 @@
     "bodyType" : null,
     "asserts" : { },
     "response" : null
+  }, {
+    "name" : "New Exp",
+    "method" : "GET",
+    "path" : "/test",
+    "bodyType" : "JSON",
+    "asserts" : {
+      "P1" : "V1"
+    },
+    "response" : {
+      "body" : "{\"message\":\"Message\"}",
+      "status" : 200,
+      "bodyTemplate" : null,
+      "headers" : {
+        "Accept" : "%{HEAD.Accept}"
+      }
+    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "logProperies" : false

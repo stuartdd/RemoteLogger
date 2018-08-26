@@ -11,7 +11,7 @@
             },
             "response": {
                 "status": 200,
-                "template": "config/post-%{XML.BorderPane.center.TabPane.tabs.Tab[0].(text)}.xml"
+                "bodyTemplate": "config/post-%{XML.BorderPane.center.TabPane.tabs.Tab[0].(text)}.xml"
             }
         },
         {
@@ -20,7 +20,7 @@
             "path": "/test/getNoFile",
             "response": {
                 "status": 200,
-                "template": "AnyFile.xml"
+                "bodyTemplate": "AnyFile.xml"
             }
         },
         {

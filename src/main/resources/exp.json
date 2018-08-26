@@ -9,7 +9,7 @@
             },
             "response": {
                 "status": 200,
-                "template": "config/post-%{XML.BorderPane.center.TabPane.tabs.Tab[0].(text)}.xml"
+                "bodyTemplate": "config/post-%{XML.BorderPane.center.TabPane.tabs.Tab[0].(text)}.xml"
             }
         },
         {
@@ -21,7 +21,7 @@
             },
             "response": {
                 "status": 200,
-                "template": "config/post-%{JSON.expectations[1].response.status}.json"
+                "bodyTemplate": "config/post-%{JSON.expectations[1].response.status}.json"
             }
         },
         {
@@ -30,7 +30,7 @@
             "path": "/test/getNoFile",
             "response": {
                 "status": 200,
-                "template": "AnyFile.xml"
+                "bodyTemplate": "AnyFile.xml"
             }
         },
         {
@@ -39,7 +39,7 @@
             "path": "/test/post/sub/body",
             "response": {
                 "status": 200,
-                "template": "config/post-200_SubBody.json"
+                "bodyTemplate": "config/post-200_SubBody.json"
             }
         },
         {
