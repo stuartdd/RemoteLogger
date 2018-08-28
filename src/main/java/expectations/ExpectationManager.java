@@ -66,8 +66,26 @@ public class ExpectationManager {
             + "         \"Accept\": \"%{HEAD.Accept}\",\n"
             + "         \"Name of Header 2\" : \"[3] Value of Header 2\"\n"
             + "    }\n"
-            + "  }, \"forward\": null"
+            + "  }, \"forward\" : {\n"
+            + "    \"host\" : \"http://localhost\",\n"
+            + "    \"path\" : null,\n"
+            + "    \"port\" : 5003,\n"
+            + "    \"method\" : null,\n"
+            + "    \"body\" : null,\n"
+            + "    \"bodyTemplate\" : null,\n"
+            + "    \"headers\" : null\n"
+            + "  }"
             + "}";
+
+    private String F = "\"forward\" : {\n"
+            + "    \"host\" : \"http://localhost\",\n"
+            + "    \"path\" : null,\n"
+            + "    \"port\" : 5003,\n"
+            + "    \"method\" : null,\n"
+            + "    \"body\" : null,\n"
+            + "    \"bodyTemplate\" : null,\n"
+            + "    \"headers\" : null\n"
+            + "  }";
     private static final String BASIC_JSON = "{\n"
             + "  \"name\" : \"Unique Expectation Name\",\n"
             + "  \"method\" : \"GET\",\n"
@@ -229,7 +247,10 @@ public class ExpectationManager {
                     headers.put(s.getKey(), Template.parse(s.getValue(), map, true));
                 }
             }
-            ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true), headers);
+            if (serverNotifier!=null) {
+                serverNotifier.log(System.currentTimeMillis(), port, "Forwarding:");
+            }
+            ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true),forward.getPort(), headers);
             Client client = new Client(clientConfig, serverNotifier);
             ClientResponse resp = client.send(Template.parse(forward.getPath(), map, true), body, Method.valueOf(forward.getMethod()));
             return new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders());

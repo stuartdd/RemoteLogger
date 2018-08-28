@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public class ForwardContent {
     private String host;
-    private String path;
     private Integer port;
+    private String path;
     private String method;
     private String body;
     private String bodyTemplate;
@@ -28,20 +28,20 @@ public class ForwardContent {
         this.host = host;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public Integer getPort() {
         return port;
     }
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getMethod() {
@@ -75,6 +75,7 @@ public class ForwardContent {
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
+
 
     
 }

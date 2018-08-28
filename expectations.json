@@ -5,7 +5,15 @@
     "path" : "/bt-consumer/v1/*/accounts/service-status",
     "bodyType" : "EMPTY",
     "asserts" : { },
-    "response" : null,
+    "response" : {
+      "body" : "{\"ntvServiceStatus\": \"healthy\",\"ntvServiceText\": \"The NTV service is Active\"}",
+      "status" : 200,
+      "bodyTemplate" : null,
+      "headers" : {
+        "Content-Type" : "application/json",
+        "Fred" : "FRED"
+      }
+    },
     "forward" : null
   }, {
     "name" : "2: Get Country Name",
@@ -37,22 +45,21 @@
     "response" : null,
     "forward" : null
   }, {
-    "name" : "Test Forward",
+    "name" : "TestForward",
     "method" : "GET",
-    "path" : "/test",
-    "bodyType" : "JSON",
-    "asserts" : {
-      "P1" : "V1"
-    },
-    "response" : {
-      "body" : "{\"message\":\"Message\"}",
-      "status" : 200,
+    "path" : "/testforward",
+    "bodyType" : "EMPTY",
+    "asserts" : { },
+    "response" : null,
+    "forward" : {
+      "host" : "http://localhost",
+      "path" : "/testforward",
+      "port" : 5003,
+      "method" : null,
+      "body" : null,
       "bodyTemplate" : null,
-      "headers" : {
-        "Accept" : "%{HEAD.Accept}"
-      }
-    },
-    "forward" : null
+      "headers" : null
+    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "logProperies" : false
