@@ -103,4 +103,11 @@ public class ClientConfig {
         }
         return headers;
     }
+
+    @Override
+    public String toString() {
+        return "ClientConfig{" + "host=" + host + ", port=" + port + '}';
+    }
+    
+    
 }

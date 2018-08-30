@@ -27,6 +27,7 @@ import common.Action;
 import common.Util;
 import expectations.ExpectationManager;
 import common.Notifier;
+import java.util.TreeMap;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
 
@@ -54,7 +55,7 @@ public class ExpectationHandler implements HttpHandler {
     public void handle(HttpExchange he) throws IOException {
         long time = System.currentTimeMillis();
         this.server.getServerStatistics().inc(ServerStatistics.STAT.REQUEST, true);
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new TreeMap<>();
         Map<String, String> headers = new HashMap<>();
         Map<String, String> queries = new HashMap<>();
         String body = Util.readStream(he.getRequestBody());
@@ -98,7 +99,6 @@ public class ExpectationHandler implements HttpHandler {
             }
         }
         map.put("INFO.BodyMapped", "false");
-
         if (responseHandler != null) {
             MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationManager, this.server.getServerStatistics());
             MockResponse mockResponse = responseHandler.handle(mockRequest, map);

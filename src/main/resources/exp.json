@@ -2,10 +2,14 @@
     "expectations": [
         {
             "name": "TestPost XML body",
-            "method": "post",
-            "path": "/test/post/xml",
-            "asserts": {
-                "XML.BorderPane.center.TabPane.tabs.Tab[1].(text)": "*ggs"
+            "method": "POST",
+            "path": "/forward",
+            "asserts": {},
+            "response" : {
+              "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}",
+              "status" : 200,
+              "bodyTemplate" : null,
+              "headers" : {}
             }
         }
     ],

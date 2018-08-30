@@ -68,13 +68,17 @@ public class LogLine {
     }
 
     public void render(StringBuilder sb, ConfigData config) {
-        if (Main.getConfig().isShowTime()) {
-            sb.append(Main.getConfig().timeStamp(time)).append(":");
+        if (text.startsWith(NL)) {
+            sb.append(text.trim()).append(NL);
+        } else {
+            if (Main.getConfig().isShowTime()) {
+                sb.append(Main.getConfig().timeStamp(time)).append(":");
+            }
+            if ((port > 0) && (config.isShowPort())) {
+                sb.append("[").append(port).append("] ");
+            }
+            sb.append(text).append(NL);
         }
-        if ((port > 0) && (config.isShowPort())) {
-            sb.append("[").append(port).append("] ");
-        }
-        sb.append(text).append(NL);
     }
 
     @Override

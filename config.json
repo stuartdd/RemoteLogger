@@ -25,9 +25,9 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 44.0,
+  "x" : 753.0,
   "y" : 65.0,
   "width" : 1471.0,
-  "height" : 817.0,
-  "expDividerPos" : [ 0.1686166551961459, 0.5898141775636614 ]
+  "height" : 693.0,
+  "expDividerPos" : [ 0.1688223281143635, 0.5895166780122533 ]
 }

@@ -78,7 +78,7 @@ public class Expectation {
         this.asserts = asserts;
         this.stringMatchers = mapAssertsToStringMatchers(asserts);
     }
-    
+
     public boolean assertMatch(String key, String value) {
         StringMatcher sm = stringMatchers.get(key);
         if (sm == null) {
@@ -86,7 +86,7 @@ public class Expectation {
         }
         return sm.match(value);
     }
-    
+
     public ResponseContent getResponse() {
         return response;
     }
@@ -113,12 +113,12 @@ public class Expectation {
 
     @Override
     public String toString() {
-        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response == null ? "Undefined" : response) + '}';
+        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response == null ? "Undefined" : response) + ", forward=" + (forward == null ? "Undefined" : forward) + '}';
     }
 
     private Map<String, StringMatcher> mapAssertsToStringMatchers(Map<String, String> stringAsserts) {
         Map<String, StringMatcher> map = new HashMap<>();
-        for (Map.Entry<String, String> e:stringAsserts.entrySet()) {
+        for (Map.Entry<String, String> e : stringAsserts.entrySet()) {
             map.put(e.getKey(), new StringMatcher(e.getValue()));
         }
         return map;

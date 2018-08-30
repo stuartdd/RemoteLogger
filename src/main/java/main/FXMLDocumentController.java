@@ -16,12 +16,14 @@
  */
 package main;
 
+import com.sun.javafx.beans.event.AbstractNotifyListener;
 import common.Action;
 import expectations.Expectation;
 import expectations.ExpectationManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -145,7 +147,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Button buttonRenameExpectation;
-    
+
     @FXML
     private Button buttonDeleteExpectation;
 
@@ -341,7 +343,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             buttonReLoadExpectations.setDisable(buttonSaveExpectations.isDisabled());
             buttonRenameExpectation.setDisable(!updatedExpectationisValid);
             buttonNewExpectation.setDisable(false);
-            buttonDeleteExpectation.setDisable(expectationWrapperManager.size()<2);
+            buttonDeleteExpectation.setDisable(expectationWrapperManager.size() < 2);
             labelSaveExpectations.setVisible(false);
         } else {
             labelSaveExpectations.setVisible(true);
@@ -402,7 +404,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public boolean notifyAction(long time, int port, Action action, Object actionOn, String message) {
-        System.out.println("ACTION:" + action.name() + " On[" + actionOn + "]");
         switch (action) {
             case EXPECTATION_TEXT_CHANGED:
                 if (expectationWrapperManager.loadedFromFile()) {

@@ -39,6 +39,7 @@ public class Client {
     public enum Method {
         GET, PUT, POST
     }
+
     private static final String NL = System.getProperty("line.separator");
 
     private ClientConfig config;
@@ -49,7 +50,25 @@ public class Client {
         this.config = config;
     }
 
-    public ClientResponse send(String path, String body, Method method) {
+    public ClientResponse send(String path, String body, String methodName) {
+        if (methodName == null) {
+            return send(path, body, Method.GET);
+        } else {
+            Method method = Method.valueOf(methodName);
+            if (method == null) {
+                return send(path, body, Method.GET);
+            }
+            return send(path, body, method);
+        }
+    }
+    
+    public ClientResponse send(String path, String body, Method methodIn) {
+        Method method;
+        if (methodIn == null) {
+            method = Method.GET;
+        } else {
+            method = methodIn;
+        }
         String fullHost;
         if (path != null) {
             if (path.startsWith("/")) {
@@ -77,8 +96,8 @@ public class Client {
             obj = new URL(fullHost);
             con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod(method.toString());
-            for (Map.Entry<String, String> s:config.getHeaders().entrySet()) {
-                con.setRequestProperty(s.getKey(),s.getValue());
+            for (Map.Entry<String, String> s : config.getHeaders().entrySet()) {
+                con.setRequestProperty(s.getKey(), s.getValue());
             }
             if ((body == null) || (body.trim().length() == 0)) {
                 con.setDoOutput(false);

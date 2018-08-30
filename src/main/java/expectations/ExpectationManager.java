@@ -200,8 +200,11 @@ public class ExpectationManager {
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), getPort(), "MATCHED " + foundExpectation);
                 }
-                mockResponse = createMockResponse(foundExpectation, map);
-                mockResponse = createMockResponseViaForward(mockResponse, foundExpectation, map);
+                if (foundExpectation.getForward() == null) {
+                    mockResponse = createMockResponse(foundExpectation, map);
+                } else {
+                    mockResponse = createMockResponseViaForward(foundExpectation, map);
+                }
             } catch (ExpectationException ee) {
                 mockResponse = MockResponse.notFound();
                 if (serverNotifier != null) {
@@ -227,41 +230,53 @@ public class ExpectationManager {
         return loadedFromAFile;
     }
 
-    private MockResponse createMockResponseViaForward(MockResponse mockResponse, Expectation foundExpectation, Map<String, Object> map) {
-        if (foundExpectation.getForward() != null) {
-            ForwardContent forward = foundExpectation.getForward();
-            String body = "";
-            if (Util.isEmpty(forward.getBodyTemplate())) {
-                if (Util.isEmpty(forward.getBody())) {
-                    body = "";
-                } else {
-                    body = Template.parse(forward.getBody(), map, true);
-                }
+    private MockResponse createMockResponseViaForward(Expectation foundExpectation, Map<String, Object> map) {
+        ForwardContent forward = foundExpectation.getForward();
+        String body = "";
+        if (Util.isEmpty(forward.getBodyTemplate())) {
+            if (Util.isEmpty(forward.getBody())) {
+                body = "";
             } else {
-                String templateName = Template.parse(forward.getBodyTemplate(), map, true);
-                body = locateResponseFile(templateName);
+                body = Template.parse(forward.getBody(), map, true);
             }
-            Map<String, String> headers = new HashMap<>();
-            if (forward.getHeaders() != null) {
-                for (Map.Entry<String, String> s : forward.getHeaders().entrySet()) {
-                    headers.put(s.getKey(), Template.parse(s.getValue(), map, true));
+        } else {
+            String templateName = Template.parse(forward.getBodyTemplate(), map, true);
+            body = locateResponseFile(templateName);
+        }
+        Map<String, String> headers = new HashMap<>();
+        if (forward.isForwardHeaders()) {
+            for (Map.Entry<String, Object> s : map.entrySet()) {
+                if (s.getKey().startsWith("HEAD.")) {
+                    headers.put(s.getKey().substring(5), Template.parse(s.getValue().toString(), map, true));
                 }
             }
-            if (serverNotifier!=null) {
-                serverNotifier.log(System.currentTimeMillis(), port, "Forwarding:");
-            }
-            ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true),forward.getPort(), headers);
-            Client client = new Client(clientConfig, serverNotifier);
-            ClientResponse resp = client.send(Template.parse(forward.getPath(), map, true), body, Method.valueOf(forward.getMethod()));
-            return new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders());
         }
-        return mockResponse;
+        if (forward.getHeaders() != null) {
+            for (Map.Entry<String, String> s : forward.getHeaders().entrySet()) {
+                headers.put(s.getKey(), Template.parse(s.getValue(), map, true));
+            }
+        }
+        ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true), forward.getPort(), headers);
+        if (serverNotifier != null) {
+            serverNotifier.log(System.currentTimeMillis(), getPort(), clientConfig.toString());
+        }
+        Client client = new Client(clientConfig, serverNotifier);
+        try {
+            ClientResponse resp = client.send(Template.parse(forward.getPath(), map, true), body, forward.getMethod());
+            return new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders());
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (serverNotifier != null) {
+                serverNotifier.log(System.currentTimeMillis(), getPort(), e);
+            }
+            return new MockResponse("Forward failed:" + e.getMessage(), 500, null);
+        }
     }
 
     private MockResponse createMockResponse(Expectation expectation, Map<String, Object> map) {
-        String response = "Not Found";
-        int statusCode = 404;
-        Map<String, String> responseHeaders = new HashMap<>();
+        String response;
+        int statusCode;
+        Map<String, String> responseHeaders;
         if (expectation.getResponse() != null) {
             ResponseContent responseContent = expectation.getResponse();
             if (Util.isEmpty(responseContent.getBodyTemplate())) {
@@ -404,7 +419,7 @@ public class ExpectationManager {
 
     private void logResponse(long time, String resp, int statusCode, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append("**").append(id).append(' ').append(LS);
+        sb.append("* ").append(id).append(' ').append(LS);
         sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
         sb.append("* ").append(id).append(' ').append(LS);
         sb.append(resp).append(NL);

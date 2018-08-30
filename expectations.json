@@ -1,8 +1,8 @@
 {
   "expectations" : [ {
-    "name" : "nowtv/accounts/service-status",
-    "method" : " ",
-    "path" : "/bt-consumer/v1/*/accounts/service-status",
+    "name" : "Test Simple",
+    "method" : "GET",
+    "path" : "/nowtv/accounts/service-status",
     "bodyType" : "EMPTY",
     "asserts" : { },
     "response" : {
@@ -22,7 +22,7 @@
     "bodyType" : null,
     "asserts" : { },
     "response" : {
-      "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}\n",
+      "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}",
       "status" : 200,
       "bodyTemplate" : null,
       "headers" : { }
@@ -53,12 +53,16 @@
     "response" : null,
     "forward" : {
       "host" : "http://localhost",
-      "path" : "/testforward",
       "port" : 5003,
-      "method" : null,
-      "body" : null,
+      "path" : "/forward",
+      "method" : "POST",
+      "body" : "{\"message\":\"Forwarded from India, Love from dad in the conservatory\"}",
       "bodyTemplate" : null,
-      "headers" : null
+      "forwardHeaders" : false,
+      "headers" : {
+        "Content-Type" : "application/json",
+        "Fred" : "FRED"
+      }
     }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],

@@ -18,6 +18,7 @@ public class ForwardContent {
     private String method;
     private String body;
     private String bodyTemplate;
+    private boolean forwardHeaders = false;
     private Map<String, String>headers;
 
     public String getHost() {
@@ -68,6 +69,14 @@ public class ForwardContent {
         this.bodyTemplate = bodyTemplate;
     }
 
+    public boolean isForwardHeaders() {
+        return forwardHeaders;
+    }
+
+    public void setForwardHeaders(boolean forwardHeaders) {
+        this.forwardHeaders = forwardHeaders;
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -76,6 +85,10 @@ public class ForwardContent {
         this.headers = headers;
     }
 
+    @Override
+    public String toString() {
+        return "ForwardContent{" + "host=" + host + ", port=" + port + ", path=" + path + '}';
+    }
 
     
 }

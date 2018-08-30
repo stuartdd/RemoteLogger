@@ -18,7 +18,7 @@ public class ExpectationSelectionChangedListener implements ChangeListener {
     private int supressActionCounts = 0;
 
     @Override
-    public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+    public synchronized void changed(ObservableValue observable, Object oldValue, Object newValue) {
         if (supressActionCounts > 0) {
             return;
         }
