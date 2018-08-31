@@ -81,6 +81,9 @@ public class ExpectationHandler implements HttpHandler {
             map.put("PATH", he.getRequestURI().getPath());
             splitIntoMap(map, null, "PATH", '/');
         }
+        if (serverNotifier != null) {
+            serverNotifier.log(time, port, "RECEIVED ---> On PORT=" + port + " BODY-TYPE=" + map.get("BODY-TYPE") + " METHOD=" + map.get("METHOD") + " PATH=" + map.get("PATH"));
+        }
         String query = Util.trimmedNull(he.getRequestURI().getQuery());
         if (query != null) {
             if (serverNotifier != null) {
@@ -98,7 +101,6 @@ public class ExpectationHandler implements HttpHandler {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "HEADER: " + head + "=" + value);
             }
         }
-        map.put("INFO.BodyMapped", "false");
         if (responseHandler != null) {
             MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationManager, this.server.getServerStatistics());
             MockResponse mockResponse = responseHandler.handle(mockRequest, map);
@@ -108,14 +110,12 @@ public class ExpectationHandler implements HttpHandler {
                 return;
             }
         }
-
         if (expectationManager.hasNoExpectations()) {
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
             expectationManager.getResponse(time, he, map, headers, queries, this.server.getServerStatistics());
         }
         this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
-
     }
 
     private void splitIntoMap(Map<String, Object> map, Map<String, String> queries, String name, char delim) {

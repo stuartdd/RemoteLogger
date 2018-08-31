@@ -87,8 +87,7 @@ public class ForwardContent {
 
     @Override
     public String toString() {
-        return "ForwardContent{" + "host=" + host + ", port=" + port + ", path=" + path + '}';
+        return "ForwardContent{" + "host=" + host + ", port=" + port + ", path=" + path + ", method=" + method + ", forwardHeaders=" + forwardHeaders + '}';
     }
-
     
 }

@@ -17,7 +17,6 @@
 package expectations;
 
 import client.Client;
-import client.Client.Method;
 import client.ClientConfig;
 import client.ClientResponse;
 import common.BodyType;
@@ -104,7 +103,7 @@ public class ExpectationManager {
             + "}";
 
     private static final String NL = System.getProperty("line.separator");
-    private static final String LS = "-----------------------------------------------------------" + NL;
+    private static final String LS = "-----------------------------------------" + NL;
     private Expectations expectations;
     private final int port;
     private final Notifier serverNotifier;
@@ -218,7 +217,7 @@ public class ExpectationManager {
             }
         }
         map.put("STATUS", "" + mockResponse.getStatus());
-        logResponse(System.currentTimeMillis(), mockResponse.getResponseBody(), mockResponse.getStatus(), "RESP");
+        logResponse(System.currentTimeMillis(), port, mockResponse.getResponseBody(), mockResponse.getStatus(), "RESP");
         return mockResponse;
     }
 
@@ -258,14 +257,13 @@ public class ExpectationManager {
         }
         ClientConfig clientConfig = new ClientConfig(Template.parse(forward.getHost(), map, true), forward.getPort(), headers);
         if (serverNotifier != null) {
-            serverNotifier.log(System.currentTimeMillis(), getPort(), clientConfig.toString());
+            serverNotifier.log(System.currentTimeMillis(), getPort(), "FORWARDING TO: " + forward.toString());
         }
         Client client = new Client(clientConfig, serverNotifier);
         try {
             ClientResponse resp = client.send(Template.parse(forward.getPath(), map, true), body, forward.getMethod());
             return new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders());
         } catch (Exception e) {
-            e.printStackTrace();
             if (serverNotifier != null) {
                 serverNotifier.log(System.currentTimeMillis(), getPort(), e);
             }
@@ -403,27 +401,26 @@ public class ExpectationManager {
 
     private void logMap(long time, Map<String, Object> map, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append(id).append(": ").append(LS);
+        sb.append("START: ------ " + id).append(": ").append(LS);
         for (Map.Entry<String, Object> e : map.entrySet()) {
             if (e.getKey().equals("BODY")) {
-                sb.append(e.getKey()).append('=').append("<-- Excluded. See elsewhere in the logs -->").append(NL);
+                sb.append("-    ").append(e.getKey()).append('=').append("<-- Excluded. See elsewhere in the logs -->").append(NL);
             } else {
-                sb.append(e.getKey()).append('=').append(e.getValue()).append(NL);
+                sb.append("-    ").append(e.getKey()).append('=').append(e.getValue()).append(NL);
             }
         }
-        sb.append(id).append(": ").append(LS);
+        sb.append("END: -------- " + id).append(": ").append(LS);
         if (serverNotifier != null) {
             serverNotifier.log(time, getPort(), NL + sb.toString().trim());
         }
     }
 
-    private void logResponse(long time, String resp, int statusCode, String id) {
+    private void logResponse(long time, int port, String resp, int statusCode, String id) {
         StringBuilder sb = new StringBuilder();
-        sb.append("* ").append(id).append(' ').append(LS);
-        sb.append("* ").append(id).append(' ').append("STATUS:").append(statusCode).append(NL);
-        sb.append("* ").append(id).append(' ').append(LS);
+        sb.append("-    ").append(id).append(' ').append(LS);
+        sb.append("-    ").append(id).append(" From PORT ").append(port).append(" With STATUS:").append(statusCode).append(' ').append(NL);
         sb.append(resp).append(NL);
-        sb.append("* ").append(id).append(' ').append(LS);
+        sb.append("-    ").append(id).append(' ').append(LS);
         if (serverNotifier != null) {
             serverNotifier.log(time, getPort(), NL + sb.toString().trim());
         }
