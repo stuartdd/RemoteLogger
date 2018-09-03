@@ -398,7 +398,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         for (int p : ServerManager.portListSorted()) {
             expectationWrapperManager.add(p, new ExpectationWrapperList(ServerManager.getExpectationManager(p)));
         }
-        packagedRequestWrapperList = new PackagedRequestWrapperList(Main.getConfig().getPackagedRequests());
+        if ((Main.getConfig().getPackagedRequestsFile()!=null) && (Main.getConfig().getPackagedRequestsFile().trim().length()>0)) {
+            packagedRequestWrapperList = new PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
+        }
+        
         updateMainLog(System.currentTimeMillis(), selectedServerPort, LogCatagory.EMPTY, null);
         changeSelectedServer(Main.getDefaultServer());
         choiceBoxPortNumber.setItems(FXCollections.observableArrayList(ServerManager.portList()));

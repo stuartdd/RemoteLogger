@@ -17,6 +17,7 @@
 package main;
 
 import common.Action;
+import common.Notifier;
 import common.Util;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -52,6 +53,7 @@ public class Main extends Application {
     private static Stage mainStage;
     private static ConfigData config;
     private static String configName;
+    private static Notifier mainNotifier;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -275,7 +277,6 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
         headless = false;
         config = new ConfigData();
         config.setWidth(600);
@@ -310,10 +311,12 @@ public class Main extends Application {
             config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
             config.setDefaultPort(PORT_NUMBER);
         }
+
         for (String portStr : config.getServers().keySet()) {
             ServerConfig serverConfig = config.getServers().get(portStr);
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
+        
         if (headless) {
             ServerManager.autoStartServers();
             int count = 0;

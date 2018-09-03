@@ -35,7 +35,7 @@ import server.ServerConfig;
 public class ConfigData extends Config {
 
     private Map<String, ServerConfig> servers = new HashMap<>();
-    private List<PackagedRequest> packagedRequests = new ArrayList<>();
+    private String packagedRequestsFile;
     private String logDateFormat;
     private String timeFormat;
     private int defaultPort;
@@ -84,12 +84,12 @@ public class ConfigData extends Config {
         this.servers = servers;
     }
 
-    public List<PackagedRequest> getPackagedRequests() {
-        return packagedRequests;
+    public String getPackagedRequestsFile() {
+        return packagedRequestsFile;
     }
 
-    public void setPackagedRequests(List<PackagedRequest> packagedRequests) {
-        this.packagedRequests = packagedRequests;
+    public void setPackagedRequestsFile(String packagedRequestsFile) {
+        this.packagedRequestsFile = packagedRequestsFile;
     }
 
     public String timeStamp(long time) {

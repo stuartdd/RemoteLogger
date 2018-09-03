@@ -17,16 +17,7 @@
       "logProperties" : true
     }
   },
-  "packagedRequests" : [ {
-    "name" : "Get Request",
-    "host" : "http://localhost",
-    "port" : 5002,
-    "path" : null,
-    "method" : null,
-    "body" : null,
-    "bodyTemplate" : null,
-    "headers" : null
-  } ],
+  "packagedRequestsFile" : "packagedrequests.json",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
