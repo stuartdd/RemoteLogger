@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLDocumentController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="913.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLDocumentController">
     <top>
         <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
@@ -37,11 +37,13 @@
                 <Label text="Display" />
                 <CheckBox fx:id="checkBoxTime" mnemonicParsing="false" onAction="#checkBoxTimeAction" text="Time" />
                 <CheckBox fx:id="checkBoxPort" mnemonicParsing="false" onAction="#checkBoxPortAction" text="Port Number" />
+            <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="2.0" />
+            <Button fx:id="buttonSendPackagedRequest" mnemonicParsing="false" onAction="#buttonSendPackagedRequestAction" text="Send:" />
             </items>
         </ToolBar>
     </top>
     <bottom>
-        <FlowPane prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+        <FlowPane prefHeight="0.0" prefWidth="778.0" BorderPane.alignment="CENTER">
             <children>
                 <Separator orientation="VERTICAL" prefHeight="31.0" prefWidth="15.0" />
                 <Label fx:id="labelStatus" prefHeight="22.0" text="Label" textOverrun="CLIP" />
@@ -137,6 +139,42 @@
                         </BorderPane>
                     </content>
                 </Tab>
+            <Tab text="Packaged Requests">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                          <items>
+                            <Button mnemonicParsing="false" text="Save" />
+                              <Button mnemonicParsing="false" text="Reload" />
+                          </items>
+                        </ToolBar>
+                     </top>
+                     <center>
+                        <SplitPane fx:id="packagedRequestSplitPane" dividerPositions="0.29797979797979796, 0.5" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                          <items>
+                              <BorderPane prefHeight="200.0" prefWidth="200.0">
+                                 <top>
+                                    <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                      <items>
+                                        <Button mnemonicParsing="false" text="Delete" />
+                                          <Button mnemonicParsing="false" text="Rename" />
+                                          <Button mnemonicParsing="false" text="New" />
+                                      </items>
+                                    </ToolBar>
+                                 </top>
+                                 <center>
+                                    <ListView fx:id="packagedRequestsListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                              <TextArea fx:id="packageRequestTextArea" prefHeight="200.0" prefWidth="200.0" />
+                              <TextArea fx:id="packageRequestTextAreaErrors" prefHeight="200.0" prefWidth="200.0" />
+                          </items>
+                        </SplitPane>
+                     </center>
+                  </BorderPane>
+               </content>
+            </Tab>
             </tabs>
         </TabPane>
     </center>

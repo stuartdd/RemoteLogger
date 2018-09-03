@@ -16,30 +16,15 @@
  */
 package common;
 
-public class ServerException extends RuntimeException {
+public class FileException extends RuntimeException {
 
-    private int status = 200;
-
-    public ServerException(String message, int status) {
+    public FileException(String message) {
         super(message);
-        this.status = status;
     }
 
-    public ServerException(String message, int status, Throwable cause) {
+    public FileException(String message, Throwable cause) {
         super(message, cause);
-        this.status = status;
     }
 
-    public int getStatus() {
-        if ((getCause() != null) && (getCause() instanceof ServerException)) {
-            return ((ServerException) getCause()).getStatus();
-        }
-        return status;
-    }
-
-    @Override
-    public String getMessage() {
-        return "Status=" + getStatus() + "] " + super.getMessage(); 
-    }
 
 }

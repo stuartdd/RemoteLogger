@@ -17,6 +17,16 @@
       "logProperties" : true
     }
   },
+  "packagedRequests" : [ {
+    "name" : "Get Request",
+    "host" : "http://localhost",
+    "port" : 5002,
+    "path" : null,
+    "method" : null,
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : null
+  } ],
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
@@ -25,9 +35,10 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 256.0,
-  "y" : 166.0,
+  "x" : 2082.0,
+  "y" : 144.0,
   "width" : 1605.0,
   "height" : 827.0,
-  "expDividerPos" : [ 0.18273471959672338, 0.5967233774417139 ]
+  "expDividerPos" : [ 0.18273471959672338, 0.5967233774417139 ],
+  "packDividerPos" : [ 0.18525519848771266, 0.5425330812854442 ]
 }

@@ -240,7 +240,7 @@ public class ExpectationManager {
             }
         } else {
             String templateName = Template.parse(forward.getBodyTemplate(), map, true);
-            body = locateResponseFile(templateName);
+            body = Util.locateResponseFile(templateName, "Expectation", expectations.getPaths(), serverNotifier);
         }
         Map<String, String> headers = new HashMap<>();
         if (forward.isForwardHeaders()) {
@@ -285,7 +285,7 @@ public class ExpectationManager {
                 }
             } else {
                 String templateName = Template.parse(responseContent.getBodyTemplate(), map, true);
-                response = locateResponseFile(templateName);
+                response = Util.locateResponseFile(templateName, "Expectation", expectations.getPaths(), serverNotifier);
             }
             statusCode = responseContent.getStatus();
             responseHeaders = responseContent.getHeaders();
@@ -424,58 +424,6 @@ public class ExpectationManager {
         if (serverNotifier != null) {
             serverNotifier.log(time, getPort(), NL + sb.toString().trim());
         }
-    }
-
-    private String locateResponseFile(String fileName) {
-        if (fileName == null) {
-            throw new ExpectationException("File for Expectation is not defined", 500);
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String path : expectations.getPaths()) {
-            sb.append('"').append(path).append('"').append(',');
-            Path p = Paths.get(path, fileName);
-            if (Files.exists(p)) {
-                try {
-                    if (serverNotifier != null) {
-                        serverNotifier.log(System.currentTimeMillis(), getPort(), "Template file found:    " + p.toString());
-                    }
-                    return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
-                } catch (IOException ex) {
-                    throw new ExpectationException("File [" + fileName + "] Not readable from file", 500, ex);
-                }
-            } else {
-                if (serverNotifier != null) {
-                    serverNotifier.log(System.currentTimeMillis(), getPort(), "Template file NOT found:    " + p.toString());
-                }
-            }
-        }
-        try {
-            return readResource(fileName, sb.toString());
-        } catch (IOException ex) {
-            throw new ExpectationException("File [" + fileName + "] Not readable from class path", 500, ex);
-        }
-    }
-
-    private String readResource(String file, String list) throws IOException {
-        InputStream is = ExpectationManager.class.getResourceAsStream(file);
-        if (is == null) {
-            is = ExpectationManager.class.getResourceAsStream("/" + file);
-        }
-        if (is == null) {
-            if (serverNotifier != null) {
-                serverNotifier.log(System.currentTimeMillis(), getPort(), "Template resource NOT found:" + file);
-            }
-            throw new ExpectationException("File [" + file + "] Not Found in paths [" + list + "] or on the class path", 404);
-        }
-        if (serverNotifier != null) {
-            serverNotifier.log(System.currentTimeMillis(), getPort(), "Template resource found:    " + file);
-        }
-        StringBuilder sb = new StringBuilder();
-        int content;
-        while ((content = is.read()) != -1) {
-            sb.append((char) content);
-        }
-        return sb.toString();
     }
 
     public void save() {

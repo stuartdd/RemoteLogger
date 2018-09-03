@@ -19,7 +19,9 @@ package main;
 import config.Config;
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -33,6 +35,7 @@ import server.ServerConfig;
 public class ConfigData extends Config {
 
     private Map<String, ServerConfig> servers = new HashMap<>();
+    private List<PackagedRequest> packagedRequests = new ArrayList<>();
     private String logDateFormat;
     private String timeFormat;
     private int defaultPort;
@@ -46,6 +49,7 @@ public class ConfigData extends Config {
     private double width;
     private double height;
     private double[] expDividerPos;
+    private double[] packDividerPos;
 
     private static String writeFileName;
     private static String readFileName;
@@ -80,7 +84,14 @@ public class ConfigData extends Config {
         this.servers = servers;
     }
 
- 
+    public List<PackagedRequest> getPackagedRequests() {
+        return packagedRequests;
+    }
+
+    public void setPackagedRequests(List<PackagedRequest> packagedRequests) {
+        this.packagedRequests = packagedRequests;
+    }
+
     public String timeStamp(long time) {
         DateTime dt = new DateTime(time);
         if (ts == null) {
@@ -145,6 +156,14 @@ public class ConfigData extends Config {
         this.expDividerPos = expDividerPos;
     }
 
+    public double[] getPackDividerPos() {
+        return packDividerPos;
+    }
+
+    public void setPackDividerPos(double[] packDividerPos) {
+        this.packDividerPos = packDividerPos;
+    }
+
     public boolean isIncludeHeaders() {
         return includeHeaders;
     }
@@ -203,5 +222,6 @@ public class ConfigData extends Config {
     public static String readFileName() {
         return readFileName;
     }
+
 
 }

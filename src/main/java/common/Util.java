@@ -20,8 +20,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.jcp.xml.dsig.internal.dom.Utils;
 
 /**
  *
@@ -139,7 +144,7 @@ public class Util {
     public static String cleanString(String in) {
         return cleanString(in, Integer.MAX_VALUE);
     }
-    
+
     public static String cleanString(String in, int max) {
         if (in == null) {
             return null;
@@ -150,7 +155,7 @@ public class Util {
                 sb.append(c);
             }
         }
-        if (sb.length()>max) {
+        if (sb.length() > max) {
             sb.setLength(max);
         }
         return sb.toString();
@@ -172,4 +177,57 @@ public class Util {
         }
         return list;
     }
+
+    public static String locateResponseFile(String fileName, String type, String[] paths, Notifier notifier) {
+        if (fileName == null) {
+            throw new FileException("File for " + type + " is not defined");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String path : paths) {
+            sb.append('"').append(path).append('"').append(',');
+            Path p = Paths.get(path, fileName);
+            if (Files.exists(p)) {
+                try {
+                    if (notifier != null) {
+                        notifier.log(System.currentTimeMillis(), -1, "Template file found:    " + p.toString());
+                    }
+                    return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
+                } catch (IOException ex) {
+                    throw new FileException("File [" + fileName + "] Not readable from file");
+                }
+            } else {
+                if (notifier != null) {
+                    notifier.log(System.currentTimeMillis(), -1, "Template file NOT found:    " + p.toString());
+                }
+            }
+        }
+        try {
+            return readResource(fileName, type, sb.toString(), notifier);
+        } catch (IOException ex) {
+            throw new FileException("File [" + fileName + "] Not readable from class path", ex);
+        }
+    }
+
+    private static String readResource(String file, String type, String list, Notifier notifier) throws IOException {
+        InputStream is = Util.class.getResourceAsStream(file);
+        if (is == null) {
+            is = FileException.class.getResourceAsStream("/" + file);
+        }
+        if (is == null) {
+            if (notifier != null) {
+                notifier.log(System.currentTimeMillis(), -1, type + " resource NOT found:" + file);
+            }
+            throw new FileException(type + " resource [" + file + "] Not Found in paths [" + list + "] or on the class path");
+        }
+        if (notifier != null) {
+            notifier.log(System.currentTimeMillis(), -1, type + " resource found:    " + file);
+        }
+        StringBuilder sb = new StringBuilder();
+        int content;
+        while ((content = is.read()) != -1) {
+            sb.append((char) content);
+        }
+        return sb.toString();
+    }
+
 }
