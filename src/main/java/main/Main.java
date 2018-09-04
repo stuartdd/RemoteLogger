@@ -336,7 +336,7 @@ public class Main extends Application {
             PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
             if ((getConfig().getPackagedRequestsFile() != null) && (Main.getConfig().getPackagedRequestsFile().trim().length() > 0)) {
                 PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
-                packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(config.getSelectedPackagedRequest());
+                packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(config.getSelectedPackagedRequestName());
                 packagedRequestWrapperList.check();
             } else {
                 packagedRequestWrapperList = null;

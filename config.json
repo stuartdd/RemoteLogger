@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequest" : "Get Request",
+  "selectedPackagedRequestName" : "Get Request 2",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,

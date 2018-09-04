@@ -19,9 +19,7 @@ package main;
 import config.Config;
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -36,7 +34,7 @@ public class ConfigData extends Config {
 
     private Map<String, ServerConfig> servers = new HashMap<>();
     private String packagedRequestsFile;
-    private String selectedPackagedRequest;
+    private String selectedPackagedRequestName;
     private String logDateFormat;
     private String timeFormat;
     private int defaultPort;
@@ -93,12 +91,12 @@ public class ConfigData extends Config {
         this.packagedRequestsFile = packagedRequestsFile;
     }
 
-    public String getSelectedPackagedRequest() {
-        return selectedPackagedRequest;
+    public String getSelectedPackagedRequestName() {
+        return selectedPackagedRequestName;
     }
 
-    public void setSelectedPackagedRequest(String selectedPackagedRequest) {
-        this.selectedPackagedRequest = selectedPackagedRequest;
+    public void setSelectedPackagedRequestName(String selectedPackagedRequestName) {
+        this.selectedPackagedRequestName = selectedPackagedRequestName;
     }
 
     public String timeStamp(long time) {

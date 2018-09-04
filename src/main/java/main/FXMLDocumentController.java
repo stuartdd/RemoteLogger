@@ -652,9 +652,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             configData.setPackDividerPos(pos);
         }
         if (packagedRequestWrapperList == null) {
-            configData.setSelectedPackagedRequest(null);
+            configData.setSelectedPackagedRequestName(null);
         } else {
-            configData.setSelectedPackagedRequest(packagedRequestWrapperList.getSelectedPackagedName());
+            configData.setSelectedPackagedRequestName(packagedRequestWrapperList.getSelectedPackagedName());
         }
         
     }
