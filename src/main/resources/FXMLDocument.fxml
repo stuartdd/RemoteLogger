@@ -145,8 +145,8 @@
                      <top>
                         <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                           <items>
-                            <Button mnemonicParsing="false" text="Save" />
-                              <Button mnemonicParsing="false" text="Reload" />
+                            <Button fx:id="buttonSavePackagedRequest" mnemonicParsing="false" text="Save" />
+                              <Button fx:id="buttonReloadPackagedRequest" mnemonicParsing="false" text="Reload" />
                           </items>
                         </ToolBar>
                      </top>
@@ -157,9 +157,9 @@
                                  <top>
                                     <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                       <items>
-                                        <Button mnemonicParsing="false" text="Delete" />
-                                          <Button mnemonicParsing="false" text="Rename" />
-                                          <Button mnemonicParsing="false" text="New" />
+                                        <Button fx:id="buttonDeletePackagedRequest" mnemonicParsing="false" text="Delete" />
+                                          <Button fx:id="buttonRenamePackagedRequest" mnemonicParsing="false" text="Rename" />
+                                          <Button fx:id="buttonNewPackagedRequest" mnemonicParsing="false" text="New" />
                                       </items>
                                     </ToolBar>
                                  </top>

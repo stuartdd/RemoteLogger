@@ -81,11 +81,7 @@ public class Client {
                         + "/" + path;
             }
         } else {
-            fullHost = config.getHost();
-        }
-
-        if (clientNotifier != null) {
-            clientNotifier.log(System.currentTimeMillis(), -1, "URL:" + fullHost);
+            fullHost = config.getHost() + (config.getPort() == null ? "" : ":" + config.getPort());
         }
 
         URL obj;
@@ -118,7 +114,7 @@ public class Client {
                 } catch (ConnectException ex) {
                     connectionFailes++;
                     if (clientNotifier != null) {
-                        clientNotifier.log(System.currentTimeMillis(), -1, "Connection Failed [" + connectionFailes + "] " + fullHost);
+                        clientNotifier.log(System.currentTimeMillis(), -1, "CLIENT: Connection Failed [" + connectionFailes + "] " + fullHost);
                     }
                     if (connectionFailes > 5) {
                         throw ex;
@@ -134,7 +130,7 @@ public class Client {
                 is = con.getErrorStream();
                 if (is == null) {
                     if (clientNotifier != null) {
-                        clientNotifier.log(System.currentTimeMillis(), -1, "RESPONSE [" + responseCode + "]: No Response");
+                        clientNotifier.log(System.currentTimeMillis(), -1, "CLIENT RESP: [" + responseCode + "]: No Response");
                     }
                     return new ClientResponse(responseCode, "");
                 }
@@ -157,14 +153,14 @@ public class Client {
                 }
             }
             if (clientNotifier != null) {
-                clientNotifier.log(System.currentTimeMillis(), -1, "RESPONSE [" + responseCode + "]:" + response.toString().trim());
+                clientNotifier.log(System.currentTimeMillis(), -1, "CLIENT RESP:  [" + responseCode + "]:" + response.toString().trim());
             }
             return new ClientResponse(responseCode, response.toString().trim(), headers);
         } catch (ClientException | IOException e) {
             if (clientNotifier != null) {
-                clientNotifier.log(System.currentTimeMillis(), -1, "Failed to send to:" + fullHost, e);
+                clientNotifier.log(System.currentTimeMillis(), -1, "CLIENT: Failed to send to:" + fullHost, e);
             }
-            throw new ClientException("Failed to send to:" + fullHost, e);
+            throw new ClientException("CLIENT: Failed to send to:" + fullHost, e);
         } finally {
             try {
                 if (in != null) {

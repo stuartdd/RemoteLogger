@@ -6,6 +6,7 @@
 package main;
 
 import java.util.Map;
+import json.JsonUtils;
 
 /**
  *
@@ -83,6 +84,10 @@ class PackagedRequest {
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+    
+    public String tojSON() {
+        return JsonUtils.toJsonFormatted(this);
     }
 
     @Override

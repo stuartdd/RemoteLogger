@@ -112,4 +112,8 @@ public class ExpectationWrapperManager {
         getSelectedExpectationWrapperList().addExpectationWithName(name);
     }
 
+    public boolean canNotDelete() {
+        return getSelectedExpectationWrapperList().canNotDelete();
+    }
+
 }

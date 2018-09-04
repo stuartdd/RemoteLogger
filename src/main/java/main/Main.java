@@ -53,7 +53,7 @@ public class Main extends Application {
     private static Stage mainStage;
     private static ConfigData config;
     private static String configName;
-    private static Notifier mainNotifier;
+    private static PackagedRequestWrapperList packagedRequestWrapperList;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -137,6 +137,10 @@ public class Main extends Application {
 
     public static Server getDefaultServer() {
         return ServerManager.getServer(config.getDefaultPort());
+    }
+
+    public static PackagedRequestWrapperList getPackagedRequestWrapperList() {
+        return packagedRequestWrapperList;
     }
 
     public static void controlStopEventAction() {
@@ -316,7 +320,7 @@ public class Main extends Application {
             ServerConfig serverConfig = config.getServers().get(portStr);
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
-        
+
         if (headless) {
             ServerManager.autoStartServers();
             int count = 0;
@@ -329,6 +333,11 @@ public class Main extends Application {
             } while (ServerManager.countServersRunning() > 0);
             System.exit(0);
         } else {
+            if ((getConfig().getPackagedRequestsFile() != null) && (Main.getConfig().getPackagedRequestsFile().trim().length() > 0)) {
+                PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
+                PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
+                packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList();
+            }
             if (config.getDefaultPort() == 0) {
                 if (config.getServers().size() != 1) {
                     System.err.println("Default port is not defined");

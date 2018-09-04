@@ -26,8 +26,72 @@ public class PackagedRequestWrapperManager {
     private static final String NL = System.getProperty("line.separator");
     private static final String LS = "-----------------------------------------" + NL;
     private static String readFileName;
+    private static PackagedRequests packagedRequests;
+    public static Notifier requestNotifier;
 
-    public static void sendPackagedRequest(PackagedRequest packagedRequest, Notifier notifier) {
+    public static final String EXAMPLE_REQUEST = "{\n"
+            + "    \"name\" : \"Get Request\",\n"
+            + "    \"host\" : \"http://localhost\",\n"
+            + "    \"port\" : 5002,\n"
+            + "    \"path\" : \"the/path\",\n"
+            + "    \"method\" : \"GET\",\n"
+            + "    \"body\" : null,\n"
+            + "    \"bodyTemplate\" : null,\n"
+            + "    \"headers\" : { "
+            + "         \"Accept\": \"application/json\",\n"
+            + "         \"Header1\" : \"Value1\"\n"
+            + "    }\n"
+            + "  }";
+
+    public static final String EXAMPLE_FILE = "{\n"
+            + "  \"packagedRequests\" : [ " + EXAMPLE_REQUEST + " ],\n"
+            + "  \"paths\" : [ \".\", \"/appl\", \"/bea\" ],\n"
+            + "  \"verbose\" : false\n"
+            + "}";
+    
+    public static boolean canNotDelete() {
+        if (packagedRequests==null) {
+            return true;
+        }
+        return packagedRequests.canNotDelete();
+    }
+
+    public static String getReadFileName() {
+        return readFileName;
+    }
+
+    public static PackagedRequests getExampleFile() {
+        return (PackagedRequests) Config.configFromJson(PackagedRequests.class, EXAMPLE_FILE);
+    }
+
+    public static PackagedRequest getExampleRequest() {
+        return (PackagedRequest) Config.configFromJson(PackagedRequest.class, EXAMPLE_REQUEST);
+    }
+
+    public static PackagedRequestWrapperList getPackagedRequestWrapperList() {
+        return new PackagedRequestWrapperList(packagedRequests);
+    }
+
+    public static PackagedRequests getPackagedRequests() {
+        return packagedRequests;
+    }
+
+    public static boolean isVerbose() {
+        if (packagedRequests == null) {
+            return false;
+        }
+        return packagedRequests.isVerbose();
+    }
+
+    public static Notifier getRequestNotifier() {
+        return requestNotifier;
+    }
+
+    public static void setRequestNotifier(Notifier requestNotifier) {
+        PackagedRequestWrapperManager.requestNotifier = requestNotifier;
+    }
+
+    public static void sendPackagedRequest(PackagedRequest packagedRequest) {
         String body = "";
         if (Util.isEmpty(packagedRequest.getBodyTemplate())) {
             if (Util.isEmpty(packagedRequest.getBody())) {
@@ -37,7 +101,7 @@ public class PackagedRequestWrapperManager {
             }
         } else {
             String templateName = packagedRequest.getBodyTemplate();
-            body = Util.locateResponseFile(templateName, "PackedRequest", null, notifier);
+            body = Util.locateResponseFile(templateName, "PackedRequest", null, requestNotifier);
         }
         Map<String, String> headers = new HashMap<>();
         if (packagedRequest.getHeaders() != null) {
@@ -46,38 +110,38 @@ public class PackagedRequestWrapperManager {
             }
         }
         ClientConfig clientConfig = new ClientConfig(packagedRequest.getHost(), packagedRequest.getPort(), headers);
-        if (notifier != null) {
-            notifier.log(System.currentTimeMillis(), -1, "SENDING PACKAGED REQUEST: " + packagedRequest.toString());
+        if (requestNotifier != null) {
+            requestNotifier.log(System.currentTimeMillis(), -1, "PACKAGED REQUEST: SEND:" + packagedRequest.toString());
         }
-        Client client = new Client(clientConfig, notifier);
+        Client client = new Client(clientConfig, requestNotifier);
         try {
             ClientResponse resp = client.send(packagedRequest.getPath(), body, packagedRequest.getMethod());
-            logResponse(new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders()), packagedRequest.getName(), notifier);
+            logResponse(new MockResponse(resp.getBody(), resp.getStatus(), resp.getHeaders()), packagedRequest.getName());
         } catch (Exception e) {
-            if (notifier != null) {
-                notifier.log(System.currentTimeMillis(), -1, e);
+            if (requestNotifier != null) {
+                requestNotifier.log(System.currentTimeMillis(), -1, e);
             }
-            logResponse(new MockResponse("SENDING PACKAGED REQUEST: failed:" + e.getMessage(), 500, null), packagedRequest.getName(), notifier);
+            logResponse(new MockResponse("PACKAGED REQUEST: SEND: failed:" + e.getMessage(), 500, null), packagedRequest.getName());
         }
     }
 
-    private static void logResponse(MockResponse mockResponse, String name, Notifier notifier) {
-        String id = "PACKAGED REQUEST";
+    private static void logResponse(MockResponse mockResponse, String name) {
+        String id = "PACKAGED REQUEST: RESP:";
         StringBuilder sb = new StringBuilder();
         sb.append("-    ").append(id).append(' ').append(LS);
         sb.append("-    ").append(id).append(" With STATUS:").append(mockResponse.getStatus()).append(' ').append(NL);
         sb.append(mockResponse.getResponseBody()).append(NL);
         sb.append("-    ").append(id).append(' ').append(LS);
-        if (notifier != null) {
-            notifier.log(System.currentTimeMillis(), -1, NL + sb.toString().trim());
+        if (requestNotifier != null) {
+            requestNotifier.log(System.currentTimeMillis(), -1, NL + sb.toString().trim());
         }
     }
 
-    public static PackagedRequestWrapperList load(String fileName) {
+    public static void load(String fileName) {
         File fil = new File(fileName);
         if (fil.exists()) {
             readFileName = fileName;
-            return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
+            packagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
@@ -86,11 +150,9 @@ public class PackagedRequestWrapperManager {
                     throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
                 }
             }
-            writeFileName = null;
             readFileName = fileName;
-            return (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
+            packagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
         }
-
     }
 
 }

@@ -25,9 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
@@ -213,7 +210,7 @@ public class ExpectationManager {
         } else {
             serverStatistics.inc(ServerStatistics.STAT.MISSMATCH, true);
             if (serverNotifier != null) {
-                serverNotifier.log(System.currentTimeMillis(), getPort(), "Expectation not met");
+                serverNotifier.log(System.currentTimeMillis(), getPort(), "Expectation not met. Returning Not Found (404)");
             }
         }
         map.put("STATUS", "" + mockResponse.getStatus());
@@ -521,6 +518,10 @@ public class ExpectationManager {
 
     public void add(Expectation ex) {
         expectations.addExpectation(ex);
+    }
+
+    public boolean canNotDelete() {
+        return expectations.size() < 2;
     }
 
 }

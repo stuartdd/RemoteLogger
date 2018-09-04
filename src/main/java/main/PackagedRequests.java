@@ -5,10 +5,51 @@
  */
 package main;
 
+import java.util.ArrayList;
+import java.util.List;
+import json.JsonUtils;
+
 /**
  *
  * @author stuart
  */
 public class PackagedRequests {
-    List<PackagedRequest> requests 
+    private List<PackagedRequest> packagedRequests = new ArrayList<>();
+    private String[] paths;
+    private boolean verbose;
+
+    public List<PackagedRequest> getPackagedRequests() {
+        return packagedRequests;
+    }
+
+    public void setPackagedRequests(List<PackagedRequest> packagedRequests) {
+        this.packagedRequests = packagedRequests;
+    }
+
+    public String[] getPaths() {
+        return paths;
+    }
+
+    public void setPaths(String[] paths) {
+        this.paths = paths;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
+    public String tojSON() {
+        return JsonUtils.toJsonFormatted(this);
+    }
+
+    public boolean canNotDelete() {
+        return packagedRequests.size() < 2;
+    }
+    
+    
+    
 }

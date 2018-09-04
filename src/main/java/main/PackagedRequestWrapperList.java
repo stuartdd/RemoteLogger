@@ -17,9 +17,9 @@ public class PackagedRequestWrapperList {
     private final List<PackagedRequestWrapper> wrappedPackagedRequests;
     private int selectedIndex;
 
-    public PackagedRequestWrapperList(List<PackagedRequest> packageRequests) {
+    public PackagedRequestWrapperList(PackagedRequests packageRequests) {
         wrappedPackagedRequests = new ArrayList<>();
-        for (PackagedRequest par : packageRequests) {
+        for (PackagedRequest par : packageRequests.getPackagedRequests()) {
             wrappedPackagedRequests.add(new PackagedRequestWrapper(par));
         }
         selectFirst();
@@ -73,6 +73,10 @@ public class PackagedRequestWrapperList {
     
     String getJson() {
         return getSelectedPackagedRequestWrapper().getJson();
+    }
+
+    boolean canNotDelete() {
+        return wrappedPackagedRequests.size() < 2;
     }
 
 }

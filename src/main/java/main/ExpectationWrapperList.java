@@ -179,5 +179,9 @@ public class ExpectationWrapperList {
         return true;
     }
 
+    boolean canNotDelete() {
+        return expectationManager.canNotDelete();
+    }
+
 
 }
