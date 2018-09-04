@@ -20,7 +20,7 @@ import common.Action;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class ExpectationSelectionChangedListener implements ChangeListener {
+public class PackagedRequestSelectionChangedListener implements ChangeListener {
 
     private int supressActionCounts = 0;
 
@@ -30,7 +30,7 @@ public class ExpectationSelectionChangedListener implements ChangeListener {
             return;
         }
         if (oldValue != newValue) {
-            Main.notifyAction(System.currentTimeMillis(), -1, Action.EXPECTATION_SELECTED, newValue, "Expectation Selected [" + newValue + "]");
+            Main.notifyAction(System.currentTimeMillis(), -1, Action.PACKAGE_REQUEST_SELECTED, newValue, "Packaged Request Selected [" + newValue + "]");
         }
     }
 

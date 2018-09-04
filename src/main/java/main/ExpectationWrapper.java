@@ -19,10 +19,6 @@ package main;
 import expectations.Expectation;
 import json.JsonUtils;
 
-/**
- *
- * @author stuar
- */
 public class ExpectationWrapper {
 
     private Expectation expectation;

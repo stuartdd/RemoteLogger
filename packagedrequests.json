@@ -4,7 +4,16 @@
     "host" : "http://localhost",
     "port" : 5002,
     "path" : null,
-    "method" : null,
+    "method" : "GET",
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : null
+  }, {
+    "name" : "Get Request 2",
+    "host" : "http://localhost",
+    "port" : 5002,
+    "path" : null,
+    "method" : "PUT",
     "body" : null,
     "bodyTemplate" : null,
     "headers" : null

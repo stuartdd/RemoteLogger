@@ -80,6 +80,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private LogLine lastLog = firstLog;
 
     private ExpectationSelectionChangedListener expectationSelectionChangedListener;
+    private PackagedRequestSelectionChangedListener packagedRequestSelectionChangedListener;
 
     private Server selectedServer;
     private int selectedServerPort = -1;
@@ -185,10 +186,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Label labelSaveExpectations;
-    
+
     @FXML
     private Label labelSavePackagedRequests;
-    
+
     @FXML
     private ChoiceBox choiceBoxPortNumber;
 
@@ -204,12 +205,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
     }
 
-    
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
     }
-    
+
     @FXML
     public void buttonReloadPackagedRequestAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RELOAD_PACKAGED_REQUEST, null, "Reload the packaged request");
@@ -219,6 +219,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public void buttonSendPackagedRequestAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.SEND_PACKAGED_REQUEST, packagedRequestWrapperList.getSelectedPackagedRequest(), "Send the packaged request");
     }
+
     @FXML
     public void buttonReLoadExpectationsAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RELOAD_EXPECTATIONS, null, "Expectations reloaded");
@@ -355,27 +356,29 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                     + Main.getConfigName() + "\nto enable Packaged Requests:\n\n"
                     + "Then restart the application.");
             buttonSendPackagedRequest.setDisable(true);
+            buttonReloadPackagedRequest.setDisable(true);
         } else {
             PackagedRequestWrapper packagedRequestWrapper = packagedRequestWrapperList.getSelectedPackagedRequestWrapper();
-            packageRequestTextArea.setText(packagedRequestWrapper.getJson());
+            if (packagedRequestWrapper != null) {
+                packageRequestTextArea.setText(packagedRequestWrapper.getJson());
+                buttonSendPackagedRequest.setText("Send: " + packagedRequestWrapper.getName());
+            }
             packageRequestTextAreaErrors.setText("EXAMPLE REQUEST:\n" + PackagedRequestWrapperManager.getExampleRequest().tojSON());
-            buttonSendPackagedRequest.setText("Send: " + packagedRequestWrapper.getName());
             buttonSendPackagedRequest.setDisable(false);
+            buttonReloadPackagedRequest.setDisable(false);
         }
         if ((packagedRequestWrapperList == null) || (!PackagedRequestWrapperManager.isLoadedFromFile())) {
             buttonSavePackagedRequest.setDisable(true);
-            buttonReloadPackagedRequest.setDisable(true);
             buttonDeletePackagedRequest.setDisable(true);
             buttonRenamePackagedRequest.setDisable(true);
             buttonNewPackagedRequest.setDisable(true);
         } else {
             buttonSavePackagedRequest.setDisable(true);
-            buttonReloadPackagedRequest.setDisable(true);
             buttonDeletePackagedRequest.setDisable(PackagedRequestWrapperManager.canNotDelete());
             buttonRenamePackagedRequest.setDisable(false);
             buttonNewPackagedRequest.setDisable(false);
         }
-            labelSavePackagedRequests.setVisible(!PackagedRequestWrapperManager.isLoadedFromFile());
+        labelSavePackagedRequests.setVisible(!PackagedRequestWrapperManager.isLoadedFromFile());
     }
 
     private void displaySelectedExpectation() {
@@ -433,6 +436,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize:");
         expectationSelectionChangedListener = new ExpectationSelectionChangedListener();
+        packagedRequestSelectionChangedListener = new PackagedRequestSelectionChangedListener();
         checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
         checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
         checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
@@ -467,13 +471,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         packagedRequestWrapperList = Main.getPackagedRequestWrapperList();
         if (packagedRequestWrapperList != null) {
             packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
-            packagedRequestsListView.getSelectionModel().selectFirst();
-            packagedRequestsListView.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.PACKAGE_REQUEST_SELECTED, newValue, "Package Request Selected [" + newValue + "]");
-                }
-            });
+            packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
+            packagedRequestsListView.getSelectionModel().selectedIndexProperty().addListener(packagedRequestSelectionChangedListener);
         }
         displaySelectedPackagedRequest();
         /*
@@ -532,8 +531,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 changeSelectedExpectationManager(selectedServer);
                 break;
             case RELOAD_PACKAGED_REQUEST:
-                PackagedRequestWrapperManager.reload();
-                displaySelectedPackagedRequest();
+                packagedRequestWrapperList = PackagedRequestWrapperManager.reload(packagedRequestWrapperList.getSelectedPackagedRequest().getName());
+                packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
+                packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
                 break;
             case ADD_EXPECTATION:
                 expectationWrapperManager.addExpectationWithName((String) actionOn);
@@ -651,6 +651,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             }
             configData.setPackDividerPos(pos);
         }
+        if (packagedRequestWrapperList == null) {
+            configData.setSelectedPackagedRequest(null);
+        } else {
+            configData.setSelectedPackagedRequest(packagedRequestWrapperList.getSelectedPackagedName());
+        }
+        
     }
 
     private void updateMainLog(long time, int port, LogCatagory cat, String message) {

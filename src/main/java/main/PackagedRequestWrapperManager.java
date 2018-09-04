@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 stuartdd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package main;
 
@@ -17,10 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import mockServer.MockResponse;
 
-/**
- *
- * @author 802996013
- */
 public class PackagedRequestWrapperManager {
 
     private static final String NL = System.getProperty("line.separator");
@@ -28,7 +35,7 @@ public class PackagedRequestWrapperManager {
     private static String readFileName;
     private static PackagedRequests packagedRequests;
     private static Notifier requestNotifier;
-    private static boolean loadedFromFile; 
+    private static boolean loadedFromFile;
 
     public static final String EXAMPLE_REQUEST = "{\n"
             + "    \"name\" : \"Get Request\",\n"
@@ -49,9 +56,9 @@ public class PackagedRequestWrapperManager {
             + "  \"paths\" : [ \".\", \"/appl\", \"/bea\" ],\n"
             + "  \"verbose\" : false\n"
             + "}";
-    
+
     public static boolean canNotDelete() {
-        if (packagedRequests==null) {
+        if (packagedRequests == null) {
             return true;
         }
         return packagedRequests.canNotDelete();
@@ -73,11 +80,11 @@ public class PackagedRequestWrapperManager {
         return (PackagedRequest) Config.configFromJson(PackagedRequest.class, EXAMPLE_REQUEST);
     }
 
-    public static PackagedRequestWrapperList getPackagedRequestWrapperList() {
+    public static PackagedRequestWrapperList getPackagedRequestWrapperList(String currentPackagedRequestName) {
         if (packagedRequests.size() == 0) {
             return null;
         }
-        return new PackagedRequestWrapperList(packagedRequests);
+        return new PackagedRequestWrapperList(packagedRequests, currentPackagedRequestName);
     }
 
     public static PackagedRequests getPackagedRequests() {
@@ -109,7 +116,7 @@ public class PackagedRequestWrapperManager {
             }
         } else {
             String templateName = packagedRequest.getBodyTemplate();
-            body = Util.locateResponseFile(templateName, "PackedRequest", null, requestNotifier);
+            body = Util.locateResponseFile(templateName, "PackedRequest", packagedRequests.getPaths(), requestNotifier);
         }
         Map<String, String> headers = new HashMap<>();
         if (packagedRequest.getHeaders() != null) {
@@ -145,13 +152,23 @@ public class PackagedRequestWrapperManager {
         }
     }
 
+    public static PackagedRequestWrapperList reload(String currentPackagedRequestName) {
+        packagedRequests = loadImpl(readFileName);
+        return getPackagedRequestWrapperList(currentPackagedRequestName);
+    }
+
     public static void load(String fileName) {
+        readFileName = fileName;
+        packagedRequests = loadImpl(fileName);
+    }
+
+    public static PackagedRequests loadImpl(String fileName) {
+        PackagedRequests packagedRequests;
         loadedFromFile = false;
         File fil = new File(fileName);
         if (fil.exists()) {
-            readFileName = fileName;
             packagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
-            loadedFromFile=true;
+            loadedFromFile = true;
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
@@ -160,13 +177,9 @@ public class PackagedRequestWrapperManager {
                     throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
                 }
             }
-            readFileName = fileName;
             packagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
         }
-    }
-
-    static void reload() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return packagedRequests;
     }
 
 }

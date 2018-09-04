@@ -36,6 +36,7 @@ public class ConfigData extends Config {
 
     private Map<String, ServerConfig> servers = new HashMap<>();
     private String packagedRequestsFile;
+    private String selectedPackagedRequest;
     private String logDateFormat;
     private String timeFormat;
     private int defaultPort;
@@ -90,6 +91,14 @@ public class ConfigData extends Config {
 
     public void setPackagedRequestsFile(String packagedRequestsFile) {
         this.packagedRequestsFile = packagedRequestsFile;
+    }
+
+    public String getSelectedPackagedRequest() {
+        return selectedPackagedRequest;
+    }
+
+    public void setSelectedPackagedRequest(String selectedPackagedRequest) {
+        this.selectedPackagedRequest = selectedPackagedRequest;
     }
 
     public String timeStamp(long time) {
