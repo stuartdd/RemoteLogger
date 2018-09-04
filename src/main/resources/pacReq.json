@@ -1,0 +1,14 @@
+{
+  "packagedRequests" : [ {
+    "name" : "Get Request",
+    "host" : "http://localhost",
+    "port" : 5002,
+    "path" : null,
+    "method" : null,
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : null
+  } ],
+  "paths" : [ ".", "/appl", "/bea" ],
+  "verbose" : true
+}

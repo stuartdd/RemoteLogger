@@ -49,6 +49,10 @@ public class PackagedRequests {
     public boolean canNotDelete() {
         return packagedRequests.size() < 2;
     }
+
+    public int size() {
+        return packagedRequests.size();
+    }
     
     
     

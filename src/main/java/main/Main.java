@@ -17,7 +17,6 @@
 package main;
 
 import common.Action;
-import common.Notifier;
 import common.Util;
 import java.io.IOException;
 import java.nio.charset.Charset;

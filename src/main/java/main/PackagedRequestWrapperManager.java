@@ -27,7 +27,8 @@ public class PackagedRequestWrapperManager {
     private static final String LS = "-----------------------------------------" + NL;
     private static String readFileName;
     private static PackagedRequests packagedRequests;
-    public static Notifier requestNotifier;
+    private static Notifier requestNotifier;
+    private static boolean loadedFromFile; 
 
     public static final String EXAMPLE_REQUEST = "{\n"
             + "    \"name\" : \"Get Request\",\n"
@@ -56,6 +57,10 @@ public class PackagedRequestWrapperManager {
         return packagedRequests.canNotDelete();
     }
 
+    public static boolean isLoadedFromFile() {
+        return loadedFromFile;
+    }
+
     public static String getReadFileName() {
         return readFileName;
     }
@@ -69,6 +74,9 @@ public class PackagedRequestWrapperManager {
     }
 
     public static PackagedRequestWrapperList getPackagedRequestWrapperList() {
+        if (packagedRequests.size() == 0) {
+            return null;
+        }
         return new PackagedRequestWrapperList(packagedRequests);
     }
 
@@ -138,10 +146,12 @@ public class PackagedRequestWrapperManager {
     }
 
     public static void load(String fileName) {
+        loadedFromFile = false;
         File fil = new File(fileName);
         if (fil.exists()) {
             readFileName = fileName;
             packagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
+            loadedFromFile=true;
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
@@ -153,6 +163,10 @@ public class PackagedRequestWrapperManager {
             readFileName = fileName;
             packagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
         }
+    }
+
+    static void reload() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

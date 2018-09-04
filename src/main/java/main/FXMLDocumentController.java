@@ -185,7 +185,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @FXML
     private Label labelSaveExpectations;
-
+    
+    @FXML
+    private Label labelSavePackagedRequests;
+    
     @FXML
     private ChoiceBox choiceBoxPortNumber;
 
@@ -201,16 +204,21 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
     }
 
+    
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
+    }
+    
+    @FXML
+    public void buttonReloadPackagedRequestAction() {
+        Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RELOAD_PACKAGED_REQUEST, null, "Reload the packaged request");
     }
 
     @FXML
     public void buttonSendPackagedRequestAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.SEND_PACKAGED_REQUEST, packagedRequestWrapperList.getSelectedPackagedRequest(), "Send the packaged request");
     }
-
     @FXML
     public void buttonReLoadExpectationsAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.RELOAD_EXPECTATIONS, null, "Expectations reloaded");
@@ -346,25 +354,28 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                     + "to the main configuration data file:\n"
                     + Main.getConfigName() + "\nto enable Packaged Requests:\n\n"
                     + "Then restart the application.");
-            packageRequestTextAreaErrors.setText("EXAMPLE FILE:\n" + PackagedRequestWrapperManager.getExampleFile().tojSON());
             buttonSendPackagedRequest.setDisable(true);
-            buttonSavePackagedRequest.setDisable(true);
-            buttonReloadPackagedRequest.setDisable(true);
-            buttonDeletePackagedRequest.setDisable(true);
-            buttonRenamePackagedRequest.setDisable(true);
-            buttonNewPackagedRequest.setDisable(true);
         } else {
             PackagedRequestWrapper packagedRequestWrapper = packagedRequestWrapperList.getSelectedPackagedRequestWrapper();
             packageRequestTextArea.setText(packagedRequestWrapper.getJson());
             packageRequestTextAreaErrors.setText("EXAMPLE REQUEST:\n" + PackagedRequestWrapperManager.getExampleRequest().tojSON());
             buttonSendPackagedRequest.setText("Send: " + packagedRequestWrapper.getName());
             buttonSendPackagedRequest.setDisable(false);
+        }
+        if ((packagedRequestWrapperList == null) || (!PackagedRequestWrapperManager.isLoadedFromFile())) {
+            buttonSavePackagedRequest.setDisable(true);
+            buttonReloadPackagedRequest.setDisable(true);
+            buttonDeletePackagedRequest.setDisable(true);
+            buttonRenamePackagedRequest.setDisable(true);
+            buttonNewPackagedRequest.setDisable(true);
+        } else {
             buttonSavePackagedRequest.setDisable(true);
             buttonReloadPackagedRequest.setDisable(true);
             buttonDeletePackagedRequest.setDisable(PackagedRequestWrapperManager.canNotDelete());
             buttonRenamePackagedRequest.setDisable(false);
             buttonNewPackagedRequest.setDisable(false);
         }
+            labelSavePackagedRequests.setVisible(!PackagedRequestWrapperManager.isLoadedFromFile());
     }
 
     private void displaySelectedExpectation() {
@@ -519,6 +530,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             case RELOAD_EXPECTATIONS:
                 expectationWrapperManager.reloadExpectations();
                 changeSelectedExpectationManager(selectedServer);
+                break;
+            case RELOAD_PACKAGED_REQUEST:
+                PackagedRequestWrapperManager.reload();
+                displaySelectedPackagedRequest();
                 break;
             case ADD_EXPECTATION:
                 expectationWrapperManager.addExpectationWithName((String) actionOn);
