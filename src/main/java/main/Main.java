@@ -86,7 +86,7 @@ public class Main extends Application {
                     if (applicationController != null) {
                         applicationController.notifyAction(time, port, action, actionOn, message);
                     } else {
-                        System.out.println("Action:" + action + " on:" + actionOn.getClass());
+                        System.out.println("Action:" + action + " on:" + (actionOn==null?"null":actionOn.getClass()));
                     }
                 }
             });

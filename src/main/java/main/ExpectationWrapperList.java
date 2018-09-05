@@ -34,8 +34,10 @@ public class ExpectationWrapperList {
         this.updated = false;
         wrappedExpectations = new ArrayList<>();
         Expectations expectations = expectationManager.getExpectations();
-        for (int index = 0; index < expectations.size(); index++) {
-            wrappedExpectations.add(new ExpectationWrapper(expectations.get(index), index));
+        if (expectations != null) {
+            for (int index = 0; index < expectations.size(); index++) {
+                wrappedExpectations.add(new ExpectationWrapper(expectations.get(index), index));
+            }
         }
         this.selectedIndex = 0;
     }
@@ -189,6 +191,5 @@ public class ExpectationWrapperList {
     boolean canNotDelete() {
         return expectationManager.canNotDelete();
     }
-
 
 }
