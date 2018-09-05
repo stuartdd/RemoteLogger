@@ -1,19 +1,19 @@
 {
   "packagedRequests" : [ {
-    "name" : "Get Request",
+    "name" : "Test Forwarding",
     "host" : "http://localhost",
     "port" : 5002,
-    "path" : null,
+    "path" : "/testforward",
     "method" : "GET",
     "body" : null,
     "bodyTemplate" : null,
     "headers" : null
   }, {
-    "name" : "Get Request 2",
+    "name" : "Get Country Name",
     "host" : "http://localhost",
     "port" : 5002,
-    "path" : null,
-    "method" : "PUT",
+    "path" : "/services.groupkt.com/country/get/iso2code/IN",
+    "method" : "GET",
     "body" : null,
     "bodyTemplate" : null,
     "headers" : null

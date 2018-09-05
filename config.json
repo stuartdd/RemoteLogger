@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequestName" : "Get Request 2",
+  "selectedPackagedRequestName" : "Get Country Name",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
@@ -27,10 +27,10 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 978.0,
-  "y" : 194.0,
+  "x" : 2070.0,
+  "y" : 116.0,
   "width" : 1605.0,
   "height" : 827.0,
-  "expDividerPos" : [ 0.18278228321896445, 0.5970056144728634 ],
-  "packDividerPos" : [ 0.1852776044915783, 0.5427323767935122 ]
+  "expDividerPos" : [ 0.18273471959672338, 0.5967233774417139 ],
+  "packDividerPos" : [ 0.18525519848771266, 0.5425330812854442 ]
 }
