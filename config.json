@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "servers" : {
     "5002" : {
@@ -33,4 +34,41 @@
   "height" : 827.0,
   "expDividerPos" : [ 0.18273471959672338, 0.5967233774417139 ],
   "packDividerPos" : [ 0.18525519848771266, 0.5425330812854442 ]
+=======
+{
+  "servers" : {
+    "5002" : {
+      "expectationsFile" : "expectations.json",
+      "autoStart" : true,
+      "showPort" : true,
+      "timeToClose" : 1,
+      "verbose" : true,
+      "logProperties" : true
+    },
+    "5003" : {
+      "expectationsFile" : "exp.json",
+      "autoStart" : true,
+      "showPort" : true,
+      "timeToClose" : 1,
+      "verbose" : true,
+      "logProperties" : true
+    }
+  },
+  "packagedRequestsFile" : "packagedrequests.json",
+  "selectedPackagedRequestName" : "Get Request",
+  "logDateFormat" : "",
+  "timeFormat" : "HH:mm:ss.SSS",
+  "defaultPort" : 5002,
+  "includeHeaders" : true,
+  "includeBody" : true,
+  "includeEmpty" : false,
+  "showTime" : true,
+  "showPort" : true,
+  "x" : 210.0,
+  "y" : 50.0,
+  "width" : 1605.0,
+  "height" : 827.0,
+  "expDividerPos" : [ 0.18273471959672338, 0.5967233774417139 ],
+  "packDividerPos" : [ 0.18525519848771266, 0.5425330812854442 ]
+>>>>>>> f3883e3a304e556fa64461d526c1040437c6c2e8
 }

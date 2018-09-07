@@ -164,7 +164,7 @@
                                     <ListView fx:id="packagedRequestsListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
-                              <TextArea fx:id="packageRequestTextArea" prefHeight="200.0" prefWidth="200.0" />
+                              <TextArea fx:id="packageRequestTextArea" onKeyTyped="#packagedRequestTextAreaKeyTyped" prefHeight="200.0" prefWidth="200.0" />
                               <TextArea fx:id="packageRequestTextAreaErrors" prefHeight="200.0" prefWidth="200.0" />
                           </items>
                         </SplitPane>
