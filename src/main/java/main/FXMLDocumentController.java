@@ -87,6 +87,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     private ExpectationWrapperManager expectationWrapperManager;
     private PackagedRequestWrapperList packagedRequestWrapperList;
     private boolean updatedExpectationisValid = true;
+    private boolean updatedPackagedRequestisValid = true;
 
     @FXML
     private TextArea expectationTextAreaErrors;
@@ -204,7 +205,15 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.EXPECTATION_TEXT_CHANGED, null, "Validate Expectation JSON");
         }
     }
+    
+    @FXML
+    public void packagedRequestTextAreaKeyTyped() {
+        if (expectationWrapperManager.loadedFromFile()) {
+            Main.notifyAction(System.currentTimeMillis(), -1, Action.PACKAGED_REQUEST_TEXT_CHANGED, null, "Validate Packaged Request JSON");
+        }
+    }
 
+    
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
@@ -473,6 +482,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
             packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
             packagedRequestsListView.getSelectionModel().selectedIndexProperty().addListener(packagedRequestSelectionChangedListener);
+            setPackagedRequestTextColourAndInfo(false, PackagedRequestWrapperManager.EXAMPLE_REQUEST);
         }
         displaySelectedPackagedRequest();
         /*
@@ -499,6 +509,25 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     @Override
     public boolean notifyAction(long time, int port, Action action, Object actionOn, String message) {
         switch (action) {
+            case PACKAGED_REQUEST_TEXT_CHANGED:
+                if (PackagedRequestWrapperManager.isLoadedFromFile()) {
+                    String json = packageRequestTextArea.getText();
+                    try {
+                        PackagedRequest validClonedPackagedRequest = (PackagedRequest) JsonUtils.beanFromJson(PackagedRequest.class, json);
+                        if (validClonedPackagedRequest.getName().equals(packagedRequestWrapperList.getSelectedPackagedName())) {
+//                            packagedRequestWrapperList.replace;
+                            setPackagedRequestTextColourAndInfo(false, null);
+                        } else {
+                            setPackagedRequestTextColourAndInfo(true, "Cannot rename an Packaged Requets from the Editor.\n\nPlease use the Rename button.\nPress Ctrl+Z to correct and continue");
+                        }
+                    } catch (Exception ex) {
+                        setPackagedRequestTextColourAndInfo(true, ex.getCause().getMessage());
+                    }
+                } else {
+                    setPackagedRequestTextColourAndInfo(false, null);
+                }
+                // configureExpectationSaveOptions();
+                break;
             case EXPECTATION_TEXT_CHANGED:
                 if (expectationWrapperManager.loadedFromFile()) {
                     String json = expectationTextArea.getText();
@@ -595,8 +624,43 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         return true;
     }
 
+    private void setPackagedRequestTextColourAndInfo(boolean isError, String message) {
+        Color color;
+        updatedPackagedRequestisValid = !isError;
+        packageRequestTextAreaErrors.setEditable(false);
+        if (!PackagedRequestWrapperManager.isLoadedFromFile()) {
+            color = Color.LIGHTCYAN;
+            packageRequestTextArea.setEditable(false);
+            packageRequestTextAreaErrors.setText(EXAMPLE_HEAD_RO + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+        } else {
+            packageRequestTextArea.setEditable(true);
+            if (isError) {
+                packageRequestTextAreaErrors.setText(message);
+                color = Color.PINK;
+            } else {
+                packageRequestTextAreaErrors.setText(EXAMPLE_HEAD + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+                color = Color.LIGHTGREEN;
+            }
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Region region1 = (Region) packageRequestTextArea.lookup(".content");
+                Region region2 = (Region) packageRequestTextAreaErrors.lookup(".content");
+                if (region1 != null) {
+                    region1.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+                if (region2 != null) {
+                    region2.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+            }
+        });
+
+    }
+
     private void setExpectationTextColourAndInfo(boolean isError, String message) {
         Color color;
+        expectationTextAreaErrors.setEditable(false);
         updatedExpectationisValid = !isError;
         if (!expectationWrapperManager.loadedFromFile()) {
             color = Color.LIGHTCYAN;
@@ -656,7 +720,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         } else {
             configData.setSelectedPackagedRequestName(packagedRequestWrapperList.getSelectedPackagedName());
         }
-        
+
     }
 
     private void updateMainLog(long time, int port, LogCatagory cat, String message) {
