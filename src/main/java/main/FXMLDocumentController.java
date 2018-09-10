@@ -55,12 +55,15 @@ import server.ServerManager;
 public class FXMLDocumentController extends BorderPane implements ApplicationController, Initializable {
 
     private static final String NL = System.getProperty("line.separator");
-    private static final Expectation EXAMPLE = ExpectationManager.getExampleExpectation();
-    private static final String EXAMPLE_HEAD = "Example Expectation (annotated):";
-    private static final String EXAMPLE_HEAD_RO = "Expectations are READ-ONLY:\nThey were not read from the file system.";
+    private static final Expectation EXAMPLE_EXPECTATION = ExpectationManager.getExampleExpectation();
+    private static final PackagedRequest EXAMPLE_PACKAGED_EXCEPTION = PackagedRequestWrapperManager.getExampleRequest();
+    private static final String EXAMPLE_EXPECTATION_HEAD = "Example Expectation (annotated):";
+    private static final String EXAMPLE_PACKAGED_REQUESTS_HEAD = "Example Packged Exception (annotated):";
+    private static final String EXAMPLE_EXPECTATION_HEAD_RO = "Expectations are READ-ONLY:\nThey were not read from the file system.";
+    private static final String EXAMPLE_PACKAGED_REQUESTS_HEAD_RO = "Packaged Requests are READ-ONLY:\nThey were not read from the file system.";
     private static final String UL = NL + "--------------------------------------------------------------------" + NL;
-    private static final String EXAMPLE_NOTES = "Notes:\n"
-            + "All fields are optional excep name.\n"
+    private static final String EXAMPLE_EXPECTATION_NOTES = "Notes:\n"
+            + "All fields are optional except name.\n"
             + "[1] Matching or match examples:\n"
             + "  'BBC' Exact match\n"
             + "  '\\\\*BBC' Exact match '*BBC'\n"
@@ -72,6 +75,9 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             + "[3] Substitutions from properties (See the logs for values). E.g:\n"
             + "    Method %{METHOD} URL:'%{PATH}' HOST:%{HEAD.Host}\n"
             + "[4] Must be one from the list:";
+    private static final String EXAMPLE_PACKAGED_REQUEST_NOTES = "Notes:\n"
+            + "All fields are optional except name.\n"
+            + "For an empty body define body and template as null:";
 
     private LogLine firstMainLog = null;
     private LogLine lastMainLog = firstMainLog;
@@ -372,7 +378,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 packageRequestTextArea.setText(packagedRequestWrapper.getJson());
                 buttonSendPackagedRequest.setText("Send: " + packagedRequestWrapper.getName());
             }
-            packageRequestTextAreaErrors.setText("EXAMPLE REQUEST:\n" + PackagedRequestWrapperManager.getExampleRequest().tojSON());
+            setPackagedRequestTextColourAndInfo(false, null);
             buttonSendPackagedRequest.setDisable(false);
             buttonReloadPackagedRequest.setDisable(false);
         }
@@ -482,7 +488,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
             packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
             packagedRequestsListView.getSelectionModel().selectedIndexProperty().addListener(packagedRequestSelectionChangedListener);
-            setPackagedRequestTextColourAndInfo(false, PackagedRequestWrapperManager.EXAMPLE_REQUEST);
+            setPackagedRequestTextColourAndInfo(false, null);
         }
         displaySelectedPackagedRequest();
         /*
@@ -515,10 +521,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                     try {
                         PackagedRequest validClonedPackagedRequest = (PackagedRequest) JsonUtils.beanFromJson(PackagedRequest.class, json);
                         if (validClonedPackagedRequest.getName().equals(packagedRequestWrapperList.getSelectedPackagedName())) {
-//                            packagedRequestWrapperList.replace;
+                            PackagedRequestWrapperManager.replace(validClonedPackagedRequest);
                             setPackagedRequestTextColourAndInfo(false, null);
                         } else {
-                            setPackagedRequestTextColourAndInfo(true, "Cannot rename an Packaged Requets from the Editor.\n\nPlease use the Rename button.\nPress Ctrl+Z to correct and continue");
+                            setPackagedRequestTextColourAndInfo(true, "Cannot rename a Packaged Requet from the Editor.\n\nPlease use the Rename button.\nPress Ctrl+Z to correct and continue");
                         }
                     } catch (Exception ex) {
                         setPackagedRequestTextColourAndInfo(true, ex.getCause().getMessage());
@@ -631,14 +637,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (!PackagedRequestWrapperManager.isLoadedFromFile()) {
             color = Color.LIGHTCYAN;
             packageRequestTextArea.setEditable(false);
-            packageRequestTextAreaErrors.setText(EXAMPLE_HEAD_RO + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+            packageRequestTextAreaErrors.setText(EXAMPLE_PACKAGED_REQUESTS_HEAD_RO + UL + JsonUtils.toJsonFormatted(EXAMPLE_PACKAGED_EXCEPTION) + UL + EXAMPLE_PACKAGED_REQUEST_NOTES);
         } else {
             packageRequestTextArea.setEditable(true);
             if (isError) {
                 packageRequestTextAreaErrors.setText(message);
                 color = Color.PINK;
             } else {
-                packageRequestTextAreaErrors.setText(EXAMPLE_HEAD + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+                packageRequestTextAreaErrors.setText(EXAMPLE_PACKAGED_REQUESTS_HEAD + UL + JsonUtils.toJsonFormatted(EXAMPLE_PACKAGED_EXCEPTION) + UL + EXAMPLE_PACKAGED_REQUEST_NOTES);
                 color = Color.LIGHTGREEN;
             }
         }
@@ -665,14 +671,14 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         if (!expectationWrapperManager.loadedFromFile()) {
             color = Color.LIGHTCYAN;
             expectationTextArea.setEditable(false);
-            expectationTextAreaErrors.setText(EXAMPLE_HEAD_RO + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+            expectationTextAreaErrors.setText(EXAMPLE_EXPECTATION_HEAD_RO + UL + JsonUtils.toJsonFormatted(EXAMPLE_EXPECTATION) + UL + EXAMPLE_EXPECTATION_NOTES);
         } else {
             expectationTextArea.setEditable(true);
             if (isError) {
                 expectationTextAreaErrors.setText(message);
                 color = Color.PINK;
             } else {
-                expectationTextAreaErrors.setText(EXAMPLE_HEAD + UL + JsonUtils.toJsonFormatted(EXAMPLE) + UL + EXAMPLE_NOTES);
+                expectationTextAreaErrors.setText(EXAMPLE_EXPECTATION_HEAD + UL + JsonUtils.toJsonFormatted(EXAMPLE_EXPECTATION) + UL + EXAMPLE_EXPECTATION_NOTES);
                 color = Color.LIGHTGREEN;
             }
         }

@@ -36,18 +36,19 @@ public class PackagedRequestWrapperManager {
     private static PackagedRequests packagedRequests;
     private static Notifier requestNotifier;
     private static boolean loadedFromFile;
+    private static boolean updated;
 
     public static final String EXAMPLE_REQUEST = "{\n"
-            + "    \"name\" : \"Get Request\",\n"
+            + "    \"name\" : \"Example Get Request\",\n"
             + "    \"host\" : \"http://localhost\",\n"
             + "    \"port\" : 5002,\n"
             + "    \"path\" : \"the/path\",\n"
             + "    \"method\" : \"GET\",\n"
-            + "    \"body\" : null,\n"
-            + "    \"bodyTemplate\" : null,\n"
+            + "    \"body\" : \"Null if you want to use a template file\",\n"
+            + "    \"bodyTemplate\" : \"Optional template file. Null for a null body element\",\n"
             + "    \"headers\" : { "
             + "         \"Accept\": \"application/json\",\n"
-            + "         \"Header1\" : \"Value1\"\n"
+            + "         \"Header-Name\" : \"Header-Value\"\n"
             + "    }\n"
             + "  }";
 
@@ -63,9 +64,27 @@ public class PackagedRequestWrapperManager {
         }
         return packagedRequests.canNotDelete();
     }
+    
+    public static void replace(PackagedRequest validClonedPackagedRequest) {
+        if (packagedRequests.replace(validClonedPackagedRequest)) {
+            setUpdated(true);
+        }
+    }
 
     public static boolean isLoadedFromFile() {
         return loadedFromFile;
+    }
+
+    public static boolean isUpdated() {
+        return updated;
+    }
+
+    public static void setUpdated(boolean updated) {
+        if (isLoadedFromFile()) {
+            PackagedRequestWrapperManager.updated = updated;
+        } else {
+            PackagedRequestWrapperManager.updated = false;
+        }
     }
 
     public static String getReadFileName() {
@@ -163,11 +182,12 @@ public class PackagedRequestWrapperManager {
     }
 
     public static PackagedRequests loadImpl(String fileName) {
-        PackagedRequests packagedRequests;
+        PackagedRequests localPackagedRequests;
         loadedFromFile = false;
+        updated = false;
         File fil = new File(fileName);
         if (fil.exists()) {
-            packagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
+            localPackagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
             loadedFromFile = true;
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
@@ -177,9 +197,9 @@ public class PackagedRequestWrapperManager {
                     throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
                 }
             }
-            packagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
+            localPackagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
         }
-        return packagedRequests;
+        return localPackagedRequests;
     }
 
 }

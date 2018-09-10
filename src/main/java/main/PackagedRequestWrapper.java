@@ -28,6 +28,10 @@ public class PackagedRequestWrapper {
     public PackagedRequest getPackagedRequest() {
         return packagedRequest;
     }
+
+    public void set(PackagedRequest packagedRequest) {
+        this.packagedRequest = packagedRequest;
+    }
     
     public String getName() {
         return packagedRequest.getName();
