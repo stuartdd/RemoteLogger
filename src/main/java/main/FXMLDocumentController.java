@@ -211,7 +211,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.EXPECTATION_TEXT_CHANGED, null, "Validate Expectation JSON");
         }
     }
-    
+
     @FXML
     public void packagedRequestTextAreaKeyTyped() {
         if (expectationWrapperManager.loadedFromFile()) {
@@ -219,7 +219,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         }
     }
 
-    
     @FXML
     public void clearMainLogAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.CLEAR_MAIN_LOGS, null, "Log has been cleared");
@@ -382,18 +381,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             buttonSendPackagedRequest.setDisable(false);
             buttonReloadPackagedRequest.setDisable(false);
         }
-        if ((packagedRequestWrapperList == null) || (!PackagedRequestWrapperManager.isLoadedFromFile())) {
-            buttonSavePackagedRequest.setDisable(true);
-            buttonDeletePackagedRequest.setDisable(true);
-            buttonRenamePackagedRequest.setDisable(true);
-            buttonNewPackagedRequest.setDisable(true);
-        } else {
-            buttonSavePackagedRequest.setDisable(true);
-            buttonDeletePackagedRequest.setDisable(PackagedRequestWrapperManager.canNotDelete());
-            buttonRenamePackagedRequest.setDisable(false);
-            buttonNewPackagedRequest.setDisable(false);
-        }
         labelSavePackagedRequests.setVisible(!PackagedRequestWrapperManager.isLoadedFromFile());
+        configurePackagedRequestSaveOptions();
     }
 
     private void displaySelectedExpectation() {
@@ -444,6 +433,20 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             buttonRenameExpectation.setDisable(true);
             buttonNewExpectation.setDisable(true);
             buttonDeleteExpectation.setDisable(true);
+        }
+    }
+
+    private void configurePackagedRequestSaveOptions() {
+        if ((packagedRequestWrapperList == null) || (!PackagedRequestWrapperManager.isLoadedFromFile())) {
+            buttonSavePackagedRequest.setDisable(true);
+            buttonDeletePackagedRequest.setDisable(true);
+            buttonRenamePackagedRequest.setDisable(true);
+            buttonNewPackagedRequest.setDisable(true);
+        } else {
+            buttonSavePackagedRequest.setDisable(!PackagedRequestWrapperManager.isUpdated());
+            buttonDeletePackagedRequest.setDisable(PackagedRequestWrapperManager.canNotDelete());
+            buttonRenamePackagedRequest.setDisable(false);
+            buttonNewPackagedRequest.setDisable(false);
         }
     }
 
@@ -532,7 +535,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 } else {
                     setPackagedRequestTextColourAndInfo(false, null);
                 }
-                // configureExpectationSaveOptions();
+                configurePackagedRequestSaveOptions();
                 break;
             case EXPECTATION_TEXT_CHANGED:
                 if (expectationWrapperManager.loadedFromFile()) {
@@ -567,6 +570,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case RELOAD_PACKAGED_REQUEST:
                 packagedRequestWrapperList = PackagedRequestWrapperManager.reload(packagedRequestWrapperList.getSelectedPackagedRequest().getName());
+                System.out.println(packagedRequestWrapperList.toString());
                 packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
                 packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
                 break;

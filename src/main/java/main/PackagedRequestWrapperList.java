@@ -107,5 +107,14 @@ public class PackagedRequestWrapperList {
         return getSelectedPackagedRequest().getName();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (PackagedRequestWrapper wr:wrappedPackagedRequests) {
+            sb.append(wr.toString());
+        }
+        return "selectedIndex=" + selectedIndex + "\n"+sb;
+    }
+
 
 }

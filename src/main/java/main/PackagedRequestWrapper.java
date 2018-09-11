@@ -39,7 +39,7 @@ public class PackagedRequestWrapper {
 
     @Override
     public String toString() {
-        return packagedRequest.getName();
+        return packagedRequest.getName() + " " + packagedRequest.getPath();
     }
 
     String getJson() {
