@@ -159,7 +159,7 @@ public class ExpectationManager {
         return oldExpectation;
     }
 
-    private int findIndexByName(String name) {
+    public int findIndexByName(String name) {
         for (int i = 0; i < expectations.size(); i++) {
             if (expectations.get(i).getName().equals(name)) {
                 return i;
@@ -522,6 +522,14 @@ public class ExpectationManager {
 
     public boolean canNotDelete() {
         return expectations.size() < 2;
+    }
+
+    public Expectation get(int selectedIndex) {
+        return expectations.get(selectedIndex);
+    }
+
+    public int size() {
+        return expectations.size();
     }
 
 }

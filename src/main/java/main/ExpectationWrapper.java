@@ -21,23 +21,19 @@ import json.JsonUtils;
 
 public class ExpectationWrapper {
 
-    private Expectation expectation;
-    private int index;
-    private String reference;
-    private boolean updated;
+    private final Expectation expectation;
+    private final int index;
 
     public ExpectationWrapper(Expectation expectation, int index) {
         this.expectation = expectation;
         this.index = index;
-        this.reference = toJson();
-        this.updated = false;
     }
 
     @Override
     public String toString() {
         return getName();
     }
-
+    
     public String toJson() {
         return JsonUtils.toJsonFormatted(expectation);
     }
@@ -62,22 +58,4 @@ public class ExpectationWrapper {
         return index;
     }
     
-    void setIndex(int index) {
-        this.index = index;
-    }
-
-    void setExpectation(Expectation newExpectation) {
-        this.expectation = newExpectation;
-        updated = !JsonUtils.toJsonFormatted(newExpectation).equals(reference);
-    }
-
-    public boolean isUpdated() {
-        return updated;
-    }
-
-    void setUpdated(boolean b) {
-        this.updated = false;
-    }
-
-
 }

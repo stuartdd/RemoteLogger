@@ -23,14 +23,11 @@ import java.util.Map;
 
 public class PackagedRequestWrapperList {
 
-    private final List<PackagedRequestWrapper> wrappedPackagedRequests;
+    private PackagedRequests packageRequests;
     private int selectedIndex;
 
     public PackagedRequestWrapperList(PackagedRequests packageRequests, String currentPackagedRequestName) {
-        wrappedPackagedRequests = new ArrayList<>();
-        for (PackagedRequest par : packageRequests.getPackagedRequests()) {
-            wrappedPackagedRequests.add(new PackagedRequestWrapper(par));
-        }
+        this.packageRequests = packageRequests;
         if (currentPackagedRequestName == null) {
             selectFirst();
         } else {
@@ -39,8 +36,8 @@ public class PackagedRequestWrapperList {
     }
 
     public void select(String currentPackagedRequestName) {
-        for (int i = 0; i < wrappedPackagedRequests.size(); i++) {
-            if (wrappedPackagedRequests.get(i).getName().equals(currentPackagedRequestName)) {
+        for (int i = 0; i < packageRequests.size(); i++) {
+            if (packageRequests.getPackagedRequests().get(i).getName().equals(currentPackagedRequestName)) {
                 selectedIndex = i;
                 return;
             }
@@ -61,23 +58,27 @@ public class PackagedRequestWrapperList {
     }
 
     public boolean isSelected() {
-        return ((selectedIndex >= 0) && (selectedIndex < wrappedPackagedRequests.size()));
+        return ((selectedIndex >= 0) && (selectedIndex < packageRequests.size()));
     }
 
     public List<PackagedRequestWrapper> getWrappedPackagedRequests() {
-        return wrappedPackagedRequests;
+        List<PackagedRequestWrapper> list = new ArrayList<>();
+        for (PackagedRequest pr:packageRequests.getPackagedRequests()) {
+            list.add(new PackagedRequestWrapper(pr));
+        }
+        return list;
     }
 
     public PackagedRequestWrapper getSelectedPackagedRequestWrapper() {
         if (isSelected()) {
-            return wrappedPackagedRequests.get(selectedIndex);
+            return getWrappedPackagedRequests().get(selectedIndex);
         }
         return null;
     }
 
     public PackagedRequest getSelectedPackagedRequest() {
         if (isSelected()) {
-            return wrappedPackagedRequests.get(selectedIndex).getPackagedRequest();
+            return getWrappedPackagedRequests().get(selectedIndex).getPackagedRequest();
         }
         return null;
     }
@@ -87,14 +88,14 @@ public class PackagedRequestWrapperList {
     }
 
     boolean canNotDelete() {
-        return wrappedPackagedRequests.size() < 2;
+        return packageRequests.size() < 2;
     }
 
     void check() {
         Map<String, String> names = new HashMap<>();
-        for (PackagedRequestWrapper pr:wrappedPackagedRequests) {
+        for (PackagedRequest pr : packageRequests.getPackagedRequests()) {
             if (names.containsKey(pr.getName())) {
-                throw new ConfigDataException("Duplicate name for Packaged Request:"+pr.getName());
+                throw new ConfigDataException("Duplicate name for Packaged Request:" + pr.getName());
             }
             names.put(pr.getName(), "");
         }
@@ -110,11 +111,10 @@ public class PackagedRequestWrapperList {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (PackagedRequestWrapper wr:wrappedPackagedRequests) {
+        for (PackagedRequestWrapper wr : getWrappedPackagedRequests()) {
             sb.append(wr.toString());
         }
-        return "selectedIndex=" + selectedIndex + "\n"+sb;
+        return "selectedIndex=" + selectedIndex + "\n" + sb;
     }
-
 
 }

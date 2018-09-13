@@ -386,7 +386,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     private void displaySelectedExpectation() {
-        System.out.println("displaySelectedExpectation:" + expectationWrapperManager.getSelectedExpectation());
         expectationSelectionChangedListener.supressActions(true);
         try {
             ExpectationWrapper expectationWrapper = expectationWrapperManager.getSelectedExpectationWrapper();
@@ -570,7 +569,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case RELOAD_PACKAGED_REQUEST:
                 packagedRequestWrapperList = PackagedRequestWrapperManager.reload(packagedRequestWrapperList.getSelectedPackagedRequest().getName());
-                System.out.println(packagedRequestWrapperList.toString());
                 packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
                 packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
                 break;
