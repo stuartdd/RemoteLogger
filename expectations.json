@@ -3,7 +3,7 @@
     "name" : "Test Simple",
     "method" : "GET",
     "path" : "/nowtv/accounts/service-status",
-    "bodyType" : "EMPTY",
+    "bodyType" : "JSON",
     "asserts" : { },
     "response" : {
       "body" : "{\"ntvServiceStatus\": \"healthy\",\"ntvServiceText\": \"The NTV service is Active\"}",

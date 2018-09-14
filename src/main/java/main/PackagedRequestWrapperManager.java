@@ -23,9 +23,13 @@ import common.Notifier;
 import common.Util;
 import config.Config;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import json.JsonUtils;
 import mockServer.MockResponse;
 
 public class PackagedRequestWrapperManager {
@@ -38,6 +42,20 @@ public class PackagedRequestWrapperManager {
     private static boolean loadedFromFile;
     private static boolean updated;
 
+    public static final String NEW_REQUEST = "{\n"
+            + "    \"name\" : \"New Request\",\n"
+            + "    \"host\" : \"http://localhost\",\n"
+            + "    \"port\" : 5002,\n"
+            + "    \"path\" : \"the/path\",\n"
+            + "    \"method\" : \"GET\",\n"
+            + "    \"body\" : null,\n"
+            + "    \"bodyTemplate\" : null,\n"
+            + "    \"headers\" : { "
+            + "         \"Accept\": \"application/json\",\n"
+            + "         \"Header-Name\" : \"Header-Value\"\n"
+            + "    }\n"
+            + "  }";
+    
     public static final String EXAMPLE_REQUEST = "{\n"
             + "    \"name\" : \"Example Get Request\",\n"
             + "    \"host\" : \"http://localhost\",\n"
@@ -64,7 +82,7 @@ public class PackagedRequestWrapperManager {
         }
         return packagedRequests.canNotDelete();
     }
-    
+
     public static void replace(PackagedRequest validClonedPackagedRequest) {
         if (packagedRequests.replace(validClonedPackagedRequest)) {
             setUpdated(true);
@@ -97,6 +115,10 @@ public class PackagedRequestWrapperManager {
 
     public static PackagedRequest getExampleRequest() {
         return (PackagedRequest) Config.configFromJson(PackagedRequest.class, EXAMPLE_REQUEST);
+    }
+    
+    public static PackagedRequest getNewRequest() {
+        return (PackagedRequest) Config.configFromJson(PackagedRequest.class, NEW_REQUEST);
     }
 
     public static PackagedRequestWrapperList getPackagedRequestWrapperList(String currentPackagedRequestName) {
@@ -176,6 +198,35 @@ public class PackagedRequestWrapperManager {
         return getPackagedRequestWrapperList(currentPackagedRequestName);
     }
 
+    public static PackagedRequestWrapperList save(String currentPackagedRequestName) {
+        if (loadedFromFile) {
+            if (readFileName != null) {
+                String exString = JsonUtils.toJsonFormatted(packagedRequests);
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(readFileName);
+                    fos.write(exString.getBytes(Charset.forName("UTF-8")));
+                } catch (IOException ex) {
+                    if (requestNotifier != null) {
+                        requestNotifier.log(System.currentTimeMillis(), -1, "Save failed for Packeged Requests.", ex);
+                    }
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (IOException ex) {
+                            if (requestNotifier != null) {
+                                requestNotifier.log(System.currentTimeMillis(), -1, "Save failed for Packeged Requests.", ex);
+                            }
+                        }
+                    }
+                }
+            }
+            updated = false;
+        }
+        return getPackagedRequestWrapperList(currentPackagedRequestName);
+    }
+
     public static void load(String fileName) {
         readFileName = fileName;
         packagedRequests = loadImpl(fileName);
@@ -200,6 +251,39 @@ public class PackagedRequestWrapperManager {
             localPackagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
         }
         return localPackagedRequests;
+    }
+
+    static PackagedRequestWrapperList delete(String currentPackagedRequestName) {
+        setUpdated(packagedRequests.delete(currentPackagedRequestName));
+        return getPackagedRequestWrapperList(currentPackagedRequestName);
+    }
+
+    static String checkNewPackagedRequestName(String name) {
+        for (PackagedRequest p : packagedRequests.getPackagedRequests()) {
+            if (p.getName().equals(name)) {
+                return "Duplicate name";
+            }
+        }
+        return null;
+    }
+
+    static PackagedRequestWrapperList rename(String currentPackagedRequestName, String newName) {
+        for (PackagedRequest p : packagedRequests.getPackagedRequests()) {
+            if (p.getName().equals(currentPackagedRequestName)) {
+                p.setName(newName);
+                setUpdated(true);
+                return getPackagedRequestWrapperList(newName);
+            }
+        }
+        return getPackagedRequestWrapperList(currentPackagedRequestName);
+    }
+
+    static PackagedRequestWrapperList add(String name) {
+        PackagedRequest p = getNewRequest();
+        p.setName(name);
+        packagedRequests.getPackagedRequests().add(p);
+        setUpdated(true);
+        return getPackagedRequestWrapperList(name);        
     }
 
 }

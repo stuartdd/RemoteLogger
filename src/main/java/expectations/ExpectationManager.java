@@ -21,6 +21,7 @@ import client.ClientConfig;
 import client.ClientResponse;
 import common.BodyType;
 import com.sun.net.httpserver.HttpExchange;
+import common.FileException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,7 +202,7 @@ public class ExpectationManager {
                 } else {
                     mockResponse = createMockResponseViaForward(foundExpectation, map);
                 }
-            } catch (ExpectationException ee) {
+            } catch (ExpectationException | FileException ee) {
                 mockResponse = MockResponse.notFound();
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), getPort(), new IOException("Read file failed for expectation: " + foundExpectation.getName() + ". " + ee.getMessage(), ee));

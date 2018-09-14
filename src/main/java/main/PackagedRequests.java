@@ -71,5 +71,15 @@ public class PackagedRequests {
         }
         return false;
     }
-    
+
+    public boolean delete(String currentPackagedRequestName) {
+        for (int i = 0; i< packagedRequests.size(); i++) {
+            if (packagedRequests.get(i).getName().equals(currentPackagedRequestName)) {
+                packagedRequests.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

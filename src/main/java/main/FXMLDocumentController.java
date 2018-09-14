@@ -258,6 +258,42 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
     }
 
     @FXML
+    public void buttonSavePackagedRequestAction() {
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.SAVE_PACKAGED_REQUEST, null, "Save Packaged Request");
+    }
+
+    @FXML
+    public void buttonDeletePackagedRequestAction() {
+        Main.notifyAction(System.currentTimeMillis(), -1, Action.DELETE_PACKAGED_REQUEST, null, "Delete Packaged Request");
+    }
+
+    @FXML
+    public void buttonRenamePackagedRequestAction() {
+        String name = Main.textInputDialog("RENAME PACKAGED REQUEST", "Rename the current packaged request. Note that the name must be unique", "Name", packagedRequestWrapperList.getSelectedPackagedRequest().getName());
+        if (name != null) {
+            String cause = PackagedRequestWrapperManager.checkNewPackagedRequestName(name);
+            if (cause != null) {
+                Main.errorDialog("ERROR", cause, "Please try again");
+            } else {
+                Main.notifyAction(System.currentTimeMillis(), -1, Action.RENAME_PACKAGED_REQUEST, name, "Rename Packaged Request");
+            }
+        }
+    }
+
+    @FXML
+    public void buttonNewPackagedRequestAction() {
+        String name = Main.textInputDialog("ADD PACKAGED REQUEST", "Add new Packaged Request. Note that the name must be unique", "Name", "");
+        if (name != null) {
+            String cause = PackagedRequestWrapperManager.checkNewPackagedRequestName(name);
+            if (cause != null) {
+                Main.errorDialog("ERROR", cause, "Please try again");
+            } else {
+                Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.ADD_PACKAGED_REQUEST, name, "New Packaged Request");
+            }
+        }
+    }
+
+    @FXML
     public void buttonDeleteExpectationAction() {
         Main.notifyAction(System.currentTimeMillis(), selectedServerPort, Action.DELETE_EXPECTATION, null, "Delete expectation");
     }
@@ -329,6 +365,12 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         } else {
             Main.stopServer(getSelectedPort());
         }
+    }
+
+    private PackagedRequestWrapperList refreshPackagedRequests(PackagedRequestWrapperList packagedRequestWrapperListIn) {
+        packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperListIn.getWrappedPackagedRequests()));
+        packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperListIn.getSelectedIndex());
+        return packagedRequestWrapperListIn;
     }
 
     private void changeSelectedServer(Server server) {
@@ -567,11 +609,6 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 expectationWrapperManager.reloadExpectations();
                 changeSelectedExpectationManager(selectedServer);
                 break;
-            case RELOAD_PACKAGED_REQUEST:
-                packagedRequestWrapperList = PackagedRequestWrapperManager.reload(packagedRequestWrapperList.getSelectedPackagedRequest().getName());
-                packagedRequestsListView.setItems(FXCollections.observableArrayList(packagedRequestWrapperList.getWrappedPackagedRequests()));
-                packagedRequestsListView.getSelectionModel().select(packagedRequestWrapperList.getSelectedIndex());
-                break;
             case ADD_EXPECTATION:
                 expectationWrapperManager.addExpectationWithName((String) actionOn);
                 changeSelectedExpectationManager(selectedServer);
@@ -582,6 +619,21 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case SEND_PACKAGED_REQUEST:
                 PackagedRequestWrapperManager.sendPackagedRequest((PackagedRequest) actionOn);
+                break;
+            case RENAME_PACKAGED_REQUEST:
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.rename(packagedRequestWrapperList.getSelectedPackagedRequest().getName(), (String) actionOn));
+                break;                
+            case ADD_PACKAGED_REQUEST:
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn));
+                break;                
+            case SAVE_PACKAGED_REQUEST:
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.save(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
+                break;
+            case DELETE_PACKAGED_REQUEST:
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.delete(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
+                break;
+            case RELOAD_PACKAGED_REQUEST:
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.reload(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
                 break;
             case PACKAGE_REQUEST_SELECTED:
                 packagedRequestWrapperList.setSelectedIndex((Integer) actionOn);

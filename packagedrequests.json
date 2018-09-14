@@ -1,6 +1,6 @@
 {
   "packagedRequests" : [ {
-    "name" : "Test Forwarding",
+    "name" : "Test ForwardingX",
     "host" : "http://localhost",
     "port" : 5002,
     "path" : "/testforward",
