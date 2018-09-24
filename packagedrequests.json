@@ -17,8 +17,8 @@
     "body" : "{\"email\":\"abc.pass@notv.com\"}",
     "bodyTemplate" : null,
     "headers" : {
-      "Content-Type" : "application/json",
-      "Accept" : "*/*"
+      "Accept" : "*/*",
+      "Content-Type" : "application/json"
     }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],

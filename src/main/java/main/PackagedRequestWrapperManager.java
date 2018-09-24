@@ -55,7 +55,7 @@ public class PackagedRequestWrapperManager {
             + "         \"Header-Name\" : \"Header-Value\"\n"
             + "    }\n"
             + "  }";
-    
+
     public static final String EXAMPLE_REQUEST = "{\n"
             + "    \"name\" : \"Example Get Request\",\n"
             + "    \"host\" : \"http://localhost\",\n"
@@ -116,7 +116,7 @@ public class PackagedRequestWrapperManager {
     public static PackagedRequest getExampleRequest() {
         return (PackagedRequest) Config.configFromJson(PackagedRequest.class, EXAMPLE_REQUEST);
     }
-    
+
     public static PackagedRequest getNewRequest() {
         return (PackagedRequest) Config.configFromJson(PackagedRequest.class, NEW_REQUEST);
     }
@@ -253,12 +253,12 @@ public class PackagedRequestWrapperManager {
         return localPackagedRequests;
     }
 
-    static PackagedRequestWrapperList delete(String currentPackagedRequestName) {
+    public static PackagedRequestWrapperList delete(String currentPackagedRequestName) {
         setUpdated(packagedRequests.delete(currentPackagedRequestName));
         return getPackagedRequestWrapperList(currentPackagedRequestName);
     }
 
-    static String checkNewPackagedRequestName(String name) {
+    public static String checkNewPackagedRequestName(String name) {
         for (PackagedRequest p : packagedRequests.getPackagedRequests()) {
             if (p.getName().equals(name)) {
                 return "Duplicate name";
@@ -267,7 +267,16 @@ public class PackagedRequestWrapperManager {
         return null;
     }
 
-    static PackagedRequestWrapperList rename(String currentPackagedRequestName, String newName) {
+    public static PackagedRequest packagedRequestforName(String name) {
+        for (PackagedRequest p : packagedRequests.getPackagedRequests()) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public static PackagedRequestWrapperList rename(String currentPackagedRequestName, String newName) {
         for (PackagedRequest p : packagedRequests.getPackagedRequests()) {
             if (p.getName().equals(currentPackagedRequestName)) {
                 p.setName(newName);
@@ -278,12 +287,18 @@ public class PackagedRequestWrapperManager {
         return getPackagedRequestWrapperList(currentPackagedRequestName);
     }
 
-    static PackagedRequestWrapperList add(String name) {
-        PackagedRequest p = getNewRequest();
+    public static PackagedRequestWrapperList add(String name, String basedOn) {
+        PackagedRequest bo = packagedRequestforName(basedOn);
+        PackagedRequest p;
+        if (bo != null) {
+            p = bo.clone();
+        } else {
+            p = getNewRequest();
+        }
         p.setName(name);
         packagedRequests.getPackagedRequests().add(p);
         setUpdated(true);
-        return getPackagedRequestWrapperList(name);        
+        return getPackagedRequestWrapperList(name);
     }
 
 }

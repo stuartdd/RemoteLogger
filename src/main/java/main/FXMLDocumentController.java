@@ -628,7 +628,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.rename(packagedRequestWrapperList.getSelectedPackagedRequest().getName(), (String) actionOn));
                 break;
             case ADD_PACKAGED_REQUEST:
-                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn));
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn,packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
                 break;
             case SAVE_PACKAGED_REQUEST:
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.save(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
@@ -758,7 +758,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
 
     @Override
     public boolean canAppClose() {
-        return !expectationWrapperManager.isUpdated();
+        return !((expectationWrapperManager.isUpdated()) || (PackagedRequestWrapperManager.isUpdated()));
     }
 
     @Override

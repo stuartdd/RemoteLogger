@@ -5,6 +5,7 @@
  */
 package main;
 
+import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
 
@@ -13,6 +14,7 @@ import json.JsonUtils;
  * @author 802996013
  */
 class PackagedRequest {
+
     private String name;
     private String host;
     private Integer port;
@@ -21,6 +23,26 @@ class PackagedRequest {
     private String body;
     private String bodyTemplate;
     private Map<String, String> headers;
+
+    public PackagedRequest clone() {
+        PackagedRequest clone = new PackagedRequest();
+        clone.setHost(getHost());
+        clone.setPort(getPort());
+        clone.setPath(getPath());
+        clone.setMethod(getMethod());
+        clone.setBody(getBody());
+        clone.setBodyTemplate(getBodyTemplate());
+        clone.setHeaders(clone(getHeaders()));
+        return clone;
+    }
+
+    private Map<String, String> clone(Map<String, String> headers) {
+        HashMap<String, String> clone = new HashMap<>();
+        for (Map.Entry<String, String> h : headers.entrySet()) {
+            clone.put(h.getKey(), h.getValue());
+        }
+        return clone;
+    }
 
     public String getName() {
         return name;
@@ -85,7 +107,7 @@ class PackagedRequest {
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
-    
+
     public String tojSON() {
         return JsonUtils.toJsonFormatted(this);
     }
@@ -94,4 +116,5 @@ class PackagedRequest {
     public String toString() {
         return "PackagedRequest{" + "name=" + name + ", host=" + host + ", port=" + port + ", path=" + path + ", method=" + method + '}';
     }
+
 }

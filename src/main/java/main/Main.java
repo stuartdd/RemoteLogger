@@ -197,7 +197,7 @@ public class Main extends Application {
 
     public static boolean closeApplication(boolean force) {
         if (!applicationController.canAppClose() && !force) {
-            if (!Main.alertOkCancel("Unsaved Data", "Unsaved Expectation data. Please save before exiting", "Ok to quit anyway and discard the changes?")) {
+            if (!Main.alertOkCancel("Unsaved Data", "Unsaved Configuration data. Please save before exiting", "Ok to quit anyway and discard the changes?")) {
                 return false;
             }
         }
