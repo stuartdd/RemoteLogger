@@ -538,22 +538,26 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         /*
         Do some stuff later in a separate thread!
          */
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
-                    expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
+        if (Main.getConfig().getExpDividerPos() != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
+                        expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
+                    }
                 }
-            }
-        });
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < Main.getConfig().getPackDividerPos().length; i++) {
-                    packagedRequestSplitPane.getDividers().get(i).setPosition(Main.getConfig().getPackDividerPos()[i]);
+            });
+        }
+        if (Main.getConfig().getPackDividerPos() != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < Main.getConfig().getPackDividerPos().length; i++) {
+                        packagedRequestSplitPane.getDividers().get(i).setPosition(Main.getConfig().getPackDividerPos()[i]);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -622,10 +626,10 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 break;
             case RENAME_PACKAGED_REQUEST:
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.rename(packagedRequestWrapperList.getSelectedPackagedRequest().getName(), (String) actionOn));
-                break;                
+                break;
             case ADD_PACKAGED_REQUEST:
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn));
-                break;                
+                break;
             case SAVE_PACKAGED_REQUEST:
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.save(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
                 break;

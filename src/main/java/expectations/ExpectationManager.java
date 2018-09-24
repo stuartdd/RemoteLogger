@@ -530,6 +530,9 @@ public class ExpectationManager {
     }
 
     public int size() {
+        if (expectations==null) {
+            return 0;
+        }
         return expectations.size();
     }
 

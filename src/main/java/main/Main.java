@@ -314,7 +314,6 @@ public class Main extends Application {
             config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
             config.setDefaultPort(PORT_NUMBER);
         }
-
         for (String portStr : config.getServers().keySet()) {
             ServerConfig serverConfig = config.getServers().get(portStr);
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
@@ -332,7 +331,6 @@ public class Main extends Application {
             } while (ServerManager.countServersRunning() > 0);
             System.exit(0);
         } else {
-            
             PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
             if ((getConfig().getPackagedRequestsFile() != null) && (Main.getConfig().getPackagedRequestsFile().trim().length() > 0)) {
                 PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
