@@ -61,7 +61,7 @@ public class Client {
             return send(path, body, method);
         }
     }
-    
+
     public ClientResponse send(String path, String body, Method methodIn) {
         Method method;
         if (methodIn == null) {
@@ -104,6 +104,12 @@ public class Client {
                 wr.flush();
                 wr.close();
                 wr = null;
+                if (clientNotifier != null) {
+                    clientNotifier.log(System.currentTimeMillis(), -1, "REQUEST: \nBODY START ----------\n" + body + "\nBODY END   ----------");
+                }
+            }
+            if (clientNotifier != null) {
+                clientNotifier.log(System.currentTimeMillis(), -1, "REQUEST: " + method.toString() + " TO:" + fullHost);
             }
             int responseCode;
             int connectionFailes = 0;

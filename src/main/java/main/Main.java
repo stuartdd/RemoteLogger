@@ -331,7 +331,6 @@ public class Main extends Application {
             } while (ServerManager.countServersRunning() > 0);
             System.exit(0);
         } else {
-            PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
             if ((getConfig().getPackagedRequestsFile() != null) && (Main.getConfig().getPackagedRequestsFile().trim().length() > 0)) {
                 PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
                 packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(config.getSelectedPackagedRequestName());
@@ -339,6 +338,7 @@ public class Main extends Application {
             } else {
                 packagedRequestWrapperList = null;
             }
+            PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
 
             if (config.getDefaultPort() == 0) {
                 if (config.getServers().size() != 1) {

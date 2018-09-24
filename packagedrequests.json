@@ -1,6 +1,6 @@
 {
   "packagedRequests" : [ {
-    "name" : "Test ForwardingX",
+    "name" : "Test Forwarding. Please keep",
     "host" : "http://localhost",
     "port" : 5002,
     "path" : "/testforward",
@@ -9,14 +9,17 @@
     "bodyTemplate" : null,
     "headers" : null
   }, {
-    "name" : "Get Country Name",
+    "name" : "NowTV validateAccount",
     "host" : "http://localhost",
-    "port" : 5002,
-    "path" : "/services.groupkt.com/country/get/iso2code/IN",
-    "method" : "GET",
-    "body" : null,
+    "port" : 8080,
+    "path" : "public/v1/account/authorise/email",
+    "method" : "POST",
+    "body" : "{\"email\":\"abc.pass@notv.com\"}",
     "bodyTemplate" : null,
-    "headers" : null
+    "headers" : {
+      "Content-Type" : "application/json",
+      "Accept" : "*/*"
+    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "verbose" : true
