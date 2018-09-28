@@ -17,15 +17,19 @@
 package common;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -86,6 +90,20 @@ public class Util {
         sb.setLength(len);
         return sb.toString();
     }
+    
+    public static String read(final String name) {
+        File f = new File(name);
+        f = new File(f.getAbsolutePath());
+        if (f.exists()) {
+            try {
+                return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                throw new FileException("File ["+f.getAbsolutePath()+"] could not be read", ex);
+            }
+        } else {
+            return readResource(name);
+        }
+    }
 
     public static String readResource(final String resourceName) {
         InputStream is = Util.class.getResourceAsStream(resourceName);
@@ -102,7 +120,7 @@ public class Util {
         long time = System.currentTimeMillis();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(iStream, "utf8"));
+            br = new BufferedReader(new InputStreamReader(iStream, StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -190,7 +208,7 @@ public class Util {
                     if (notifier != null) {
                         notifier.log(System.currentTimeMillis(), -1, "Template file found:    " + p.toString());
                     }
-                    return new String(Files.readAllBytes(p), Charset.forName("UTF-8"));
+                    return new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
                 } catch (IOException ex) {
                     throw new FileException("File [" + fileName + "] Not readable from file");
                 }

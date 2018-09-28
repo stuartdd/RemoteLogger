@@ -22,6 +22,7 @@ import client.ClientNotifier;
 import client.ClientResponse;
 import json.JsonUtils;
 import mockServer.MockServer;
+import mockServer.MockServerBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class StandAloneWithExpectationTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null, (Expectations) JsonUtils.beanFromJson(Expectations.class,StandAloneWithExpectationTest.class.getResourceAsStream("/config/expectationsResource.json")), true)).start();
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, true);
     }
 
     @AfterClass

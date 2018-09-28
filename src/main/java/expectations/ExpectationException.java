@@ -22,8 +22,13 @@ package expectations;
  */
 public class ExpectationException extends RuntimeException {
 
-    private int status = 200;
+    private Integer status = 200;
 
+    public ExpectationException(String message) {
+        super(message);
+        this.status = null;
+    }
+    
     public ExpectationException(String message, int status) {
         super(message);
         this.status = status;
@@ -38,12 +43,15 @@ public class ExpectationException extends RuntimeException {
         if ((getCause() != null) && (getCause() instanceof ExpectationException)) {
             return ((ExpectationException) getCause()).getStatus();
         }
+        if (status == null) {
+            return -1;
+        }
         return status;
     }
 
     @Override
     public String getMessage() {
-        return "Status=" + getStatus() + "] " + super.getMessage(); 
+        return status!=null?"Status=" + getStatus() + "] " + super.getMessage():super.getMessage(); 
     }
 
 }

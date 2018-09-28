@@ -20,6 +20,7 @@ import common.Action;
 import common.Util;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -46,7 +47,7 @@ import server.ServerConfig;
 public class Main extends Application {
 
     private static final int PORT_NUMBER = 1088;
-    private static final Charset CHARSET = Charset.forName("UTF-8");
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static boolean headless = false;
     private static ApplicationController applicationController;
     private static Stage mainStage;

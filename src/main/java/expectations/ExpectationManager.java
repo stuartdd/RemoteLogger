@@ -35,6 +35,7 @@ import template.Template;
 import xml.MappedXml;
 import common.Notifier;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mockServer.MockResponse;
@@ -431,7 +432,7 @@ public class ExpectationManager {
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(expectationsFile);
-                fos.write(exString.getBytes(Charset.forName("UTF-8")));
+                fos.write(exString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ex) {
                 Logger.getLogger(ExpectationManager.class.getName()).log(Level.SEVERE, null, ex);
             } finally {

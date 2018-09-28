@@ -24,6 +24,7 @@ import java.util.Map;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
 import mockServer.MockServer;
+import mockServer.MockServerBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class StandAloneWithConfigAndCallbackReloaded2Test {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null, "/config/expectationsResource.json", true)).start();
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, true);
     }
 
     @AfterClass

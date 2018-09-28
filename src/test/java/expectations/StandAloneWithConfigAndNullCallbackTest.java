@@ -24,6 +24,7 @@ import java.util.Map;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
 import mockServer.MockServer;
+import mockServer.MockServerBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,12 +43,12 @@ public class StandAloneWithConfigAndNullCallbackTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, new ResponseHandler() {
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, new ResponseHandler() {
             @Override
             public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
                 return null;
             }
-        }, "/config/expectationsResource.json", true)).start();
+        }, true);
     }
 
     @AfterClass

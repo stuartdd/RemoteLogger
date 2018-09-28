@@ -39,7 +39,7 @@ public class StandAloneWithExpectationsFromStringTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, null,Expectations.fromString(Util.readResource("/config/expectationsResource.json")) , true)).start();
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, true);
     }
 
     @AfterClass

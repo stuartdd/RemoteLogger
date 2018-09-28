@@ -30,15 +30,29 @@ import static org.junit.Assert.*;
  *
  * @author stuart
  */
-public class StandAloneWithConfigTest {
+public class StandAloneWithSingleExpectationFromStringTest2 {
 
     private static final int PORT = 1999;
-    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
+    private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
+
+    private static String expectationsString = "{\n"
+            + "            \"name\": \"Test Get Response Body\",\n"
+            + "            \"method\": \"get\",\n"
+            + "            \"path\": \"/pre\",\n"
+            + "            \"response\": {\n"
+            + "                \"status\": 201,\n"
+            + "                \"body\": \"Method %{METHOD}.URL:'%{PATH}'.HOST:%{HEAD.Host}.Accept:%{HEAD.Accept}.\",\n"
+            + "                \"headers\": {\n"
+            + "                    \"Accept\": \"%{HEAD.Accept}\",\n"
+            + "                    \"Connection\": \"%{HEAD.Connection}\"\n"
+            + "                }\n"
+            + "            }\n"
+            + "        }";
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, true);
+        mockServer = MockServer.single(expectationsString).start(PORT,true);
     }
 
     @AfterClass
@@ -49,10 +63,8 @@ public class StandAloneWithConfigTest {
     @Test
     public void test() {
         assertTrue(mockServer.isRunning());
-        ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
-        assertTrue(r.getBody().contains("PATH[0]=test PATH[1]=get PATH[2]=parts"));
-        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
-        assertEquals(200, r.getStatus());
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
+        assertEquals("Method GET.URL:'/pre'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.", r.getBody());
+        assertEquals("keep-alive", r.getHeader("Connection"));
     }
-
 }

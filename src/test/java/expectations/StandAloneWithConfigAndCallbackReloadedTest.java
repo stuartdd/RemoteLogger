@@ -21,6 +21,7 @@ import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
 import java.util.Map;
+import mockServer.MockServerBuilder;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
 import mockServer.MockServer;
@@ -42,7 +43,7 @@ public class StandAloneWithConfigAndCallbackReloadedTest {
 
     @BeforeClass
     public static void beforeClass() {
-        mockServer = (new MockServer(PORT, new ResponseHandler() {
+        ResponseHandler handler = new ResponseHandler() {
             @Override
             public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
                 /*
@@ -55,8 +56,9 @@ public class StandAloneWithConfigAndCallbackReloadedTest {
                 */
                 return mockRequest.getResponseData(map);
             }
-        }, "/config/expectationsResource.json", true)).start();
-    }
+        };
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, handler, true);
+    }   
 
     @AfterClass
     public static void afterClass() {

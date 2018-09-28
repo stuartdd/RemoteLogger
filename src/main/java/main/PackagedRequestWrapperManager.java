@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
@@ -205,7 +206,7 @@ public class PackagedRequestWrapperManager {
                 FileOutputStream fos = null;
                 try {
                     fos = new FileOutputStream(readFileName);
-                    fos.write(exString.getBytes(Charset.forName("UTF-8")));
+                    fos.write(exString.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException ex) {
                     if (requestNotifier != null) {
                         requestNotifier.log(System.currentTimeMillis(), -1, "Save failed for Packeged Requests.", ex);
