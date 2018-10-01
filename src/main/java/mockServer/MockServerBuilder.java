@@ -6,6 +6,7 @@
 package mockServer;
 
 import common.ServerException;
+import expectations.Exp;
 import expectations.Expectation;
 import expectations.ExpectationException;
 import expectations.Expectations;
@@ -28,52 +29,61 @@ public class MockServerBuilder {
     }
 
     protected MockServerBuilder(Expectation expectation) {
-        addExpectation(expectation);
+        addExpectation(-1, expectation);
+    }
+    
+   protected MockServerBuilder(Exp expectation) {
+        addExpectation(-1, expectation.getExpectation());
     }
 
     public Expectations getExpectations() {
         return expectationList;
     }
 
-    public MockServerBuilder add(Expectation exp) {
-        addExpectation(exp);
+    public MockServerBuilder add(Exp exp) {
+        addExpectation(0, exp.getExpectation());
         return this;
     }
     
+    public MockServerBuilder add(Expectation exp) {
+        addExpectation(0, exp);
+        return this;
+    }
+
     public MockServerBuilder add(Expectations exps) {
-        for (Expectation e:exps.getExpectations()) {
-            addExpectation(e);
+        for (Expectation e : exps.getExpectations()) {
+            addExpectation(-1, e);
         }
         return this;
     }
-    
+
     public MockServerBuilder add(String json) {
-        addExpectation((Expectation) JsonUtils.beanFromJson(Expectation.class, json));
+        addExpectation(0, (Expectation) JsonUtils.beanFromJson(Expectation.class, json));
         return this;
     }
-    
+
     public MockServer start(int port) {
         return (new MockServer(port, null, getExpectations(), true)).start();
     }
-    
-    public MockServer start(int port, boolean verbose ) {
+
+    public MockServer start(int port, boolean verbose) {
         return (new MockServer(port, null, getExpectations(), verbose)).start();
     }
 
     public MockServer start(int port, ResponseHandler handler) {
         return (new MockServer(port, handler, getExpectations(), true)).start();
     }
-    
-    public MockServer start(int port, ResponseHandler handler, boolean verbose ) {
+
+    public MockServer start(int port, ResponseHandler handler, boolean verbose) {
         return (new MockServer(port, handler, getExpectations(), verbose)).start();
     }
-    
-    private void addExpectation(Expectation exp) {
-        for (Expectation e:expectationList.getExpectations()) {
+
+    private void addExpectation(int index, Expectation exp) {
+        for (Expectation e : expectationList.getExpectations()) {
             if (e.getName().equals(exp.getName())) {
-                throw new ExpectationException("Duplicate Expectation Name ["+exp.getName()+"] found.");
+                throw new ExpectationException("Duplicate Expectation Name [" + exp.getName() + "] found.");
             }
         }
-        expectationList.add(exp);
+        expectationList.add(index, exp);
     }
 }

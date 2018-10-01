@@ -41,7 +41,7 @@ public class StandAloneWithExpectationAddTest {
             + "            \"method\": \"get\",\n"
             + "            \"path\": \"/test/add\",\n"
             + "            \"response\": {\n"
-            + "                \"status\": 200,\n"
+            + "                \"status\": 201,\n"
             + "                \"body\": \"{\\\"msg\\\":\\\"ADD\\\"}\"\n"
             + "            }\n"
             + "        }";
@@ -68,7 +68,7 @@ public class StandAloneWithExpectationAddTest {
     public void test2() {
         assertTrue(mockServer.isRunning());
         ClientResponse r = CLIENT.send("test/add", null, Client.Method.GET);
-        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
-        assertEquals(200, r.getStatus());
+        assertTrue(r.getBody().contains("ADD"));
+        assertEquals(201, r.getStatus());
     }
 }

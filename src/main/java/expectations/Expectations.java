@@ -24,7 +24,7 @@ import json.JsonUtils;
  *
  * @author 802996013
  */
-public class Expectations  {
+public class Expectations {
 
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;
@@ -81,7 +81,6 @@ public class Expectations  {
         return this;
     }
 
-
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
         expectations.addExpectation(json);
@@ -107,7 +106,15 @@ public class Expectations  {
     }
 
     public void add(Expectation newExpectation) {
-        expectations.add(newExpectation);
+        add(-1, newExpectation);
+    }
+
+    public void add(int index, Expectation newExpectation) {
+        if (index >= 0) {
+            expectations.add(index, newExpectation);
+        } else {
+            expectations.add(newExpectation);
+        }
     }
 
     void remove(Expectation expectation) {
