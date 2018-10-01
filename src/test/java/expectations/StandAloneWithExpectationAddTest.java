@@ -30,15 +30,25 @@ import static org.junit.Assert.*;
  *
  * @author stuart
  */
-public class StandAloneWithExpectationTest {
+public class StandAloneWithExpectationAddTest {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(false));
     private static MockServer mockServer;
 
+    private static String addExpc = "{\n"
+            + "            \"name\": \"Test Add\",\n"
+            + "            \"method\": \"get\",\n"
+            + "            \"path\": \"/test/add\",\n"
+            + "            \"response\": {\n"
+            + "                \"status\": 200,\n"
+            + "                \"body\": \"{\\\"msg\\\":\\\"ADD\\\"}\"\n"
+            + "            }\n"
+            + "        }";
+
     @BeforeClass
     public static void beforeClass() {
-        mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, true);
+        mockServer = MockServer.fromfile("/config/expectationsResource.json").add(addExpc).start(PORT, true);
     }
 
     @AfterClass
@@ -47,10 +57,17 @@ public class StandAloneWithExpectationTest {
     }
 
     @Test
-    public void test() {
+    public void test1() {
         assertTrue(mockServer.isRunning());
         ClientResponse r = CLIENT.send("test/get/parts?q1=ONE&q2=TWO", null, Client.Method.GET);
         assertTrue(r.getBody().contains("PATH[0]=test PATH[1]=get PATH[2]=parts"));
+        assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
+        assertEquals(200, r.getStatus());
+    }
+    @Test
+    public void test2() {
+        assertTrue(mockServer.isRunning());
+        ClientResponse r = CLIENT.send("test/add", null, Client.Method.GET);
         assertTrue(r.getBody().contains("QUERY.q1=ONE QUERY.q2=TWO"));
         assertEquals(200, r.getStatus());
     }
