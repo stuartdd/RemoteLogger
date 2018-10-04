@@ -54,7 +54,7 @@ public class StandAloneWithConfigAndCallbackReloadedTest {
                 /*
                 Defer to the loaded expectations
                 */
-                return mockRequest.getResponseData(map);
+                return mockRequest.createResponse(map);
             }
         };
         mockServer = MockServer.fromfile("/config/expectationsResource.json").start(PORT, handler, true);

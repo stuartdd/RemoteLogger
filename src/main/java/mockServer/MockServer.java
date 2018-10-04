@@ -17,6 +17,7 @@
 package mockServer;
 
 import common.Util;
+import expectations.ExpChain;
 import expectations.Expectation;
 import expectations.Expectations;
 import json.JsonUtils;
@@ -92,25 +93,25 @@ public class MockServer {
     public ServerStatistics getServerStatistics() {
         return server.getServerStatistics();
     }
-    
-    public static MockServerBuilder empty() {
-        return new MockServerBuilder();
+         
+    public static MockServerBuilder add(ExpChain exp) {
+        return new MockServerBuilder().add(exp);
     }
     
-    public static MockServerBuilder list(String json) {
+    public static MockServerBuilder addAll(String json) {
         Expectations list = (Expectations) JsonUtils.beanFromJson(Expectations.class, json);
         return new MockServerBuilder(list);
     }
     
-    public static MockServerBuilder list(Expectations expectations) {
+    public static MockServerBuilder addAll(Expectations expectations) {
         return new MockServerBuilder(expectations);
     }
     
-    public static MockServerBuilder single(Expectation expectation) {
+    public static MockServerBuilder add(Expectation expectation) {
         return new MockServerBuilder(expectation);
     }
 
-    public static MockServerBuilder single(String json) {
+    public static MockServerBuilder add(String json) {
         Expectation exp = (Expectation) JsonUtils.beanFromJson(Expectation.class, json);
         return new MockServerBuilder(exp);
     }

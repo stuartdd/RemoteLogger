@@ -5,70 +5,53 @@
  */
 package expectations;
 
-import java.util.HashMap;
-
 /**
  *
  * @author 802996013
  */
 public class Exp {
-    Expectation expectation = new Expectation();
 
-    public Exp() {
-        expectation.setMethod("GET");
-        expectation.setBodyType("EMPTY");
-        expectation.setForward(null);
-        expectation.setPath(null);
-        expectation.setResponse(null);
-        expectation.setAsserts(new HashMap<>());
+    public static ExpChain withPath(String path) {
+        return new ExpChain().withPath(path);
     }
 
-    public Expectation getExpectation() {
-        return expectation;
+    public static ExpChain withGetMethod() {
+        return new ExpChain().withGetMethod();
     }
     
-    public Exp withPath(String path) {
-        expectation.setPath(path);
-        return this;
-    }
-    
-    public Exp withGetMethod() {
-        expectation.setMethod("GET");
-        return this;
-    }
-    
-    public Exp withPostMethod() {
-        expectation.setMethod("POST");
-        return this;
-    }
-    
-    public Exp withPutMethod() {
-        expectation.setMethod("PUT");
-        return this;
-    }
-    
-    public Exp withPatchMethod() {
-        expectation.setMethod("PATCH");
-        return this;
+    public static ExpChain withName(String name) {
+        return new ExpChain().withName(name);
     }
 
-    public Exp withDeleteMethod() {
-        expectation.setMethod("DELETE");
-        return this;
+    public static ExpChain withAnyMethod() {
+        return new ExpChain().withAnyMethod();
     }
 
-    public Exp withEmptyBody() {
-        expectation.setBodyType("EMPTY");
-        return this;
+    public static ExpChain withPostMethod() {
+        return new ExpChain().withPostMethod();
     }
 
-    public Exp withJsonBody() {
-        expectation.setBodyType("JSON");
-        return this;
+    public static ExpChain withPutMethod() {
+        return new ExpChain().withPutMethod();
     }
 
-    public Exp withXmlBody() {
-        expectation.setBodyType("JSON");
-        return this;
+    public static ExpChain withPatchMethod() {
+        return new ExpChain().withPatchMethod();
+    }
+
+    public static ExpChain withDeleteMethod() {
+        return new ExpChain().withDeleteMethod();
+    }
+
+    public static ExpChain withEmptyBody() {
+        return new ExpChain().withEmptyBody();
+    }
+
+    public static ExpChain withJsonBody() {
+        return new ExpChain().withJsonBody();
+    }
+
+    public static ExpChain withXmlBody() {
+        return new ExpChain().withXmlBody();
     }
 }

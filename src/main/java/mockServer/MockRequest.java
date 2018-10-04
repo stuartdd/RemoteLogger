@@ -16,6 +16,7 @@
  */
 package mockServer;
 
+import expectations.Expectation;
 import expectations.ExpectationManager;
 import java.util.Map;
 import server.ServerStatistics;
@@ -33,10 +34,10 @@ public class MockRequest {
     private final String body;
     private final String path;
     private final String method;
-    private final ExpectationManager expectationMatcher;
-    private final ServerStatistics serverStatistics;
+    private final Expectation expectation;
+    private final ExpectationManager expectationManager;
 
-    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationManager expectationMatcher, ServerStatistics serverStatistics) {
+    public MockRequest(int port, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ExpectationManager expectationManager, Expectation expectation) {
         this.port = port;
         this.map = map;
         this.headers = headers;
@@ -44,15 +45,8 @@ public class MockRequest {
         this.method = getMapObject("METHOD");
         this.body = getMapObject("BODY");
         this.path = getMapObject("PATH");
-        this.expectationMatcher = expectationMatcher;
-        this.serverStatistics = serverStatistics;
-    }
-
-    public MockResponse getResponseData(Map<String, Object> map) {
-        return expectationMatcher.getResponseData(map, serverStatistics);
-    }
-    public MockResponse getResponseData() {
-        return expectationMatcher.getResponseData(map, serverStatistics);
+        this.expectation = expectation;
+        this.expectationManager = expectationManager;
     }
 
     private String getMapObject(String key) {
@@ -85,6 +79,18 @@ public class MockRequest {
 
     public int getPort() {
         return port;
+    }
+
+    public boolean hasMatchingExpectation() {
+        return expectation != null;
+    }
+
+    public Expectation getMatchingExpectation() {
+        return expectation;
+    }
+
+    public MockResponse createResponse(Map<String, Object> map) {
+        return expectationManager.getResponseData(map, expectation);
     }
 
 }

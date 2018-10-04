@@ -31,6 +31,9 @@ public class MultiStringMatch {
     
     public MultiStringMatch(String in, char delim) {
         this.delim = delim;
+        if (in == null) {
+            return;
+        }
         List<String> strings = Util.split(in, delim);
         for (String st : strings) {
             list.add(new StringMatcher(st));
@@ -40,6 +43,9 @@ public class MultiStringMatch {
     boolean match(Object with) {
         if (with == null) {
             return false;
+        }
+        if (list.isEmpty()) {
+            return true;
         }
         List<String> strings = Util.split(with.toString(), delim);
         if (strings.size()!=list.size()) {

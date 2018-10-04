@@ -48,7 +48,7 @@ public class CallbackWithNoExpectationAndNullResponseTest {
                 /*
                 * NULL RESPONSE!
                 */
-                return  null;
+                return null;
             }
         }, true)).start();
     }

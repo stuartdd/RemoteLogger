@@ -65,7 +65,7 @@ public class StandAloneWithConfigAndCallbackReloaded2Test {
                 /*
                 Defer to the loaded expectations
                 */
-                return mockRequest.getResponseData(map);
+                return mockRequest.createResponse(map);
             }
         });
                 

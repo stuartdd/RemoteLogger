@@ -38,21 +38,21 @@ public class Server {
         if (serverConfig == null) {
             throw new ServerConfigException("Server serverConfig is null");
         }
-        if (serverConfig.expectations() == null) {
-            expectationManager = new ExpectationManager(port, serverConfig.getExpectationsFile(), serverNotifier, serverConfig.isLogProperties());
-        } else {
-            expectationManager = new ExpectationManager(port, serverConfig.expectations(), serverNotifier, serverConfig.isLogProperties());
-        }
-        if ((serverNotifier != null) && expectationManager.hasNoExpectations()) {
-            serverNotifier.log(System.currentTimeMillis(), port, "Server on " + port + " does not have any expectations defined. 404 will be returned");
-
-        }
         this.port = port;
         this.serverNotifier = serverNotifier;
         this.serverConfig = serverConfig;
         this.responseHandler = responseHandler;
         this.serverThread = null;
         this.serverStatistics = new ServerStatistics();
+        if (serverConfig.expectations() == null) {
+            expectationManager = new ExpectationManager(port, serverConfig.getExpectationsFile(), serverNotifier, serverStatistics, serverConfig.isLogProperties());
+        } else {
+            expectationManager = new ExpectationManager(port, serverConfig.expectations(), serverNotifier, serverStatistics, serverConfig.isLogProperties());
+        }
+        if ((serverNotifier != null) && expectationManager.hasNoExpectations()) {
+            serverNotifier.log(System.currentTimeMillis(), port, "Server on " + port + " does not have any expectations defined. 404 will be returned");
+
+        }
     }
 
     public int getPort() {

@@ -16,6 +16,7 @@
  */
 package expectations;
 
+import common.ExpectationException;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;

@@ -16,23 +16,21 @@
  */
 package expectations;
 
+import common.ExpectationException;
 import client.Client;
 import client.ClientConfig;
 import client.ClientResponse;
-import common.BodyType;
 import com.sun.net.httpserver.HttpExchange;
 import common.FileException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import json.JsonUtils;
 
 import common.Util;
 import template.Template;
-import xml.MappedXml;
 import common.Notifier;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -106,23 +104,26 @@ public class ExpectationManager {
     private Expectations expectations;
     private final int port;
     private final Notifier serverNotifier;
+    private final ServerStatistics serverStatistics;
     private File expectationsFile;
     private long expectationsLoadTime;
     private boolean logProperties;
     private boolean loadedFromAFile;
 
-    public ExpectationManager(int port, Expectations expectations, Notifier serverNotifier, boolean logProperties) {
+    public ExpectationManager(int port, Expectations expectations, Notifier serverNotifier, ServerStatistics serverStatistics, boolean logProperties) {
         this.port = port;
         this.serverNotifier = serverNotifier;
+        this.serverStatistics = serverStatistics;
         this.expectations = expectations;
         this.logProperties = logProperties;
         this.loadedFromAFile = false;
         testExpectations(expectations);
     }
 
-    public ExpectationManager(int port, String fileName, Notifier serverNotifier, boolean logProperties) {
+    public ExpectationManager(int port, String fileName, Notifier serverNotifier, ServerStatistics serverStatistics, boolean logProperties) {
         this.port = port;
         this.serverNotifier = serverNotifier;
+        this.serverStatistics = serverStatistics;
         if ((fileName == null) || (fileName.trim().length() == 0)) {
             expectations = null;
             expectationsFile = null;
@@ -180,18 +181,17 @@ public class ExpectationManager {
         return exp;
     }
 
-    public void getResponse(long time, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, ServerStatistics serverStatistics) {
-        getResponseData(map, serverStatistics).respond(he, map);
+    public void getResponse(long time, HttpExchange he, Map<String, Object> map, Map<String, String> headers, Map<String, String> queries, Expectation foundExpectation) {
+        getResponseData(map, foundExpectation).respond(he, map);
     }
 
-    public MockResponse getResponseData(Map<String, Object> map, ServerStatistics serverStatistics) {
+    public MockResponse getResponseData(Map<String, Object> map, Expectation foundExpectation) {
         MockResponse mockResponse = MockResponse.notFound();
 
-        loadPropertiesFromBody(map, (String) map.get("BODY"));
         if ((expectations.isLogProperies() || logProperties) && (serverNotifier != null)) {
             logMap(System.currentTimeMillis(), map, "REQUEST PROPERTIES");
         }
-        Expectation foundExpectation = findMatchingExpectation(System.currentTimeMillis(), map);
+
         if (foundExpectation != null) {
             try {
                 serverStatistics.inc(ServerStatistics.STAT.MATCH, true);
@@ -204,7 +204,6 @@ public class ExpectationManager {
                     mockResponse = createMockResponseViaForward(foundExpectation, map);
                 }
             } catch (ExpectationException | FileException ee) {
-                mockResponse = MockResponse.notFound();
                 if (serverNotifier != null) {
                     serverNotifier.log(System.currentTimeMillis(), getPort(), new IOException("Read file failed for expectation: " + foundExpectation.getName() + ". " + ee.getMessage(), ee));
                 }
@@ -294,7 +293,7 @@ public class ExpectationManager {
         return new MockResponse(response, statusCode, responseHeaders);
     }
 
-    private Expectation findMatchingExpectation(long time, Map<String, Object> map) {
+    public Expectation findMatchingExpectation(long time, Map<String, Object> map) {
         if (expectations == null) {
             if (serverNotifier != null) {
                 serverNotifier.log(time, getPort(), "No Expectation have been set!");
@@ -339,18 +338,6 @@ public class ExpectationManager {
         return exp;
     }
 
-    private void loadPropertiesFromBody(Map map, String bodyTrimmed) {
-        if ((bodyTrimmed == null) || (bodyTrimmed.isEmpty())) {
-            return;
-        }
-        BodyType bodyType = (BodyType) map.get("BODY-TYPE");
-        String bodyTypeName = bodyType.name();
-        Map<String, Object> tempMap = mapBodyContent(System.currentTimeMillis(), bodyTrimmed, bodyType);
-        for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
-            map.put(bodyTypeName + "." + ent.getKey(), ent.getValue());
-        }
-    }
-
     private boolean doesNotMatchAllAssertions(long time, Expectation exp, Map<String, Object> map) {
         for (Map.Entry<String, String> ass : exp.getAsserts().entrySet()) {
             Object actual = map.get(ass.getKey());
@@ -368,23 +355,6 @@ public class ExpectationManager {
             }
         }
         return false;
-    }
-
-    private static Map<String, Object> mapBodyContent(long time, String body, BodyType bodyType) {
-        Map<String, Object> tempMap = new HashMap<>();
-        try {
-            switch (bodyType) {
-                case XML:
-                    MappedXml mappedXml = new MappedXml(body, null);
-                    tempMap.putAll(mappedXml.getMap());
-                    break;
-                case JSON:
-                    tempMap.putAll(JsonUtils.flatMap(body));
-            }
-        } catch (Exception pe) {
-            throw new ExpectationException("Failed to parse body text: Type:" + bodyType, 500, pe);
-        }
-        return tempMap;
     }
 
     private static boolean doesNotMatchStringOrNullExp(String exp, Object subject) {
@@ -507,6 +477,9 @@ public class ExpectationManager {
             }
             map.put(e.getName(), e.getName());
         }
+        if ((expectations.getPaths()==null) || (expectations.getPaths().length == 0)) {
+            expectations.setPaths(new String[] {""});
+        }
     }
 
     public void ensureNotEmpty() {
@@ -531,7 +504,7 @@ public class ExpectationManager {
     }
 
     public int size() {
-        if (expectations==null) {
+        if (expectations == null) {
             return 0;
         }
         return expectations.size();

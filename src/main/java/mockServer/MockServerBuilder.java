@@ -5,10 +5,9 @@
  */
 package mockServer;
 
-import common.ServerException;
-import expectations.Exp;
+import expectations.ExpChain;
 import expectations.Expectation;
-import expectations.ExpectationException;
+import common.ExpectationException;
 import expectations.Expectations;
 import json.JsonUtils;
 import server.ResponseHandler;
@@ -31,8 +30,8 @@ public class MockServerBuilder {
     protected MockServerBuilder(Expectation expectation) {
         addExpectation(-1, expectation);
     }
-    
-   protected MockServerBuilder(Exp expectation) {
+
+    protected MockServerBuilder(ExpChain expectation) {
         addExpectation(-1, expectation.getExpectation());
     }
 
@@ -40,19 +39,19 @@ public class MockServerBuilder {
         return expectationList;
     }
 
-    public MockServerBuilder add(Exp exp) {
+    public MockServerBuilder add(ExpChain exp) {
         addExpectation(0, exp.getExpectation());
         return this;
     }
-    
+
     public MockServerBuilder add(Expectation exp) {
         addExpectation(0, exp);
         return this;
     }
 
-    public MockServerBuilder add(Expectations exps) {
-        for (Expectation e : exps.getExpectations()) {
-            addExpectation(-1, e);
+    public MockServerBuilder add(Expectations expectations) {
+        for (Expectation exp : expectations.getExpectations()) {
+            addExpectation(0, exp);
         }
         return this;
     }
@@ -86,4 +85,5 @@ public class MockServerBuilder {
         }
         expectationList.add(index, exp);
     }
+
 }

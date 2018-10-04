@@ -27,9 +27,13 @@ import common.Action;
 import common.Util;
 import expectations.ExpectationManager;
 import common.Notifier;
+import common.ExpectationException;
+import expectations.Expectation;
 import java.util.TreeMap;
+import json.JsonUtils;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
+import xml.MappedXml;
 
 /**
  *
@@ -51,6 +55,10 @@ public class ExpectationHandler implements HttpHandler {
         this.serverNotifier = server.getServerNotifier();
     }
 
+    public void setCallBackClass(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
+    }
+
     @Override
     public void handle(HttpExchange he) throws IOException {
         long time = System.currentTimeMillis();
@@ -66,6 +74,7 @@ public class ExpectationHandler implements HttpHandler {
             }
             map.put("BODY", bodyTrim);
             map.put("BODY-TYPE", Util.detirmineBodyType(bodyTrim));
+            Util.loadPropertiesFromBody(map, bodyTrim);
         } else {
             map.put("BODY-TYPE", BodyType.EMPTY);
         }
@@ -92,6 +101,7 @@ public class ExpectationHandler implements HttpHandler {
             map.put("QUERY", he.getRequestURI().getQuery());
             splitIntoMap(map, queries, "QUERY", '&');
         }
+
         for (Iterator<String> it = he.getRequestHeaders().keySet().iterator(); it.hasNext();) {
             String head = it.next();
             String value = Util.asString(he.getRequestHeaders().get(head));
@@ -101,19 +111,31 @@ public class ExpectationHandler implements HttpHandler {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "HEADER: " + head + "=" + value);
             }
         }
+
+        Expectation foundExpectation = expectationManager.findMatchingExpectation(System.currentTimeMillis(), map);
+
         if (responseHandler != null) {
-            MockRequest mockRequest = new MockRequest(port, map, headers, queries, expectationManager, this.server.getServerStatistics());
-            MockResponse mockResponse = responseHandler.handle(mockRequest, map);
-            if (mockResponse != null) {
-                mockResponse.respond(he, map);
-                this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
-                return;
+            MockRequest mockRequest = null;
+            if (expectationManager.hasNoExpectations()) {
+                mockRequest = new MockRequest(port, map, headers, queries, expectationManager, null);
+            } else {
+                if (foundExpectation != null) {
+                    mockRequest = new MockRequest(port, map, headers, queries, expectationManager, foundExpectation);
+                }
+            }
+            if (mockRequest != null) {
+                MockResponse mockResponse = responseHandler.handle(mockRequest, map);
+                if (mockResponse != null) {
+                    mockResponse.respond(he, map);
+                    this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
+                    return;
+                }
             }
         }
         if (expectationManager.hasNoExpectations()) {
             MockResponse.respond(he, 404, "No Expectation defined", null, null);
         } else {
-            expectationManager.getResponse(time, he, map, headers, queries, this.server.getServerStatistics());
+            expectationManager.getResponse(time, he, map, headers, queries, foundExpectation);
         }
         this.server.getServerStatistics().inc(ServerStatistics.STAT.RESPONSE, true);
     }
@@ -153,7 +175,4 @@ public class ExpectationHandler implements HttpHandler {
         return count;
     }
 
-    public void setCallBackClass(ResponseHandler responseHandler) {
-        this.responseHandler = responseHandler;
-    }
 }

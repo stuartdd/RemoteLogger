@@ -113,7 +113,7 @@ public class Expectation {
 
     @Override
     public String toString() {
-        return "Expectation{name='" + name + "', method=" + method + ", path=" + path + ", response=" + (response == null ? "Undefined" : response) + ", forward=" + (forward == null ? "Undefined" : forward) + '}';
+        return "Expectation{name='" + (name == null ? "Undefined" : name) + "', method=" + (method == null ? "Undefined" : method) + ", path=" + (path == null ? "Undefined" : path) + ", response=" + (response == null ? "Undefined" : response) + ", forward=" + (forward == null ? "Undefined" : forward) + '}';
     }
 
     private Map<String, StringMatcher> mapAssertsToStringMatchers(Map<String, String> stringAsserts) {

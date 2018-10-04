@@ -64,7 +64,7 @@ public class ResponseContent {
 
     @Override
     public String toString() {
-        return "{" + "status=" + status + ", body[20]='" + (Util.isEmpty(body)?"":Util.firstN(body, 20)) + "', bodyTemplate=" + (Util.isEmpty(bodyTemplate)?"Undefined":bodyTemplate) + ", headers=" + headers.size() + '}';
+        return "{" + "status=" + status + ", body[20]='" + (Util.isEmpty(body)?"":Util.firstN(body, 20)) + "', bodyTemplate=" + (Util.isEmpty(bodyTemplate)?"Undefined":bodyTemplate) + ", headers=" + (headers==null?0: headers.size()) + '}';
     }
     
     

@@ -21,15 +21,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
+import json.JsonUtils;
+import xml.MappedXml;
 
 /**
  *
@@ -90,7 +91,7 @@ public class Util {
         sb.setLength(len);
         return sb.toString();
     }
-    
+
     public static String read(final String name) {
         File f = new File(name);
         f = new File(f.getAbsolutePath());
@@ -98,7 +99,7 @@ public class Util {
             try {
                 return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
             } catch (IOException ex) {
-                throw new FileException("File ["+f.getAbsolutePath()+"] could not be read", ex);
+                throw new FileException("File [" + f.getAbsolutePath() + "] could not be read", ex);
             }
         } else {
             return readResource(name);
@@ -197,31 +198,33 @@ public class Util {
 
     public static String locateResponseFile(String fileName, String type, String[] paths, Notifier notifier) {
         if (fileName == null) {
-            throw new FileException("File for " + type + " is not defined");
+            throw new FileException(type + "File for " + type + " is not defined");
         }
         StringBuilder sb = new StringBuilder();
         for (String path : paths) {
-            sb.append('"').append(path).append('"').append(',');
+            if (path.length() > 0) {
+                sb.append('"').append(path).append('"').append(',');
+            } 
             Path p = Paths.get(path, fileName);
             if (Files.exists(p)) {
                 try {
                     if (notifier != null) {
-                        notifier.log(System.currentTimeMillis(), -1, "Template file found:    " + p.toString());
+                        notifier.log(System.currentTimeMillis(), -1, type + " File found: " + p.toString());
                     }
                     return new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
                 } catch (IOException ex) {
-                    throw new FileException("File [" + fileName + "] Not readable from file");
+                    throw new FileException(type + " File [" + fileName + "] Not readable", ex);
                 }
             } else {
                 if (notifier != null) {
-                    notifier.log(System.currentTimeMillis(), -1, "Template file NOT found:    " + p.toString());
+                    notifier.log(System.currentTimeMillis(), -1, type + " File NOT found: " + p.toString());
                 }
             }
         }
         try {
             return readResource(fileName, type, sb.toString(), notifier);
         } catch (IOException ex) {
-            throw new FileException("File [" + fileName + "] Not readable from class path", ex);
+            throw new FileException(type + " File [" + fileName + "] Not readable", ex);
         }
     }
 
@@ -232,12 +235,12 @@ public class Util {
         }
         if (is == null) {
             if (notifier != null) {
-                notifier.log(System.currentTimeMillis(), -1, type + " resource NOT found:" + file);
+                notifier.log(System.currentTimeMillis(), -1, type + " Resource file NOT found:" + file);
             }
-            throw new FileException(type + " resource [" + file + "] Not Found in paths [" + list + "] or on the class path");
+            throw new FileException(type + " Resource [" + file + "] Not Found in path(s) [" + list + "] or on the class path");
         }
         if (notifier != null) {
-            notifier.log(System.currentTimeMillis(), -1, type + " resource found:    " + file);
+            notifier.log(System.currentTimeMillis(), -1, type + " Resource found:    " + file);
         }
         StringBuilder sb = new StringBuilder();
         int content;
@@ -245,6 +248,35 @@ public class Util {
             sb.append((char) content);
         }
         return sb.toString();
+    }
+
+    public static void loadPropertiesFromBody(Map map, String bodyTrimmed) {
+        if ((bodyTrimmed == null) || (bodyTrimmed.isEmpty())) {
+            return;
+        }
+        BodyType bodyType = (BodyType) map.get("BODY-TYPE");
+        String bodyTypeName = bodyType.name();
+        Map<String, Object> tempMap = mapBodyContent(bodyTrimmed, bodyType);
+        for (Map.Entry<String, Object> ent : tempMap.entrySet()) {
+            map.put(bodyTypeName + "." + ent.getKey(), ent.getValue());
+        }
+    }
+
+    private static Map<String, Object> mapBodyContent(String body, BodyType bodyType) {
+        Map<String, Object> tempMap = new HashMap<>();
+        try {
+            switch (bodyType) {
+                case XML:
+                    MappedXml mappedXml = new MappedXml(body, null);
+                    tempMap.putAll(mappedXml.getMap());
+                    break;
+                case JSON:
+                    tempMap.putAll(JsonUtils.flatMap(body));
+            }
+        } catch (Exception pe) {
+            throw new ExpectationException("Failed to parse body text: Type:" + bodyType, 500, pe);
+        }
+        return tempMap;
     }
 
 }

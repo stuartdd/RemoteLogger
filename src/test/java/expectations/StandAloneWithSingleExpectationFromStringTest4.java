@@ -20,39 +20,39 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
+import java.util.Map;
+import mockServer.MockRequest;
+import mockServer.MockResponse;
 import mockServer.MockServer;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import server.ResponseHandler;
 
 /**
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest2 {
+public class StandAloneWithSingleExpectationFromStringTest4 implements ResponseHandler {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
 
-    private static String expectationsString = "{\n"
-            + "            \"name\": \"Test Get Response Body\",\n"
-            + "            \"method\": \"get\",\n"
-            + "            \"path\": \"/pre\",\n"
-            + "            \"response\": {\n"
-            + "                \"status\": 201,\n"
-            + "                \"body\": \"Method %{METHOD}.URL:'%{PATH}'.HOST:%{HEAD.Host}.Accept:%{HEAD.Accept}.\",\n"
-            + "                \"headers\": {\n"
-            + "                    \"Accept\": \"%{HEAD.Accept}\",\n"
-            + "                    \"Connection\": \"%{HEAD.Connection}\"\n"
-            + "                }\n"
-            + "            }\n"
-            + "        }";
-
-    @BeforeClass
-    public static void beforeClass() {
-        mockServer = MockServer.add(expectationsString).start(PORT,true);
+    @Before
+    public void before() {
+        if (mockServer == null) {
+            mockServer = MockServer.add(
+                    Exp.withGetMethod().
+                            withPath("/pre").
+                            withResponse(
+                                    Res.withStatus(201).
+                                            withHeader("MyHeader", "HEAD").
+                                            withBody("Status 201"))
+            ).start(PORT, this, true);
+        }
+        assertTrue(mockServer.isRunning());
     }
 
     @AfterClass
@@ -62,9 +62,14 @@ public class StandAloneWithSingleExpectationFromStringTest2 {
 
     @Test
     public void test() {
-        assertTrue(mockServer.isRunning());
         ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
-        assertEquals("Method GET.URL:'/pre'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.", r.getBody());
-        assertEquals("keep-alive", r.getHeader("Connection"));
+        assertEquals("HEAD", r.getHeader("Myheader"));
+        assertEquals(201, r.getStatus());
+        assertEquals("Status 201", r.getBody());
+    }
+
+    @Override
+    public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+        return mockRequest.createResponse(map);
     }
 }
