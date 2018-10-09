@@ -15,6 +15,10 @@ public class Exp {
         return new ExpChain().withPath(path);
     }
 
+    public static ExpChain withProperty(String key, String value) {
+        return new ExpChain().withProperty(key, value);
+    }
+
     public static ExpChain withGetMethod() {
         return new ExpChain().withGetMethod();
     }

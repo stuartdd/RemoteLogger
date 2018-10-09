@@ -80,7 +80,7 @@ public class ExpChain {
     }
 
     public ExpChain withXmlBody() {
-        expectation.setBodyType("JSON");
+        expectation.setBodyType("XML");
         return this;
     }
 
@@ -92,5 +92,10 @@ public class ExpChain {
     ExpChain withName(String name) {
         expectation.setName(name);
         return this;   
+    }
+
+    ExpChain withProperty(String key, String value) {
+        expectation.getAsserts().put(key, value);
+        return this;
     }
 }
