@@ -16,6 +16,7 @@
  */
 package main;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import config.Config;
 import java.io.File;
 import java.io.InputStream;
@@ -50,17 +51,40 @@ public class ConfigData extends Config {
     private double[] expDividerPos;
     private double[] packDividerPos;
 
-    private static String writeFileName;
-    private static String readFileName;
-
+    @JsonIgnore
     private DateTimeFormatter ts;
 
-    public static ConfigData loadConfig(String fileName) {
+    private static String writeFileName;
+    private static String readFileName;
+    private static ConfigData instance;
+
+
+    public static ConfigData getInstance() {
+        if (instance == null) {
+            instance = new ConfigData();
+            instance.setWidth(600);
+            instance.setHeight(600);
+            instance.setX(0);
+            instance.setY(0);
+            instance.setDefaultPort(0);
+        }
+        return instance;
+    }
+
+    public static boolean isLoadedFromFile() {
+        return (readFileName != null);
+    }
+
+    public static boolean canWriteToFile() {
+        return (writeFileName != null);
+    }
+
+    public static void load(String fileName) {
         File fil = new File(fileName);
         if (fil.exists()) {
             writeFileName = fil.getAbsolutePath();
             readFileName = writeFileName;
-            return (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
+            instance = (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
         } else {
             InputStream is = ConfigData.class.getResourceAsStream(fileName);
             if (is == null) {
@@ -71,7 +95,7 @@ public class ConfigData extends Config {
             }
             writeFileName = null;
             readFileName = fileName;
-            return (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
+            instance = (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
         }
     }
 

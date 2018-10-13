@@ -18,15 +18,7 @@ package main;
 
 import common.Action;
 import common.Util;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.Optional;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -41,8 +33,16 @@ import javafx.stage.WindowEvent;
 import json.JsonUtils;
 import org.joda.time.DateTime;
 import server.Server;
-import server.ServerManager;
 import server.ServerConfig;
+import server.ServerManager;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Optional;
 
 public class Main extends Application {
 
@@ -51,19 +51,15 @@ public class Main extends Application {
     private static boolean headless = false;
     private static ApplicationController applicationController;
     private static Stage mainStage;
-    private static ConfigData config;
-    private static String configName;
     private static PackagedRequestWrapperList packagedRequestWrapperList;
 
     @Override
     public void start(Stage stage) throws Exception {
         mainStage = stage;
-        if ((configName != null) && (config != null)) {
-            stage.setX(config.getX());
-            stage.setY(config.getY());
-            stage.setHeight(config.getHeight());
-            stage.setWidth(config.getWidth());
-        }
+        stage.setX(ConfigData.getInstance().getX());
+        stage.setY(ConfigData.getInstance().getY());
+        stage.setHeight(ConfigData.getInstance().getHeight());
+        stage.setWidth(ConfigData.getInstance().getWidth());
         Parent root = FXMLLoader.load(getClass().getResource("/FXMLDocument.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -87,7 +83,7 @@ public class Main extends Application {
                     if (applicationController != null) {
                         applicationController.notifyAction(time, port, action, actionOn, message);
                     } else {
-                        System.out.println("Action:" + action + " on:" + (actionOn==null?"null":actionOn.getClass()));
+                        System.out.println("Action:" + action + " on:" + (actionOn == null ? "null" : actionOn.getClass()));
                     }
                 }
             });
@@ -97,26 +93,26 @@ public class Main extends Application {
     }
 
     public static void setTitle(String title) {
-        mainStage.setTitle("Log Server:" + (configName == null ? "<Undefined>" : configName) + " - " + title);
+        mainStage.setTitle("Log Server:" + (ConfigData.isLoadedFromFile() ? ConfigData.readFileName() : "<Undefined>") + " - " + title);
     }
 
     public static void notifyConfigChangeOption(Option option, int port, boolean selected, String message) {
         if (!headless) {
             switch (option) {
                 case FILTER_HEADERS:
-                    config.setIncludeHeaders(selected);
+                    ConfigData.getInstance().setIncludeHeaders(selected);
                     break;
                 case FILTER_BODY:
-                    config.setIncludeBody(selected);
+                    ConfigData.getInstance().setIncludeBody(selected);
                     break;
                 case FILTER_EMPTY:
-                    config.setIncludeEmpty(selected);
+                    ConfigData.getInstance().setIncludeEmpty(selected);
                     break;
                 case TIME:
-                    config.setShowTime(selected);
+                    ConfigData.getInstance().setShowTime(selected);
                     break;
                 case PORT:
-                    config.setShowPort(selected);
+                    ConfigData.getInstance().setShowPort(selected);
                     break;
             }
             notifyAction(System.currentTimeMillis(), port, Action.LOG_REFRESH, null, "");
@@ -136,7 +132,7 @@ public class Main extends Application {
     }
 
     public static Server getDefaultServer() {
-        return ServerManager.getServer(config.getDefaultPort());
+        return ServerManager.getServer(ConfigData.getInstance().getDefaultPort());
     }
 
     public static PackagedRequestWrapperList getPackagedRequestWrapperList() {
@@ -205,16 +201,16 @@ public class Main extends Application {
 
         log(System.currentTimeMillis(), -1, "Shutting down");
         if (!headless) {
-            if (ConfigData.writeFileName() != null) {
-                config.setX(mainStage.getX());
-                config.setY(mainStage.getY());
-                config.setWidth(mainStage.getWidth());
-                config.setHeight(mainStage.getHeight());
-                applicationController.updateConfig(config);
+            if (ConfigData.canWriteToFile()) {
+                ConfigData.getInstance().setX(mainStage.getX());
+                ConfigData.getInstance().setY(mainStage.getY());
+                ConfigData.getInstance().setWidth(mainStage.getWidth());
+                ConfigData.getInstance().setHeight(mainStage.getHeight());
+                applicationController.updateConfig(ConfigData.getInstance());
                 try {
                     Files.write(
                             FileSystems.getDefault().getPath(ConfigData.writeFileName()),
-                            JsonUtils.toJsonFormatted(config).getBytes(CHARSET),
+                            JsonUtils.toJsonFormatted(ConfigData.getInstance()).getBytes(CHARSET),
                             StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException io) {
@@ -259,22 +255,11 @@ public class Main extends Application {
         System.out.println(getTimeStamp(time) + (port <= 0 ? "" : "[" + port + "] ") + message);
     }
 
-    public static ConfigData getConfig() {
-        return config;
-    }
-
-    public static String getConfigName() {
-        return configName;
-    }
-
     public static String getTimeStamp(long time) {
-        if (config == null) {
-            return (new DateTime(time)).toString("HH:mm:ss.SSS: ");
+        if ((ConfigData.getInstance().getLogDateFormat() != null) && (ConfigData.getInstance().getLogDateFormat().trim().length() > 0)) {
+            return (new DateTime(time)).toString(ConfigData.getInstance().getLogDateFormat());
         }
-        if ((config.getLogDateFormat() != null) && (config.getLogDateFormat().trim().length() > 0)) {
-            return (new DateTime(time)).toString(config.getLogDateFormat());
-        }
-        return "";
+        return (new DateTime(time)).toString("HH:mm:ss.SSS: ");
     }
 
     /**
@@ -282,13 +267,6 @@ public class Main extends Application {
      */
     public static void main(String[] args) {
         headless = false;
-        config = new ConfigData();
-        config.setWidth(600);
-        config.setHeight(600);
-        config.setX(0);
-        config.setY(0);
-        config.setDefaultPort(0);
-        configName = null;
         try {
             for (String arg : args) {
                 if (arg.startsWith("-h")) {
@@ -297,8 +275,7 @@ public class Main extends Application {
             }
             for (String arg : args) {
                 if (arg.toLowerCase().endsWith(".json")) {
-                    config = ConfigData.loadConfig(arg);
-                    configName = ConfigData.readFileName();
+                    ConfigData.load(arg);
                 }
             }
         } catch (Exception e) {
@@ -308,15 +285,15 @@ public class Main extends Application {
             }
             System.exit(1);
         }
-        if (config.getLogDateFormat() == null) {
-            config.setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
+        if (ConfigData.getInstance().getLogDateFormat() == null) {
+            ConfigData.getInstance().setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
-        if ((config.getServers() == null) || (config.getServers().isEmpty())) {
-            config.getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
-            config.setDefaultPort(PORT_NUMBER);
+        if ((ConfigData.getInstance().getServers() == null) || (ConfigData.getInstance().getServers().isEmpty())) {
+            ConfigData.getInstance().getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
+            ConfigData.getInstance().setDefaultPort(PORT_NUMBER);
         }
-        for (String portStr : config.getServers().keySet()) {
-            ServerConfig serverConfig = config.getServers().get(portStr);
+        for (String portStr : ConfigData.getInstance().getServers().keySet()) {
+            ServerConfig serverConfig = ConfigData.getInstance().getServers().get(portStr);
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
 
@@ -332,8 +309,8 @@ public class Main extends Application {
             } while (ServerManager.countServersRunning() > 0);
             System.exit(0);
         } else {
-            if ((getConfig().getPackagedRequestsFile() != null) && (Main.getConfig().getPackagedRequestsFile().trim().length() > 0)) {
-                PackagedRequestWrapperManager.load(Main.getConfig().getPackagedRequestsFile());
+            if ((ConfigData.getInstance().getPackagedRequestsFile() != null) && (ConfigData.getInstance().getPackagedRequestsFile().trim().length() > 0)) {
+                PackagedRequestWrapperManager.load(ConfigData.getInstance().getPackagedRequestsFile());
                 packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(config.getSelectedPackagedRequestName());
                 packagedRequestWrapperList.check();
             } else {
