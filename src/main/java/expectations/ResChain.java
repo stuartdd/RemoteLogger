@@ -16,14 +16,9 @@
  */
 package expectations;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author stuar
- */
 public class ResChain {
     ResponseContent responseContent = new ResponseContent();
 

@@ -16,10 +16,6 @@
  */
 package expectations;
 
-/**
- *
- * @author stuart
- */
 public class StringMatcher {
 
     private static final int START = 0;

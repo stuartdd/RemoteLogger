@@ -17,6 +17,7 @@
 package expectations;
 
 import common.ExpectationException;
+import common.Util;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;
@@ -92,10 +93,11 @@ public class Expectations {
     public static Expectations fromString(String json) {
         Expectations ex = (Expectations) JsonUtils.beanFromJson(Expectations.class, json);
         ExpectationManager.testExpectations(ex);
-        if (ex.getExpectations().isEmpty()) {
-            throw new ExpectationException("Expectations are empty.", 500);
-        }
         return ex;
+    }
+    
+    public static Expectations fromFile(String fileName) {
+        return fromString(Util.readFile(fileName).getContent());
     }
 
     public Expectation get(int index) {

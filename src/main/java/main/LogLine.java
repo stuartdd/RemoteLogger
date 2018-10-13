@@ -71,8 +71,8 @@ public class LogLine {
         if (text.startsWith(NL)) {
             sb.append(text.trim()).append(NL);
         } else {
-            if (Main.getConfig().isShowTime()) {
-                sb.append(Main.getConfig().timeStamp(time)).append(":");
+            if (ConfigData.getInstance().isShowTime()) {
+                sb.append(ConfigData.getInstance().timeStamp(time)).append(":");
             }
             if ((port > 0) && (config.isShowPort())) {
                 sb.append("[").append(port).append("] ");

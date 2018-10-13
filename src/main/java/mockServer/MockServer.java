@@ -35,7 +35,7 @@ public class MockServer {
     private Server server;
 
     public MockServer(int port, ResponseHandler responseHandler, String expectationFile, boolean verbose) {
-        server = new Server(port, new ServerConfig(expectationFile, 0, verbose, true), responseHandler, new MockServerNotifier());
+        server = new Server(port, new ServerConfig(Expectations.fromFile(expectationFile), 0, verbose, true), responseHandler, new MockServerNotifier());
     }
 
     public MockServer(int port, ResponseHandler responseHandler, Expectations expectations, boolean verbose) {
@@ -117,7 +117,7 @@ public class MockServer {
     }
     
     public static MockServerBuilder fromfile(String jsonFile) {
-        Expectations exp = (Expectations) JsonUtils.beanFromJson(Expectations.class, Util.read(jsonFile));
+        Expectations exp = Expectations.fromFile(jsonFile);
         return new MockServerBuilder(exp);
     }
 

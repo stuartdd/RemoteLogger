@@ -72,21 +72,21 @@ public class TestExp {
 
     @Test
     public void testPostJson() {
-        ClientResponse r = CLIENT.send("test/post/json", Util.readResource("config/testPostData.json"), Client.Method.POST);
+        ClientResponse r = CLIENT.send("test/post/json", Util.readResource("config/testPostData.json").getContent(), Client.Method.POST);
         assertEquals(POST_RESPONSE_JSON, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
 
     @Test
     public void testPostSubBody() {
-        ClientResponse r = CLIENT.send("test/post/sub/body", Util.readResource("config/testPostData.json"), Client.Method.POST);
+        ClientResponse r = CLIENT.send("test/post/sub/body", Util.readResource("config/testPostData.json").getContent(), Client.Method.POST);
         assertEquals(POST_RESPONSE_JSON, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }
 
     @Test
     public void testPostXml() {
-        ClientResponse r = CLIENT.send("test/post/xml", Util.readResource("config/testPostData.xml"), Client.Method.POST);
+        ClientResponse r = CLIENT.send("test/post/xml", Util.readResource("config/testPostData.xml").getContent(), Client.Method.POST);
         assertEquals(POST_RESPONSE_XML, Util.cleanString(r.getBody()));
         assertEquals(200, r.getStatus());
     }

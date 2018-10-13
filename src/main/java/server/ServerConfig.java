@@ -26,18 +26,11 @@ public class ServerConfig {
     private boolean showPort = false;
     private int timeToClose = 1;
     private boolean verbose = true;
-    private boolean logProperties;
+    private boolean logProperties = false;
 
     @JsonIgnore
     private Expectations expectations;
 
-    public ServerConfig(String expectationsFile, int timeToClose, boolean verbose, boolean logProperties) {
-        this.expectationsFile = expectationsFile;
-        this.expectations = null;
-        this.timeToClose = timeToClose;
-        this.verbose = verbose;
-        this.logProperties = logProperties;
-    }
 
     public ServerConfig(Expectations expectations, int timeToClose, boolean verbose, boolean logProperties) {
         this.expectationsFile = null;

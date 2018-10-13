@@ -20,10 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author 802996013
- */
 public class Expectation {
 
     private String name;

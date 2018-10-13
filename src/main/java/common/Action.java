@@ -16,10 +16,6 @@
  */
 package common;
 
-/**
- *
- * @author stuart
- */
 public enum Action {
     LOG,
     LOG_BODY,

@@ -16,6 +16,34 @@
  */
 package common;
 
-public enum BodyType {
-    XML, JSON, HTML, TXT, EMPTY
+public class FileData {
+    private final String fileName;
+    private final boolean readFromFile;
+    private final String content;
+
+    public FileData(String fileName, boolean readFromFile, String content) {
+        this.fileName = fileName;
+        this.readFromFile = readFromFile;
+        this.content = content;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public boolean isReadFromFile() {
+        return readFromFile;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    @Override
+    public String toString() {
+        return getContent();
+    }
+    
+    
+    
 }

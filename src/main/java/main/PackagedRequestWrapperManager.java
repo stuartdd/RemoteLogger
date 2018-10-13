@@ -19,6 +19,7 @@ package main;
 import client.Client;
 import client.ClientConfig;
 import client.ClientResponse;
+import common.FileData;
 import common.Notifier;
 import common.Util;
 import config.Config;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -234,24 +234,10 @@ public class PackagedRequestWrapperManager {
     }
 
     public static PackagedRequests loadImpl(String fileName) {
-        PackagedRequests localPackagedRequests;
-        loadedFromFile = false;
+        FileData fd = Util.readFile(fileName);
+        loadedFromFile = fd.isReadFromFile();
         updated = false;
-        File fil = new File(fileName);
-        if (fil.exists()) {
-            localPackagedRequests = (PackagedRequests) Config.configFromJsonFile(PackagedRequests.class, fil);
-            loadedFromFile = true;
-        } else {
-            InputStream is = ConfigData.class.getResourceAsStream(fileName);
-            if (is == null) {
-                is = ConfigData.class.getResourceAsStream("/" + fileName);
-                if (is == null) {
-                    throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
-                }
-            }
-            localPackagedRequests = (PackagedRequests) Config.configFromJsonStream(PackagedRequests.class, is);
-        }
-        return localPackagedRequests;
+        return (PackagedRequests) JsonUtils.beanFromJson(PackagedRequests.class, fd.getContent());
     }
 
     public static PackagedRequestWrapperList delete(String currentPackagedRequestName) {

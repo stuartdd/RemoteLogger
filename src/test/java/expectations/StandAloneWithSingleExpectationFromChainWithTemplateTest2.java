@@ -49,12 +49,12 @@ public class StandAloneWithSingleExpectationFromChainWithTemplateTest2 implement
                     Exp.withName("Post Test").
                             withPostMethod().
                             withXmlBody().
-                            withProperty("A", "B").
+                            withProperty("XML.BorderPane.top.ToolBar.(BorderPane.alignment)", "CENTER").
                             withResponse(
                                     Res.withStatus(202).
                                             withHeader("MyHeader", "HEAD").
                                             withHeader("MyHeader2", "HEAD2").
-                                            withTemplate("config/Test001.json"))
+                                            withTemplate("config/test001.json"))
             ).start(PORT, this, true);
         }
         assertTrue(mockServer.isRunning());
@@ -68,17 +68,39 @@ public class StandAloneWithSingleExpectationFromChainWithTemplateTest2 implement
     @Test
     public void testInOrder() {
         testMatch();
-//        testMissMatchMethod();
-//        testMissMatchPath();
+        testMissMatchMethod();
+        testMissMatchPath();
+        testMissMatchProperty();
     }
 
     public void testMatch() {
-        ClientResponse r = CLIENT.send("pre", Util.readResource("config/testPostData.xml"), Client.Method.POST);
+        ClientResponse r = CLIENT.send("pre", Util.readResource("config/testPostData.xml").getContent(), Client.Method.POST);
         assertEquals(202, r.getStatus());
         assertEquals("HEAD", r.getHeader("Myheader"));
         assertEquals("HEAD2", r.getHeader("Myheader2"));
         assertEquals(202, r.getStatus());
         assertTrue(r.getBody().contains("logDateFormat"));
+    }
+
+    public void testMissMatchMethod() {
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.PUT);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=2, response=2, missmatch=1, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchPath() {
+        ClientResponse r = CLIENT.send("pres", null, Client.Method.GET);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=3, response=3, missmatch=2, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchProperty() {
+        ClientResponse r = CLIENT.send("pre", Util.readResource("config/post-Requests.xml").getContent(), Client.Method.POST);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=4, response=4, missmatch=3, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
     }
 
     @Override

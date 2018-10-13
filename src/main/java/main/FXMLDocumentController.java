@@ -409,7 +409,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                     "Please Add:\n\n"
                     + "\"packagedRequestsFile\" : \"packagedRequests.json\"\n\n"
                     + "to the main configuration data file:\n"
-                    + Main.getConfigName() + "\nto enable Packaged Requests:\n\n"
+                    + ConfigData.readFileName() + "\nto enable Packaged Requests:\n\n"
                     + "Then restart the application.");
             buttonSendPackagedRequest.setDisable(true);
             buttonReloadPackagedRequest.setDisable(true);
@@ -496,11 +496,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         System.out.println("initialize:");
         expectationSelectionChangedListener = new ExpectationSelectionChangedListener();
         packagedRequestSelectionChangedListener = new PackagedRequestSelectionChangedListener();
-        checkBoxHeaders.setSelected(Main.getConfig().isIncludeHeaders());
-        checkBoxBody.setSelected(Main.getConfig().isIncludeBody());
-        checkBoxEmpty.setSelected(Main.getConfig().isIncludeEmpty());
-        checkBoxTime.setSelected(Main.getConfig().isShowTime());
-        checkBoxPort.setSelected(Main.getConfig().isShowPort());
+        checkBoxHeaders.setSelected(ConfigData.getInstance().isIncludeHeaders());
+        checkBoxBody.setSelected(ConfigData.getInstance().isIncludeBody());
+        checkBoxEmpty.setSelected(ConfigData.getInstance().isIncludeEmpty());
+        checkBoxTime.setSelected(ConfigData.getInstance().isShowTime());
+        checkBoxPort.setSelected(ConfigData.getInstance().isShowPort());
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         Main.setApplicationController(this);
@@ -538,22 +538,22 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         /*
         Do some stuff later in a separate thread!
          */
-        if (Main.getConfig().getExpDividerPos() != null) {
+        if (ConfigData.getInstance().getExpDividerPos() != null) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    for (int i = 0; i < Main.getConfig().getExpDividerPos().length; i++) {
-                        expectationsSplitPane.getDividers().get(i).setPosition(Main.getConfig().getExpDividerPos()[i]);
+                    for (int i = 0; i < ConfigData.getInstance().getExpDividerPos().length; i++) {
+                        expectationsSplitPane.getDividers().get(i).setPosition(ConfigData.getInstance().getExpDividerPos()[i]);
                     }
                 }
             });
         }
-        if (Main.getConfig().getPackDividerPos() != null) {
+        if (ConfigData.getInstance().getPackDividerPos() != null) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    for (int i = 0; i < Main.getConfig().getPackDividerPos().length; i++) {
-                        packagedRequestSplitPane.getDividers().get(i).setPosition(Main.getConfig().getPackDividerPos()[i]);
+                    for (int i = 0; i < ConfigData.getInstance().getPackDividerPos().length; i++) {
+                        packagedRequestSplitPane.getDividers().get(i).setPosition(ConfigData.getInstance().getPackDividerPos()[i]);
                     }
                 }
             });
@@ -628,7 +628,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.rename(packagedRequestWrapperList.getSelectedPackagedRequest().getName(), (String) actionOn));
                 break;
             case ADD_PACKAGED_REQUEST:
-                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn,packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
+                packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.add((String) actionOn, packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
                 break;
             case SAVE_PACKAGED_REQUEST:
                 packagedRequestWrapperList = refreshPackagedRequests(PackagedRequestWrapperManager.save(packagedRequestWrapperList.getSelectedPackagedRequest().getName()));
@@ -853,18 +853,18 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
             if (ServerManager.isShowPort(line.getPort())) {
                 switch (line.getCatagory()) {
                     case EMPTY:
-                        if (Main.getConfig().isIncludeEmpty()) {
+                        if (ConfigData.getInstance().isIncludeEmpty()) {
                             sb.append(NL);
                         }
                         break;
                     case BODY:
-                        if (Main.getConfig().isIncludeBody()) {
-                            line.render(sb, Main.getConfig());
+                        if (ConfigData.getInstance().isIncludeBody()) {
+                            line.render(sb, ConfigData.getInstance());
                         }
                         break;
                     case HEADER:
-                        if (Main.getConfig().isIncludeHeaders()) {
-                            line.render(sb, Main.getConfig());
+                        if (ConfigData.getInstance().isIncludeHeaders()) {
+                            line.render(sb, ConfigData.getInstance());
                         }
                         break;
                 }
@@ -879,7 +879,7 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         LogLine line = firstLog;
         while (line != null) {
             if ((ServerManager.isShowPort(line.getPort()) || (line.getPort() < 0))) {
-                line.render(sb, Main.getConfig());
+                line.render(sb, ConfigData.getInstance());
             }
             line = line.getNext();
         }

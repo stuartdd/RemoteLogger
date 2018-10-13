@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class Main extends Application {
@@ -288,15 +289,17 @@ public class Main extends Application {
         if (ConfigData.getInstance().getLogDateFormat() == null) {
             ConfigData.getInstance().setLogDateFormat("yyyy-MM-dd':'HH-mm-ss-SSS': '");
         }
-        if ((ConfigData.getInstance().getServers() == null) || (ConfigData.getInstance().getServers().isEmpty())) {
-            ConfigData.getInstance().getServers().put("" + PORT_NUMBER, new ServerConfig("", 1, true, true));
+        if (ConfigData.getInstance().getServers() == null) {
+            ConfigData.getInstance().setServers(new HashMap<>());
+        }
+        if (ConfigData.getInstance().getServers().isEmpty()) {
+            ConfigData.getInstance().getServers().put("" + PORT_NUMBER, new ServerConfig(null, 1, true, true));
             ConfigData.getInstance().setDefaultPort(PORT_NUMBER);
         }
         for (String portStr : ConfigData.getInstance().getServers().keySet()) {
             ServerConfig serverConfig = ConfigData.getInstance().getServers().get(portStr);
             ServerManager.addServer(portStr, serverConfig, new MainNotifier(serverConfig.isVerbose()));
         }
-
         if (headless) {
             ServerManager.autoStartServers();
             int count = 0;
@@ -311,22 +314,22 @@ public class Main extends Application {
         } else {
             if ((ConfigData.getInstance().getPackagedRequestsFile() != null) && (ConfigData.getInstance().getPackagedRequestsFile().trim().length() > 0)) {
                 PackagedRequestWrapperManager.load(ConfigData.getInstance().getPackagedRequestsFile());
-                packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(config.getSelectedPackagedRequestName());
+                packagedRequestWrapperList = PackagedRequestWrapperManager.getPackagedRequestWrapperList(ConfigData.getInstance().getSelectedPackagedRequestName());
                 packagedRequestWrapperList.check();
             } else {
                 packagedRequestWrapperList = null;
             }
             PackagedRequestWrapperManager.setRequestNotifier(new MainNotifier(PackagedRequestWrapperManager.isVerbose()));
 
-            if (config.getDefaultPort() == 0) {
-                if (config.getServers().size() != 1) {
+            if (ConfigData.getInstance().getDefaultPort() == 0) {
+                if (ConfigData.getInstance().getServers().size() != 1) {
                     System.err.println("Default port is not defined");
                     System.exit(1);
                 }
-                config.setDefaultPort(ServerManager.ports()[0]);
+                ConfigData.getInstance().setDefaultPort(ServerManager.ports()[0]);
             }
-            if (!ServerManager.hasPort(config.getDefaultPort())) {
-                System.err.println("Default port [" + config.getDefaultPort() + "] is not listed in the servers " + ServerManager.ports());
+            if (!ServerManager.hasPort(ConfigData.getInstance().getDefaultPort())) {
+                System.err.println("Default port [" + ConfigData.getInstance().getDefaultPort() + "] is not listed in the servers " + ServerManager.ports());
                 System.exit(1);
             }
             launch(args);

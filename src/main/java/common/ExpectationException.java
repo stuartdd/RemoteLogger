@@ -16,10 +16,6 @@
  */
 package common;
 
-/**
- *
- * @author stuar
- */
 public class ExpectationException extends RuntimeException {
 
     private Integer status = 200;

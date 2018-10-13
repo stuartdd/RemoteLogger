@@ -10,6 +10,18 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+/*
+ * Copyright (C) 2018 stuartdd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -32,10 +44,6 @@ import java.util.Map;
 import json.JsonUtils;
 import xml.MappedXml;
 
-/**
- *
- * @author stuar
- */
 public class Util {
 
     public static final String NL = System.getProperty("line.separator");
@@ -92,12 +100,12 @@ public class Util {
         return sb.toString();
     }
 
-    public static String read(final String name) {
+    public static FileData readFile(final String name) {
         File f = new File(name);
         f = new File(f.getAbsolutePath());
         if (f.exists()) {
             try {
-                return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+                return new FileData(name, true, new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
             } catch (IOException ex) {
                 throw new FileException("File [" + f.getAbsolutePath() + "] could not be read", ex);
             }
@@ -106,15 +114,15 @@ public class Util {
         }
     }
 
-    public static String readResource(final String resourceName) {
+    public static FileData readResource(final String resourceName) {
         InputStream is = Util.class.getResourceAsStream(resourceName);
         if (is == null) {
             is = Util.class.getResourceAsStream("/" + resourceName);
             if (is == null) {
-                throw new ServerException("Resource data [" + resourceName + "] could not be found.", 500);
+                throw new ServerException("Resource (or file) [" + resourceName + "] could not be found.", 500);
             }
         }
-        return readStream(is);
+        return new FileData(resourceName, false, readStream(is));
     }
 
     public static String readStream(final InputStream iStream) {
@@ -204,7 +212,7 @@ public class Util {
         for (String path : paths) {
             if (path.length() > 0) {
                 sb.append('"').append(path).append('"').append(',');
-            } 
+            }
             Path p = Paths.get(path, fileName);
             if (Files.exists(p)) {
                 try {

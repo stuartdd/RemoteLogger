@@ -16,10 +16,6 @@
  */
 package expectations;
 
-/**
- *
- * @author stuar
- */
 public class Res {
        public static ResChain withBody(String body) {
         return new ResChain().withBody(body);

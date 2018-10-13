@@ -20,10 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import common.Util;
 
-/**
- *
- * @author 802996013
- */
 public class ResponseContent {
     private String body;
     private int status;

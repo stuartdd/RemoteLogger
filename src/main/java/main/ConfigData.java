@@ -17,9 +17,9 @@
 package main;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import common.FileData;
+import common.Util;
 import config.Config;
-import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.joda.time.DateTime;
@@ -27,10 +27,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import server.ServerConfig;
 
-/**
- *
- * @author stuar
- */
 public class ConfigData extends Config {
 
     private Map<String, ServerConfig> servers = new HashMap<>();
@@ -80,23 +76,12 @@ public class ConfigData extends Config {
     }
 
     public static void load(String fileName) {
-        File fil = new File(fileName);
-        if (fil.exists()) {
-            writeFileName = fil.getAbsolutePath();
-            readFileName = writeFileName;
-            instance = (ConfigData) Config.configFromJsonFile(ConfigData.class, fil);
-        } else {
-            InputStream is = ConfigData.class.getResourceAsStream(fileName);
-            if (is == null) {
-                is = ConfigData.class.getResourceAsStream("/" + fileName);
-                if (is == null) {
-                    throw new ConfigDataException("Configuration data [" + fileName + "] could not be found (file or classpath)");
-                }
-            }
-            writeFileName = null;
-            readFileName = fileName;
-            instance = (ConfigData) Config.configFromJsonStream(ConfigData.class, is);
+        FileData fd = Util.readFile(fileName);
+        if (fd.isReadFromFile()) {
+            writeFileName = fd.getFileName();
         }
+        readFileName = fd.getFileName();
+        instance = (ConfigData) Config.configFromJson(ConfigData.class, fd.getContent());
     }
 
     public Map<String, ServerConfig> getServers() {
