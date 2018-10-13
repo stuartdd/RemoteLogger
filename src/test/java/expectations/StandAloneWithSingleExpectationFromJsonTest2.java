@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest2 {
+public class StandAloneWithSingleExpectationFromJsonTest2 {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
@@ -59,12 +59,34 @@ public class StandAloneWithSingleExpectationFromStringTest2 {
     public static void afterClass() {
         mockServer.stop();
     }
-
     @Test
-    public void test() {
+    public void testInOrder() {
+        testMatch();
+        testMissMatchMethod();
+        testMissMatchPath();
+    }
+
+ 
+    public void testMatch() {
         assertTrue(mockServer.isRunning());
         ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
         assertEquals("Method GET.URL:'/pre'.HOST:localhost:1999.Accept:text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2.", r.getBody());
         assertEquals("keep-alive", r.getHeader("Connection"));
     }
+        @Test
+    public void testMissMatchMethod() {
+        assertTrue(mockServer.isRunning());
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.POST);
+        assertEquals("Not Found", r.getBody());
+        assertEquals(404, r.getStatus());
+
+    }
+    @Test
+    public void testMissMatchPath() {
+        assertTrue(mockServer.isRunning());
+        ClientResponse r = CLIENT.send("presss", null, Client.Method.GET);
+        assertEquals("Not Found", r.getBody());
+        assertEquals(404, r.getStatus());
+    }
+
 }

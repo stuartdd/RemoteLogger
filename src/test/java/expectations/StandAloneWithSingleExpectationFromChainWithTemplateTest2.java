@@ -20,6 +20,7 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
+import common.Util;
 import java.util.Map;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
@@ -34,18 +35,21 @@ import server.ResponseHandler;
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest5 implements ResponseHandler {
+public class StandAloneWithSingleExpectationFromChainWithTemplateTest2 implements ResponseHandler {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
+    private static int eventCount = 0;
 
     @Before
     public void before() {
         if (mockServer == null) {
             mockServer = MockServer.add(
-                    Exp.withGetMethod().withName("FRED").
-                            withPath("/pre").
+                    Exp.withName("Post Test").
+                            withPostMethod().
+                            withXmlBody().
+                            withProperty("A", "B").
                             withResponse(
                                     Res.withStatus(202).
                                             withHeader("MyHeader", "HEAD").
@@ -62,8 +66,15 @@ public class StandAloneWithSingleExpectationFromStringTest5 implements ResponseH
     }
 
     @Test
-    public void test() {
-        ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
+    public void testInOrder() {
+        testMatch();
+//        testMissMatchMethod();
+//        testMissMatchPath();
+    }
+
+    public void testMatch() {
+        ClientResponse r = CLIENT.send("pre", Util.readResource("config/testPostData.xml"), Client.Method.POST);
+        assertEquals(202, r.getStatus());
         assertEquals("HEAD", r.getHeader("Myheader"));
         assertEquals("HEAD2", r.getHeader("Myheader2"));
         assertEquals(202, r.getStatus());
@@ -72,6 +83,7 @@ public class StandAloneWithSingleExpectationFromStringTest5 implements ResponseH
 
     @Override
     public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+        eventCount++;
         return mockRequest.createResponse(map);
     }
 }

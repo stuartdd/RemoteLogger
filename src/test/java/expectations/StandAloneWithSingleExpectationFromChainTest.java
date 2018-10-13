@@ -34,11 +34,12 @@ import server.ResponseHandler;
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest4 implements ResponseHandler {
+public class StandAloneWithSingleExpectationFromChainTest implements ResponseHandler {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
+    private static int eventCount = 0;
 
     @Before
     public void before() {
@@ -61,15 +62,38 @@ public class StandAloneWithSingleExpectationFromStringTest4 implements ResponseH
     }
 
     @Test
-    public void test() {
+    public void testInOrder() {
+        testMatch();
+        testMissMatchMethod();
+        testMissMatchPath();
+    }
+
+    public void testMatch() {
         ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
         assertEquals("HEAD", r.getHeader("Myheader"));
         assertEquals(201, r.getStatus());
         assertEquals("Status 201", r.getBody());
+        assertEquals("ServerStatistics{request=1, response=1, missmatch=0, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchMethod() {
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.PUT);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=2, response=2, missmatch=1, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchPath() {
+        ClientResponse r = CLIENT.send("pres", null, Client.Method.GET);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=3, response=3, missmatch=2, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
     }
 
     @Override
     public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+        eventCount++;
         return mockRequest.createResponse(map);
     }
 }

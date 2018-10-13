@@ -20,7 +20,6 @@ import client.Client;
 import client.ClientConfig;
 import client.ClientNotifier;
 import client.ClientResponse;
-import common.Util;
 import java.util.Map;
 import mockServer.MockRequest;
 import mockServer.MockResponse;
@@ -35,20 +34,19 @@ import server.ResponseHandler;
  *
  * @author stuart
  */
-public class StandAloneWithSingleExpectationFromStringTest6 implements ResponseHandler {
+public class StandAloneWithSingleExpectationFromChainWithTemplateTest implements ResponseHandler {
 
     private static final int PORT = 1999;
     private static final Client CLIENT = new Client(new ClientConfig("http://localhost:" + PORT), new ClientNotifier(true));
     private static MockServer mockServer;
+    private static int eventCount = 0;
 
     @Before
     public void before() {
         if (mockServer == null) {
             mockServer = MockServer.add(
-                    Exp.withName("Post Test").
-                            withPostMethod().
-                            withXmlBody().
-                            withProperty("A", "B").
+                    Exp.withGetMethod().withName("FRED").
+                            withPath("/pre").
                             withResponse(
                                     Res.withStatus(202).
                                             withHeader("MyHeader", "HEAD").
@@ -65,16 +63,39 @@ public class StandAloneWithSingleExpectationFromStringTest6 implements ResponseH
     }
 
     @Test
-    public void test() {
-        ClientResponse r = CLIENT.send("pre", Util.readResource("config/testPostData.xml"), Client.Method.POST);
+    public void testInOrder() {
+        testMatch();
+        testMissMatchMethod();
+        testMissMatchPath();
+    }
+
+    public void testMatch() {
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.GET);
         assertEquals("HEAD", r.getHeader("Myheader"));
         assertEquals("HEAD2", r.getHeader("Myheader2"));
         assertEquals(202, r.getStatus());
         assertTrue(r.getBody().contains("logDateFormat"));
+        assertEquals("ServerStatistics{request=1, response=1, missmatch=0, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchMethod() {
+        ClientResponse r = CLIENT.send("pre", null, Client.Method.PUT);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=2, response=2, missmatch=1, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
+    }
+
+    public void testMissMatchPath() {
+        ClientResponse r = CLIENT.send("pres", null, Client.Method.GET);
+        assertEquals(404, r.getStatus());
+        assertEquals("ServerStatistics{request=3, response=3, missmatch=2, match=1}", mockServer.getServerStatistics().toString());
+        assertEquals(1, eventCount);
     }
 
     @Override
     public MockResponse handle(MockRequest mockRequest, Map<String, Object> map) {
+        eventCount++;
         return mockRequest.createResponse(map);
     }
 }
