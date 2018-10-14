@@ -248,7 +248,7 @@ public class Util {
             throw new FileException(type + " Resource [" + file + "] Not Found in path(s) [" + list + "] or on the class path");
         }
         if (notifier != null) {
-            notifier.log(System.currentTimeMillis(), -1, type + " Resource found:    " + file);
+            notifier.log(System.currentTimeMillis(), -1, type + " Resource found:" + file);
         }
         StringBuilder sb = new StringBuilder();
         int content;

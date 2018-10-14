@@ -52,10 +52,19 @@ public class ClientResponse {
         return headers.get(key);
     }
 
+    public String getHeaderIgnoreCase(String key) {
+        for (Map.Entry<String, String> es : headers.entrySet()) {
+            if (es.getKey().equalsIgnoreCase(key)) {
+                return es.getValue();
+            }
+        }
+        return null;
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }
-    
+
     @Override
     public String toString() {
         return "ClientResponse{" + "status=" + status + ", body=" + body + '}';
