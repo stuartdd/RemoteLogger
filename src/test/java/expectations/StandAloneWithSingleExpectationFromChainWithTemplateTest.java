@@ -51,7 +51,7 @@ public class StandAloneWithSingleExpectationFromChainWithTemplateTest implements
                                     Res.withStatus(202).
                                             withHeader("MyHeader", "HEAD").
                                             withHeader("MyHeader2", "HEAD2").
-                                            withTemplate("config/Test001.json"))
+                                            withTemplate("config/test001.json"))
             ).start(PORT, this, true);
         }
         assertTrue(mockServer.isRunning());
