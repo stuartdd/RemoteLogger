@@ -18,11 +18,11 @@
   }, {
     "name" : "2: Get Country Name",
     "method" : "GET",
-    "path" : "/services.groupkt.com/country/get/iso2code/IN",
+    "path" : "/services.groupkt.com/country/get/iso2code/*",
     "bodyType" : null,
     "asserts" : { },
     "response" : {
-      "body" : "{\"message\":\"Hi from India, Love from dad in the conservatory\"}",
+      "body" : "{\"message\":\"Hi from India (%{PATH[4]})\"}",
       "status" : 200,
       "bodyTemplate" : null,
       "headers" : { }

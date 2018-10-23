@@ -37,6 +37,9 @@ class PackagedRequest {
     }
 
     private Map<String, String> clone(Map<String, String> headers) {
+        if (headers == null) {
+            return null;
+        }
         HashMap<String, String> clone = new HashMap<>();
         for (Map.Entry<String, String> h : headers.entrySet()) {
             clone.put(h.getKey(), h.getValue());

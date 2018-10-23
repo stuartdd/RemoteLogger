@@ -10,7 +10,7 @@
     },
     "5003" : {
       "expectationsFile" : "exp.json",
-      "autoStart" : true,
+      "autoStart" : false,
       "showPort" : true,
       "timeToClose" : 1,
       "verbose" : true,
@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequestName" : "Test Forwarding. Please keep",
+  "selectedPackagedRequestName" : "Test Get Country Name",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
@@ -28,9 +28,9 @@
   "showTime" : true,
   "showPort" : true,
   "x" : 887.0,
-  "y" : 295.0,
+  "y" : 56.0,
   "width" : 1302.0,
-  "height" : 588.0,
+  "height" : 1102.0,
   "expDividerPos" : [ 0.22846153846153847, 0.6169230769230769 ],
   "packDividerPos" : [ 0.22923076923076924, 0.5776923076923077 ]
 }

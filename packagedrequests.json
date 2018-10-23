@@ -44,7 +44,7 @@
       "Content-Type" : "application/json",
       "Accept" : "*/*"
     }
-  } , {
+  }, {
     "name" : "NowTv Validate Invalid Email",
     "host" : "http://localhost",
     "port" : 8080,
@@ -56,6 +56,15 @@
       "Accept" : "*/*",
       "Content-Type" : "application/json"
     }
+  }, {
+    "name" : "Test Get Country Name",
+    "host" : "http://localhost",
+    "port" : 5002,
+    "path" : "/services.groupkt.com/country/get/iso2code/IN",
+    "method" : "GET",
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : null
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "verbose" : true
