@@ -19,8 +19,9 @@ package expectations;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Map;
+import model.Model;
 
-public class Expectation {
+public class Expectation implements Model {
 
     private String name;
     private String method;
