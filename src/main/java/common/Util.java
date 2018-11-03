@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,24 +209,28 @@ public class Util {
         if (fileName == null) {
             throw new FileException(type + "File for " + type + " is not defined");
         }
+        paths = Arrays.copyOf(paths, paths.length + 2);
+        paths[paths.length - 2] = System.getProperty("user.dir", "");
+        paths[paths.length - 1] = System.getProperty("user.home", "");
+
         StringBuilder sb = new StringBuilder();
         for (String path : paths) {
             if (path.length() > 0) {
                 sb.append('"').append(path).append('"').append(',');
-            }
-            Path p = Paths.get(path, fileName);
-            if (Files.exists(p)) {
-                try {
-                    if (notifier != null) {
-                        notifier.log(System.currentTimeMillis(), -1, type + " File found: " + p.toString());
+                Path p = Paths.get(path, fileName);
+                if (Files.exists(p)) {
+                    try {
+                        if (notifier != null) {
+                            notifier.log(System.currentTimeMillis(), -1, type + " File found: " + p.toString());
+                        }
+                        return new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
+                    } catch (IOException ex) {
+                        throw new FileException(type + " File [" + fileName + "] Not readable", ex);
                     }
-                    return new String(Files.readAllBytes(p), StandardCharsets.UTF_8);
-                } catch (IOException ex) {
-                    throw new FileException(type + " File [" + fileName + "] Not readable", ex);
-                }
-            } else {
-                if (notifier != null) {
-                    notifier.log(System.currentTimeMillis(), -1, type + " File NOT found: " + p.toString());
+                } else {
+                    if (notifier != null) {
+                        notifier.log(System.currentTimeMillis(), -1, type + " File NOT found: " + p.toString());
+                    }
                 }
             }
         }

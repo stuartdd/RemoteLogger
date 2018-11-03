@@ -16,24 +16,25 @@
  */
 package model;
 
+import common.Util;
 import expectations.*;
 import json.JsonUtils;
-
 import main.PackagedRequest;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 
 public class ModelTester {
 
-    private static final String BB = "{\n"
+    private static final String BB = clean("{\n"
             + "  \"name\" : \"B\",\n"
             + "  \"id\" : \"B\"\n"
-            + "}";
-    private static final String BX = "{\n"
+            + "}");
+    private static final String BX = clean("{\n"
             + "  \"name\" : \"B\",\n"
             + "  \"id\" : \"X\"\n"
-            + "}";
+            + "}");
 
     MultiModelManager mmmExp = MultiModelManager.instance(Expectation.class);
     MultiModelManager mmmPac = MultiModelManager.instance(PackagedRequest.class);
@@ -41,7 +42,6 @@ public class ModelTester {
 
     @Before
     public void before() {
-        System.out.println(JsonUtils.toJson(model("B", "B")));
         JsonUtils.beanFromJson(ModelType.class, BB);
     }
 
@@ -64,12 +64,19 @@ public class ModelTester {
         mmmExp.add(model("10", "A"));
     }
 
-    @Test(expected = DuplicateDataException.class)
+    @Test()
     public void testManagerAddDuplicate() {
+        mmmMT.removeAll();
         assertFalse(mmmMT.isUpdated());
         mmmMT.add(model("10", "A"));
         assertTrue(mmmMT.isUpdated());
-        mmmMT.add(model("10", "B"));
+        try {
+            mmmMT.add(model("10", "B"));
+            fail("Should throw Exception");
+        } catch (DuplicateDataException dde) {
+            return;
+        }
+        fail("Should throw Exception");
     }
 
     @Test
@@ -150,10 +157,9 @@ public class ModelTester {
         mmmMT.add(model("A", "A"));
         mmmMT.add(model("B", "B"));
         mmmMT.add(model("C", "C"));
-        System.out.println(mmmMT.getJson("B"));
-        assertEquals(BB, mmmMT.getJson("B"));
+        assertEquals(BB, clean(mmmMT.getJson("B")));
         mmmMT.replace(BX);
-        assertEquals(BX, mmmMT.getJson("B"));
+        assertEquals(BX, clean(mmmMT.getJson("B")));
     }
 
     private String list(Object[] a) {
@@ -169,6 +175,10 @@ public class ModelTester {
         mt.setName(name);
         mt.setId(id);
         return mt;
+    }
+
+    private static String clean(String s) {
+        return Util.cleanString(s);
     }
 
 }

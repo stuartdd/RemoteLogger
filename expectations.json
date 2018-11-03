@@ -64,6 +64,21 @@
         "Fred" : "FRED"
       }
     }
+  }, {
+    "name" : "Set SSID and PW",
+    "method" : "GET",
+    "path" : "/config",
+    "bodyType" : "EMPTY",
+    "asserts" : { },
+    "response" : {
+      "body" : "{\"message\":\"Message\"}",
+      "status" : 200,
+      "bodyTemplate" : "/git/ESP32_HeatingController/HeatingController/setHeaders.html",
+      "headers" : {
+        "Accept" : "%{HEAD.Accept}"
+      }
+    },
+    "forward" : null
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "logProperies" : false

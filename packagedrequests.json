@@ -65,6 +65,17 @@
     "body" : null,
     "bodyTemplate" : null,
     "headers" : null
+  }, {
+    "name" : "Set SSID andPW",
+    "host" : "http://localhost",
+    "port" : 5002,
+    "path" : "/config",
+    "method" : "GET",
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : {
+      "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "verbose" : true

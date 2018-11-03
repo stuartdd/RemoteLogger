@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequestName" : "Test Get Country Name",
+  "selectedPackagedRequestName" : "Set SSID andPW",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
@@ -27,10 +27,10 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 887.0,
-  "y" : 56.0,
-  "width" : 1302.0,
-  "height" : 1102.0,
-  "expDividerPos" : [ 0.22846153846153847, 0.6169230769230769 ],
-  "packDividerPos" : [ 0.22923076923076924, 0.5776923076923077 ]
+  "x" : 821.0,
+  "y" : 16.0,
+  "width" : 1086.0,
+  "height" : 981.0,
+  "expDividerPos" : [ 0.2050561797752809, 0.6048689138576779 ],
+  "packDividerPos" : [ 0.20599250936329588, 0.5580524344569289 ]
 }
