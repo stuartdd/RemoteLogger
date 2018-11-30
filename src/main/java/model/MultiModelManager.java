@@ -16,19 +16,26 @@
  */
 package model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import json.JsonUtils;
 
 public class MultiModelManager {
 
+    /*
+    Many instances of the managers
+     */
     private static Map<Class, MultiModelManager> instances = new ConcurrentHashMap<>();
 
+    private ModelProvider models;
     private final Class type;
     private boolean updated = false;
-
-    private Map<String, Model> models = new HashMap<>();
+    private Model selectedModel;
+    private List<SelectedModelChangeListener> changeListeners = new ArrayList<>();
 
     private MultiModelManager(Class type) {
         this.type = type;
@@ -38,48 +45,43 @@ public class MultiModelManager {
         return updated;
     }
 
-    public MultiModelManager replace(String json) {
-        return replace((Model) JsonUtils.beanFromJson(type, json));
+    public boolean isEmpty() {
+        return models.size() == 0;
     }
 
-    public MultiModelManager replace(Model model) {
-        Object o = models.replace(model.getName(), model);
-        if (o != null) {
-            updated = true;
+    public Model[] list() {
+        if (isEmpty()) {
+            return new Model[0];
         }
-        return this;
+        Model[] mod = new Model[models.size()];
+        for (int i = 0; i < mod.length; i++) {
+            mod[i] = models.getModel(i);
+        }
+        return mod;
     }
 
-    public MultiModelManager remove(Model model) {
+    public boolean replace(String json) {
+        return models.replaceModel(json);
+    }
+
+    public boolean remove(Model model) {
         return remove(model.getName());
     }
 
-    public MultiModelManager remove(String name) {
-        Object o = models.remove(name);
-        if (o != null) {
-            updated = true;
-        }
-        return this;
+    public boolean remove(String name) {
+        return models.deleteModel(name);
     }
 
     public Model get(String name) {
-        return models.get(name);
+        return models.getModel(name);
     }
 
     public String getJson(String name) {
-        Model m = models.get(name);
+        Model m = get(name);
         if (m == null) {
             return null;
         }
         return JsonUtils.toJsonFormatted(m);
-    }
-
-    public synchronized MultiModelManager removeAll() {
-        if (models.size() > 0) {
-            models.clear();
-            updated = true;
-        }
-        return this;
     }
 
     public MultiModelManager clearUpdated() {
@@ -87,22 +89,8 @@ public class MultiModelManager {
         return this;
     }
 
-    public boolean isEmpty() {
-        return models.isEmpty();
-    }
-
     public int size() {
         return models.size();
-    }
-
-    public Model[] list() {
-        Model[] list = new Model[models.size()];
-        int i = 0;
-        for (String m : models.keySet()) {
-            list[i] = models.get(m);
-            i++;
-        }
-        return list;
     }
 
     public MultiModelManager add(String json) {
@@ -110,15 +98,28 @@ public class MultiModelManager {
     }
 
     public MultiModelManager add(Model model) {
-        if (model.getClass() != type) {
-            throw new ModelTypeException("Model [" + model.getClass().getName() + "] must be of type [" + type.getName() + "]");
+        if (models.getModel(model.getName()) != null) {
+            throw new DuplicateDataException("Data for item with name[" + model.getName() + "] already exists");
         }
-        if (models.containsKey(model.getName())) {
-            throw new DuplicateDataException("Date for [" + model.getClass().getSimpleName() + "] has a duplicate id [" + model.getName() + "]");
-        }
-        models.put(model.getName(), model);
+        models.addModel(model);
         updated = true;
         return this;
+    }
+
+    public Model getSelectedModel() {
+        return selectedModel;
+    }
+
+    public void setSelectedModel(Model selectedModel) {
+        Model m = get(selectedModel.getName());
+        if (m == null) {
+            return;
+        }
+        changeSelectedModel(m);
+    }
+
+    public void setSelectedModel(String selectedModelName) {
+        setSelectedModel(get(selectedModelName));
     }
 
     public static MultiModelManager instance(Class type) {
@@ -133,6 +134,25 @@ public class MultiModelManager {
             instances.put(type, mmm);
         }
         return mmm;
+    }
+
+    public void addChangeListener(SelectedModelChangeListener changeListener) {
+        changeListeners.add(changeListener);
+    }
+
+    private void changeSelectedModel(Model m) {
+        if (selectedModel != m) {
+            selectedModel = m;
+            notifySelectedModelChange(selectedModel);
+        }
+    }
+
+    private void notifySelectedModelChange(Model selectedModel) {
+        for (SelectedModelChangeListener cl : changeListeners) {
+            if (cl != null) {
+                cl.notify(selectedModel);
+            }
+        }
     }
 
 }

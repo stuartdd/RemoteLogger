@@ -18,15 +18,15 @@ package main;
 
 import expectations.Expectation;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import model.MultiModelManager;
 
 public class ExpectationWrapperManager {
 
-    private final Map<Integer, ExpectationWrapperList> wrapperList = new HashMap<>();
+    private final Map<Integer, MultiModelManager> wrapperList = new HashMap<>();
     private int selectedPort;
 
-    public void add(int port, ExpectationWrapperList list) {
+    public void add(int port, MultiModelManager list) {
         wrapperList.put(port, list);
     }
 
@@ -34,93 +34,80 @@ public class ExpectationWrapperManager {
         this.selectedPort = port;
     }
 
-    public ExpectationWrapperList getSelectedExpectationWrapperList() {
+    public MultiModelManager getSelectedModelManager() {
         return wrapperList.get(selectedPort);
     }
 
     public void selectFirst() {
-        getSelectedExpectationWrapperList().selectFirst();
-    }
-
-    public List<ExpectationWrapper> getWrappedExpectations() {
-        return getSelectedExpectationWrapperList().getWrappedExpectations();
+        MultiModelManager m = getSelectedModelManager();
+        if (!m.isEmpty()) {
+            m.setSelectedModel(m.list()[0]);
+        }
     }
 
     public boolean loadedFromFile() {
-        return getSelectedExpectationWrapperList().loadedFromFile();
+        return getSelectedModelManager().loadedFromFile();
     }
 
     public Expectation getSelectedExpectation() {
-        return getSelectedExpectationWrapperList().getSelectedExpectation();
-    }
-
-    public ExpectationWrapper getSelectedExpectationWrapper() {
-        return getSelectedExpectationWrapperList().getSelectedExpectationWrapper();
+        return (Expectation) getSelectedModelManager().getSelectedModel();
     }
     int size() {
-        return getSelectedExpectationWrapperList().size();
-    }
-
-    public boolean isSelected() {
-        return getSelectedExpectationWrapperList().isSelected();
+        return getSelectedModelManager().size();
     }
 
     public boolean isUpdated() {
-        return getSelectedExpectationWrapperList().isUpdated();
+        return getSelectedModelManager().isUpdated();
     }
 
     public void replaceSelectedExpectation(Expectation expectation) {
-        getSelectedExpectationWrapperList().replaceSelectedExpectation(expectation);
+        getSelectedModelManager().replace(expectation);
     }
 
     public void save() {
-        getSelectedExpectationWrapperList().save();
+        getSelectedModelManager().save();
     }
 
     public void reloadExpectations() {
-        getSelectedExpectationWrapperList().reloadExpectations();
-    }
-
-    public void setSelectedExpectationWrapper(Integer integer) {
-        getSelectedExpectationWrapperList().setSelectedExpectationWrapper(integer);
+        getSelectedModelManager().reload();
     }
 
     public void setLogProperties(boolean logProperties) {
-        getSelectedExpectationWrapperList().setLogProperties(logProperties);
+        getSelectedModelManager().setLogProperties(logProperties);
     }
 
     public void delete() {
-        getSelectedExpectationWrapperList().deleteSelectedExpectation();
+        getSelectedModelManager().deleteSelectedExpectation();
     }
 
     String getJson() {
-        return getSelectedExpectationWrapperList().getJson();
+        return getSelectedModelManager().getJson();
     }
 
     String getName() {
-        return getSelectedExpectationWrapperList().getName();
+        return getSelectedModelManager().getName();
     }
 
-    String checkNewExpectationName(String name) {
+    String checkNameIsUnique(String name) {
         if ((name == null) || (name.trim().length()==0)) {
             return "Name cannot be empty";
         }
-        if (getSelectedExpectationWrapperList().checkNewExpectationName(name)) {
+        if (getSelectedModelManager().checkNameIsUnique(name)) {
             return null;
         }
         return "Duplicate Expectation names are not allowed";
     }
 
     void rename(String name) {
-        getSelectedExpectationWrapperList().renameSelectedExpectation(name);
+        getSelectedModelManager().renameSelectedExpectation(name);
     }
 
     void addExpectationWithName(String name) {
-        getSelectedExpectationWrapperList().addExpectationWithName(name);
+        getSelectedModelManager().addExpectationWithName(name);
     }
 
     public boolean canNotDelete() {
-        return getSelectedExpectationWrapperList().canNotDelete();
+        return getSelectedModelManager().canNotDelete();
     }
 
 }

@@ -18,7 +18,6 @@ package main;
 
 import expectations.Expectation;
 import expectations.ExpectationManager;
-import expectations.Expectations;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;

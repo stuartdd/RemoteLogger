@@ -496,6 +496,8 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         System.out.println("initialize:");
         expectationSelectionChangedListener = new ExpectationSelectionChangedListener();
         packagedRequestSelectionChangedListener = new PackagedRequestSelectionChangedListener();
+        /*
+        */
         checkBoxHeaders.setSelected(ConfigData.getInstance().isIncludeHeaders());
         checkBoxBody.setSelected(ConfigData.getInstance().isIncludeBody());
         checkBoxEmpty.setSelected(ConfigData.getInstance().isIncludeEmpty());
@@ -503,8 +505,11 @@ public class FXMLDocumentController extends BorderPane implements ApplicationCon
         checkBoxPort.setSelected(ConfigData.getInstance().isShowPort());
         textAreaLogging.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         textAreaLog.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        /*
+        */
         Main.setApplicationController(this);
         resetMainLog();
+        
         ServerManager.autoStartServers();
         expectationWrapperManager = new ExpectationWrapperManager();
         for (int p : ServerManager.portListSorted()) {

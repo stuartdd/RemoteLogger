@@ -20,12 +20,14 @@ import common.Util;
 import java.util.ArrayList;
 import java.util.List;
 import json.JsonUtils;
+import model.Model;
+import model.ModelProvider;
 
 /**
  *
  * @author 802996013
  */
-public class Expectations {
+public class Expectations implements ModelProvider {
 
     private List<Expectation> expectations = new ArrayList<>();
     private String[] paths;
@@ -94,32 +96,82 @@ public class Expectations {
         ExpectationManager.testExpectations(ex);
         return ex;
     }
-    
+
     public static Expectations fromFile(String fileName) {
         return fromString(Util.readFile(fileName).getContent());
     }
 
-    public Expectation get(int index) {
+    @Override
+    public int getModelIndex(String modelName) {
+        for (int i=0; i<size(); i++) {
+            if (expectations.get(i).getName().equals(modelName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public void addModel(Model model) {
+        expectations.add((Expectation) model);
+    }
+
+    @Override
+    public void addModel(int pos, Model model) {
+        expectations.add(pos, (Expectation) model);
+    }
+
+    @Override
+    public Model getModel(int index) {
         return expectations.get(index);
     }
 
-    public void set(int i, Expectation newExpectation) {
-        expectations.set(i, newExpectation);
-    }
-
-    public void add(Expectation newExpectation) {
-        add(-1, newExpectation);
-    }
-
-    public void add(int index, Expectation newExpectation) {
-        if (index >= 0) {
-            expectations.add(index, newExpectation);
-        } else {
-            expectations.add(newExpectation);
+    @Override
+    public Model getModel(String modelName) {
+        for (Expectation exp : expectations) {
+            if (exp.getName().equals(modelName)) {
+                return exp;
+            }
         }
+        return null;
     }
 
-    void remove(Expectation expectation) {
-        expectations.remove(expectation);
+    @Override
+    public synchronized boolean deleteModel(String modelName) {
+        boolean deleted = false;
+        List<Expectation> expList = new ArrayList<>();
+        for (Expectation exp : expectations) {
+            if (!exp.getName().equals(modelName)) {
+                expList.add(exp);
+            } else {
+                deleted = true;
+            }
+        }
+        expectations = expList;
+        return deleted;
     }
+
+    @Override
+    public synchronized boolean replaceModel(String withThisModelJson) {
+        Expectation exp = (Expectation) JsonUtils.beanFromJson(Expectations.class, withThisModelJson);
+        return replaceModel(exp.getName(), exp);
+    }
+    
+    @Override
+    public synchronized boolean replaceModel(String replaceModelName, Model withThisModel) {
+        boolean replaced = false;
+        List<Expectation> expList = new ArrayList<>();
+        for (Expectation exp : expectations) {
+            if (!exp.getName().equals(replaceModelName)) {
+                expList.add(exp);
+            } else {
+                replaced = true;
+                expList.add((Expectation) withThisModel);
+            }
+        }
+        expectations = expList;
+        return replaced;
+    }
+
+
 }

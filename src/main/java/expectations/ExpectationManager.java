@@ -147,28 +147,14 @@ public class ExpectationManager {
     }
 
     public void remove(Expectation expectation) {
-        int index = findIndexByName(expectation.getName());
-        if (index >= 0) {
-            expectations.remove(expectations.get(index));
-        }
+            expectations.deleteModel(expectation.getName());
     }
 
     public Expectation replace(Expectation oldExpectation, Expectation newExpectation) {
-        int index = findIndexByName(oldExpectation.getName());
-        if (index >= 0) {
-            expectations.set(index, newExpectation);
-            return newExpectation;
+        if (expectations.replaceModel(oldExpectation.getName(), newExpectation)) {
+            return newExpectation;            
         }
         return oldExpectation;
-    }
-
-    public int findIndexByName(String name) {
-        for (int i = 0; i < expectations.size(); i++) {
-            if (expectations.get(i).getName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public static Expectation getExampleExpectation() {
@@ -500,7 +486,7 @@ public class ExpectationManager {
     }
 
     public Expectation get(int selectedIndex) {
-        return expectations.get(selectedIndex);
+        return (Expectation) expectations.getModel(selectedIndex);
     }
 
     public int size() {
@@ -508,6 +494,10 @@ public class ExpectationManager {
             return 0;
         }
         return expectations.size();
+    }
+
+    public int findIndexByName(String name) {
+        return expectations.getModelIndex(name);
     }
 
 }
