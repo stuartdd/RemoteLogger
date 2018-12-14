@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequestName" : "Set SSID andPW",
+  "selectedPackagedRequestName" : "Config",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5002,
@@ -27,10 +27,10 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 821.0,
-  "y" : 16.0,
-  "width" : 1086.0,
+  "x" : 1174.0,
+  "y" : 459.0,
+  "width" : 1191.0,
   "height" : 981.0,
-  "expDividerPos" : [ 0.2050561797752809, 0.6048689138576779 ],
-  "packDividerPos" : [ 0.20599250936329588, 0.5580524344569289 ]
+  "expDividerPos" : [ 0.21783010933557612, 0.6114381833473507 ],
+  "packDividerPos" : [ 0.2674516400336417, 0.7300252312867956 ]
 }
