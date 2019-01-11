@@ -108,19 +108,21 @@ public class ExpectationManager {
     private File expectationsFile;
     private long expectationsLoadTime;
     private boolean logProperties;
+    private boolean verbose;
     private boolean loadedFromAFile;
 
-    public ExpectationManager(int port, Expectations expectations, Notifier serverNotifier, ServerStatistics serverStatistics, boolean logProperties) {
+    public ExpectationManager(int port, Expectations expectations, Notifier serverNotifier, ServerStatistics serverStatistics, boolean verbose, boolean logProperties) {
         this.port = port;
         this.serverNotifier = serverNotifier;
         this.serverStatistics = serverStatistics;
         this.expectations = expectations;
         this.logProperties = logProperties;
+        this.verbose = verbose;
         this.loadedFromAFile = false;
         testExpectations(expectations);
     }
 
-    public ExpectationManager(int port, String fileName, Notifier serverNotifier, ServerStatistics serverStatistics, boolean logProperties) {
+    public ExpectationManager(int port, String fileName, Notifier serverNotifier, ServerStatistics serverStatistics, boolean verbose, boolean logProperties) {
         this.port = port;
         this.serverNotifier = serverNotifier;
         this.serverStatistics = serverStatistics;
@@ -130,6 +132,7 @@ public class ExpectationManager {
             return;
         }
         this.logProperties = logProperties;
+        this.verbose = verbose;
         this.loadedFromAFile = false;
         loadExpectations(fileName);
     }
