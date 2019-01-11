@@ -18,7 +18,7 @@
     }
   },
   "packagedRequestsFile" : "packagedrequests.json",
-  "selectedPackagedRequestName" : "Test Forwarding. Please keep",
+  "selectedPackagedRequestName" : "PostOrders",
   "logDateFormat" : "",
   "timeFormat" : "HH:mm:ss.SSS",
   "defaultPort" : 5012,
@@ -27,10 +27,10 @@
   "includeEmpty" : false,
   "showTime" : true,
   "showPort" : true,
-  "x" : 513.0,
-  "y" : 40.0,
-  "width" : 1296.0,
+  "x" : 2099.0,
+  "y" : 29.0,
+  "width" : 1577.0,
   "height" : 929.0,
-  "expDividerPos" : [ 0.2269170579029734, 0.6158059467918623 ],
-  "packDividerPos" : [ 0.22769953051643194, 0.5766823161189358 ]
+  "expDividerPos" : [ 0.2456703014753047, 0.6247594611930725 ],
+  "packDividerPos" : [ 0.11802437459910199, 0.7434252726106478 ]
 }

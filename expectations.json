@@ -67,6 +67,23 @@
         "Fred" : "FRED"
       }
     }
+  }, {
+    "name" : "PostOrders",
+    "method" : "POST",
+    "path" : "/public/v1/account/authorise/email",
+    "bodyType" : "JSON",
+    "asserts" : {
+      "JSON.purchase.vouchers[0]" : "BT_SPECIAL"
+    },
+    "response" : {
+      "body" : "{\"orderId\":\"7409e94e-4eec-4562-8478-eb90ff1ca5f5\"}",
+      "status" : 200,
+      "bodyTemplate" : null,
+      "headers" : {
+        "Accept" : "%{HEAD.Accept}"
+      }
+    },
+    "forward" : null
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "logProperies" : false
