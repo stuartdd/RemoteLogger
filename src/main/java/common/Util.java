@@ -230,10 +230,28 @@ public class Util {
             }
         }
         try {
-            return readResource(fileName, type, sb.toString(), notifier);
+            return readResource(paths, fileName, type, sb.toString(), notifier);
         } catch (IOException ex) {
             throw new FileException(type + " File [" + fileName + "] Not readable", ex);
         }
+    }
+
+    private static String readResource(String[] paths, String file, String type, String list, Notifier notifier) throws IOException {
+        for (String path : paths) {
+            String resPath = path + '/' + file;
+            if (!resPath.startsWith("/")) {
+                resPath = '/' + resPath;
+            }
+            InputStream is = Util.class.getResourceAsStream(resPath);
+            if (is == null) {
+                if (notifier != null) {
+                    notifier.log(System.currentTimeMillis(), -1, type + " Resource CHECK: " + resPath);
+                }
+            } else {
+                return readResource(resPath, type, list, notifier);
+            }
+        }
+        return readResource(file, type, list, notifier);
     }
 
     private static String readResource(String file, String type, String list, Notifier notifier) throws IOException {
@@ -243,12 +261,12 @@ public class Util {
         }
         if (is == null) {
             if (notifier != null) {
-                notifier.log(System.currentTimeMillis(), -1, type + " Resource file NOT found:" + file);
+                notifier.log(System.currentTimeMillis(), -1, type + " Resource file NOT found: " + file);
             }
             throw new FileException(type + " Resource [" + file + "] Not Found in path(s) [" + list + "] or on the class path");
         }
         if (notifier != null) {
-            notifier.log(System.currentTimeMillis(), -1, type + " Resource found:" + file);
+            notifier.log(System.currentTimeMillis(), -1, type + " Resource found: " + file);
         }
         StringBuilder sb = new StringBuilder();
         int content;
