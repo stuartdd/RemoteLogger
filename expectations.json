@@ -16,11 +16,14 @@
     },
     "forward" : null
   }, {
-    "name" : "2: Get Country Name",
+    "name" : "Get Country Name",
     "method" : "GET",
-    "path" : "/services.groupkt.com/country/get/iso2code/*",
+    "path" : null,
     "bodyType" : null,
-    "asserts" : { },
+    "asserts" : {
+      "PATH[3]" : "iso2code",
+      "PATH[1]" : "coundtry"
+    },
     "response" : {
       "body" : "{\"message\":\"Hi from India (%{PATH[4]})\"}",
       "status" : 200,
@@ -29,7 +32,7 @@
     },
     "forward" : null
   }, {
-    "name" : "3: Test Post Response Empty",
+    "name" : "Test Post Response Empty",
     "method" : "post",
     "path" : "/pre",
     "bodyType" : null,
@@ -37,7 +40,7 @@
     "response" : null,
     "forward" : null
   }, {
-    "name" : "4: Test Get Response Empty",
+    "name" : "Test Get Response Empty",
     "method" : "get",
     "path" : "/gre",
     "bodyType" : null,
@@ -65,15 +68,17 @@
       }
     }
   }, {
-    "name" : "Set SSID and PW",
-    "method" : "GET",
-    "path" : "/config",
-    "bodyType" : "EMPTY",
-    "asserts" : { },
+    "name" : "PostOrders",
+    "method" : "POST",
+    "path" : "/public/v1/account/authorise/email",
+    "bodyType" : "JSON",
+    "asserts" : {
+      "JSON.purchase.vouchers[0]" : "BT_SPECIAL"
+    },
     "response" : {
-      "body" : "{\"message\":\"Message\"}",
+      "body" : "{\"orderId\":\"7409e94e-4eec-4562-8478-eb90ff1ca5f5\"}",
       "status" : 200,
-      "bodyTemplate" : "/git/ESP32_HeatingController/HeatingController/setHeaders.html",
+      "bodyTemplate" : null,
       "headers" : {
         "Accept" : "%{HEAD.Accept}"
       }

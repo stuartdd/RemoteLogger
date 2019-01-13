@@ -24,6 +24,7 @@ import main.PackagedRequest;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 
 public class ModelTester {
 
@@ -66,7 +67,7 @@ public class ModelTester {
 
     @Test()
     public void testManagerAddDuplicate() {
-        mmmMT.removeAll();
+        mmmMT.clear();
         assertFalse(mmmMT.isUpdated());
         mmmMT.add(model("10", "A"));
         assertTrue(mmmMT.isUpdated());
@@ -81,7 +82,7 @@ public class ModelTester {
 
     @Test
     public void testManagerRemove() {
-        mmmMT.removeAll();
+        mmmMT.clear();
         mmmMT.clearUpdated();
 
         assertFalse(mmmMT.isUpdated());
@@ -109,7 +110,7 @@ public class ModelTester {
         assertNull(mmmMT.get("B"));
         assertEquals("A:A|C:C|", list(mmmMT.list()));
         mmmMT.clearUpdated();
-        mmmMT.removeAll();
+        mmmMT.clear();
         assertEquals(0, mmmMT.size());
         assertTrue(mmmMT.isEmpty());
         assertTrue(mmmMT.isUpdated());
@@ -117,7 +118,7 @@ public class ModelTester {
 
     @Test
     public void testManagerReplace() {
-        mmmMT.removeAll();
+        mmmMT.clear();
         mmmMT.clearUpdated();
         mmmMT.add(model("A", "A"));
         mmmMT.add(BB);
@@ -134,12 +135,12 @@ public class ModelTester {
         mmmMT.replace(model("Z", "X"));
         assertFalse(mmmMT.isUpdated());
         assertEquals("A:A|B:X|C:C|", list(mmmMT.list()));
-        mmmMT.removeAll();
+        mmmMT.clear();
     }
 
     @Test
     public void testManagerReplaceJson() {
-        mmmMT.removeAll();
+        mmmMT.clear();
         mmmMT.add(model("A", "A"));
         mmmMT.add(model("B", "Y"));
         mmmMT.add(model("C", "C"));
@@ -148,12 +149,12 @@ public class ModelTester {
         mmmMT.replace(BB);
         assertTrue(mmmMT.isUpdated());
         assertEquals("A:A|B:B|C:C|", list(mmmMT.list()));
-        mmmMT.removeAll();
+        mmmMT.clear();
     }
 
     @Test
     public void testManagerJson() {
-        mmmMT.removeAll();
+        mmmMT.clear();
         mmmMT.add(model("A", "A"));
         mmmMT.add(model("B", "B"));
         mmmMT.add(model("C", "C"));

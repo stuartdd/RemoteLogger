@@ -43,9 +43,11 @@ public class ExpectationHandler implements HttpHandler {
     private final ExpectationManager expectationManager;
     private ResponseHandler responseHandler;
     private final Notifier serverNotifier;
+    private final boolean verbose;
 
     public ExpectationHandler(Server server) {
         this.server = server;
+        this.verbose = server.getServerConfig().isVerbose();
         this.port = server.getPort();
         this.expectationManager = server.getExpectationManager();
         this.responseHandler = server.getResponseHandler();
@@ -75,24 +77,24 @@ public class ExpectationHandler implements HttpHandler {
         } else {
             map.put("BODY-TYPE", BodyType.EMPTY);
         }
-        if (serverNotifier != null) {
+        if ((serverNotifier != null) && (verbose)) {
             serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "METHOD:" + he.getRequestMethod());
         }
         map.put("METHOD", he.getRequestMethod());
         String path = Util.trimmedNull(he.getRequestURI().getPath());
         if (path != null) {
-            if (serverNotifier != null) {
+            if ((serverNotifier != null) && (verbose)) {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "PATH:" + he.getRequestURI().getPath());
             }
             map.put("PATH", he.getRequestURI().getPath());
             splitIntoMap(map, null, "PATH", '/');
         }
-        if (serverNotifier != null) {
+        if ((serverNotifier != null) && (verbose)) {
             serverNotifier.log(time, port, "RECEIVED ---> On PORT=" + port + " BODY-TYPE=" + map.get("BODY-TYPE") + " METHOD=" + map.get("METHOD") + " PATH=" + map.get("PATH"));
         }
         String query = Util.trimmedNull(he.getRequestURI().getQuery());
         if (query != null) {
-            if (serverNotifier != null) {
+            if ((serverNotifier != null) && (verbose)) {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "QUERY:" + he.getRequestURI().getQuery());
             }
             map.put("QUERY", he.getRequestURI().getQuery());
@@ -104,7 +106,7 @@ public class ExpectationHandler implements HttpHandler {
             String value = Util.asString(he.getRequestHeaders().get(head));
             map.put("HEAD." + head, value);
             headers.put(head, value);
-            if (serverNotifier != null) {
+            if ((serverNotifier != null) && (verbose)) {
                 serverNotifier.notifyAction(time, port, Action.LOG_HEADER, null, "HEADER: " + head + "=" + value);
             }
         }

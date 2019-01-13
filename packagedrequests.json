@@ -76,6 +76,40 @@
     "headers" : {
       "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
     }
+  }, {
+    "name" : "CH Device",
+    "host" : "http://192.168.1.13",
+    "port" : 80,
+    "path" : "/config",
+    "method" : "GET",
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : {
+      "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    }
+  }, {
+    "name" : "CH Read DEVICE",
+    "host" : "http://192.168.1.13",
+    "port" : 80,
+    "path" : "/device",
+    "method" : "GET",
+    "body" : null,
+    "bodyTemplate" : null,
+    "headers" : {
+      "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    }
+  }, {
+    "name" : "PostOrders",
+    "host" : "http://localhost",
+    "port" : 5012,
+    "path" : "public/v1/account/authorise/email",
+    "method" : "POST",
+    "body" : "{ \"cancel\" : null, \"purchase\" : { \"products\" : [ { \"productId\" : \"ENTERTAINMENT_SUBSCRIPTION_MONTH\", \"quantity\" : 2 }, { \"productId\" : \"HAYU_SUBSCRIPTION_MONTH\", \"quantity\" : 3 } ], \"vouchers\" : [ \"BT_SPECIAL\", \"BT_VERY_SPECIAL\" ] }}",
+    "bodyTemplate" : null,
+    "headers" : {
+      "Accept" : "*/*",
+      "Content-Type" : "application/json"
+    }
   } ],
   "paths" : [ ".", "/appl", "/bea" ],
   "verbose" : true
