@@ -34,6 +34,20 @@ public class MultiModelManager {
         this.type = type;
     }
 
+    public static MultiModelManager instance(Class type) {
+        try {
+            type.getMethod("getName");
+        } catch (NoSuchMethodException ex) {
+            throw new ModelTypeException("Type perameter [" + type.getName() + "] must be of type [" + type.getName() + "]");
+        }
+        MultiModelManager mmm = instances.get(type);
+        if (mmm == null) {
+            mmm = new MultiModelManager(type);
+            instances.put(type, mmm);
+        }
+        return mmm;
+    }
+
     public boolean isUpdated() {
         return updated;
     }
@@ -74,7 +88,7 @@ public class MultiModelManager {
         return JsonUtils.toJsonFormatted(m);
     }
 
-    public synchronized MultiModelManager removeAll() {
+    public synchronized MultiModelManager clear() {
         if (models.size() > 0) {
             models.clear();
             updated = true;
@@ -121,18 +135,5 @@ public class MultiModelManager {
         return this;
     }
 
-    public static MultiModelManager instance(Class type) {
-        try {
-            type.getMethod("getName");
-        } catch (NoSuchMethodException ex) {
-            throw new ModelTypeException("Type perameter [" + type.getName() + "] must be of type [" + type.getName() + "]");
-        }
-        MultiModelManager mmm = instances.get(type);
-        if (mmm == null) {
-            mmm = new MultiModelManager(type);
-            instances.put(type, mmm);
-        }
-        return mmm;
-    }
 
 }
