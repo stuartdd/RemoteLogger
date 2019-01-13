@@ -78,12 +78,7 @@ public class MockServerBuilder {
     }
 
     private void addExpectation(int index, Expectation exp) {
-        for (Expectation e : expectationList.getExpectations()) {
-            if (e.getName().equals(exp.getName())) {
-                throw new ExpectationException("Duplicate Expectation Name [" + exp.getName() + "] found.");
-            }
-        }
-        expectationList.add(index, exp);
+        expectationList.addExpectation(index ,exp);
     }
 
 }

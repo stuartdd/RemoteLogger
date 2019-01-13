@@ -16,6 +16,7 @@
  */
 package expectations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import common.Util;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class Expectations implements ModelProvider {
         return paths;
     }
 
+    @JsonIgnore
     public int size() {
         if (expectations == null) {
             expectations = new ArrayList<>();
@@ -83,6 +85,12 @@ public class Expectations implements ModelProvider {
         ExpectationManager.testExpectations(this);
         return this;
     }
+    
+    public Expectations addExpectation(int index, Expectation expectation) {
+        expectations.add(index, expectation);
+        ExpectationManager.testExpectations(this);
+        return this;
+    }
 
     public static Expectations newExpectation(String json) {
         Expectations expectations = new Expectations();
@@ -101,6 +109,7 @@ public class Expectations implements ModelProvider {
         return fromString(Util.readFile(fileName).getContent());
     }
 
+    @JsonIgnore
     @Override
     public int getModelIndex(String modelName) {
         for (int i=0; i<size(); i++) {
@@ -121,11 +130,13 @@ public class Expectations implements ModelProvider {
         expectations.add(pos, (Expectation) model);
     }
 
+    @JsonIgnore
     @Override
     public Model getModel(int index) {
         return expectations.get(index);
     }
 
+    @JsonIgnore
     @Override
     public Model getModel(String modelName) {
         for (Expectation exp : expectations) {
@@ -151,6 +162,10 @@ public class Expectations implements ModelProvider {
         return deleted;
     }
 
+    public synchronized void removeAll() {
+        expectations.clear();
+    }
+    
     @Override
     public synchronized boolean replaceModel(String withThisModelJson) {
         Expectation exp = (Expectation) JsonUtils.beanFromJson(Expectations.class, withThisModelJson);

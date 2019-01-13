@@ -33,6 +33,8 @@ public interface ModelProvider {
     boolean replaceModel(String withThisJson);
     
     boolean replaceModel(String replaceModelName, Model withThisModel);
+    
+    void removeAll();
 
     int size();
 }
