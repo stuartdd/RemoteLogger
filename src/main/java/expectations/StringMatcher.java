@@ -1,20 +1,4 @@
-/*
- * Copyright (C) 2018 stuartdd
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package expectations;
+package com.bt.consumer.localtestserver.expectations;
 
 public class StringMatcher {
 
@@ -26,34 +10,16 @@ public class StringMatcher {
     private static final char ANY_CHAR = '*';
 
     private enum TYPE {
-        start, mid, end, any, exact, contains
+        start, mid, end, any, exact, contains, nulll
     };
 
     private final TYPE type;
     private final String start;
     private final String end;
 
-    boolean match(String with) {
-        switch (type) {
-            case any:
-                return true;
-            case exact:
-                return with.equals(start);
-            case start:
-                return with.startsWith(start);
-            case end:
-                return with.endsWith(end);
-            case contains:
-                return (with.contains(start));
-            case mid:
-                return (with.startsWith(start) && with.endsWith(end));
-        }
-        return false;
-    }
-
     public StringMatcher(String value) {
         if (value == null) {
-            this.type = TYPE.any;
+            this.type = TYPE.nulll;
             this.start = null;
             this.end = null;
         } else {
@@ -131,6 +97,30 @@ public class StringMatcher {
             }
         }
     }
+
+    public boolean match(String with) {
+        switch (type) {
+            case nulll:
+                return with == null;
+            case any:
+                return true;
+            case exact:
+                if (with == null) {
+                    return start == null;
+                }
+                return with.equals(start);
+            case start:
+                return with.startsWith(start);
+            case end:
+                return with.endsWith(end);
+            case contains:
+                return (with.contains(start));
+            case mid:
+                return (with.startsWith(start) && with.endsWith(end));
+        }
+        return false;
+    }
+
 
     @Override
     public String toString() {
